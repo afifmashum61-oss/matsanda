@@ -8,8 +8,7 @@ import {
   Menu, 
   X,
   School,
-  ChevronRight,
-  Cloud
+  ChevronRight
 } from 'lucide-react';
 
 import Dashboard from './components/Dashboard';
@@ -138,17 +137,6 @@ export default function App() {
               <p className="text-[11px] text-emerald-300 font-medium hidden sm:block">
                 Sistem Informasi Absensi Digital • Ngesong - Jombang
               </p>
-            </div>
-          </div>
-
-          {/* Right: Cloud Sync Status Indicator */}
-          <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-800/80 border border-emerald-700/60 text-emerald-100 text-xs font-medium shadow-inner">
-              <span className={`w-2.5 h-2.5 rounded-full ${isCloudConnected ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400 animate-ping'}`}></span>
-              <Cloud className="w-3.5 h-3.5 text-emerald-300" />
-              <span className="hidden sm:inline">
-                {isCloudConnected ? 'Realtime Cloud' : 'Menghubungkan Cloud...'}
-              </span>
             </div>
           </div>
 
