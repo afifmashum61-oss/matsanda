@@ -38,10 +38,20 @@ export const getClasses = () => {
   if (!data) return INITIAL_CLASSES;
   try {
     const stored = JSON.parse(data);
-    const existingIds = stored.map(c => c.id);
+    let updated = false;
+    const updatedStored = stored.map(c => {
+      const init = INITIAL_CLASSES.find(ic => ic.id === c.id);
+      if (init && (c.waliKelas !== init.waliKelas || c.nama !== init.nama)) {
+        updated = true;
+        return { ...c, waliKelas: init.waliKelas, nama: init.nama };
+      }
+      return c;
+    });
+
+    const existingIds = updatedStored.map(c => c.id);
     const missing = INITIAL_CLASSES.filter(c => !existingIds.includes(c.id));
-    if (missing.length > 0) {
-      const merged = [...stored, ...missing];
+    if (missing.length > 0 || updated) {
+      const merged = [...updatedStored, ...missing];
       localStorage.setItem(KEYS.CLASSES, JSON.stringify(merged));
       syncClassesToCloud(merged);
       return merged;

@@ -22,25 +22,25 @@ export const JAM_PELAJARAN = [
 
 export const INITIAL_CLASSES = [
   // Kelas 7 (7A - 7E)
-  { id: "7A", nama: "Kelas 7A", waliKelas: "Ust. M. Ridwan, S.Pd." },
-  { id: "7B", nama: "Kelas 7B", waliKelas: "Ustadzah Siti Fatimah, S.Pd." },
-  { id: "7C", nama: "Kelas 7C", waliKelas: "Ust. Lukman Hakim, S.Pd.I." },
-  { id: "7D", nama: "Kelas 7D", waliKelas: "Ustadzah Dewi Aminah, S.Pd." },
-  { id: "7E", nama: "Kelas 7E", waliKelas: "Ust. Abdul Ghofur, S.Pd." },
+  { id: "7A", nama: "Kelas 7A", waliKelas: "Irqima Azzah, S.Pd" },
+  { id: "7B", nama: "Kelas 7B", waliKelas: "Krisdayanti, S.Pd" },
+  { id: "7C", nama: "Kelas 7C", waliKelas: "Noer Ita Anggraeni, S.Pd" },
+  { id: "7D", nama: "Kelas 7D", waliKelas: "Nur Azizatul Khasanah, S.Pd" },
+  { id: "7E", nama: "Kelas 7E", waliKelas: "Silvia Dwi Anggraini, S.Pd" },
 
   // Kelas 8 (8A - 8E)
-  { id: "8A", nama: "Kelas 8A", waliKelas: "Ust. Ahmad Fauzi, S.Ag." },
-  { id: "8B", nama: "Kelas 8B", waliKelas: "Ustadzah Nurul Hidayah, S.Pd." },
-  { id: "8C", nama: "Kelas 8C", waliKelas: "Ust. Muhammad Sholeh, M.Pd." },
-  { id: "8D", nama: "Kelas 8D", waliKelas: "Ustadzah Khotimatul Husna, S.Pd." },
-  { id: "8E", nama: "Kelas 8E", waliKelas: "Ust. Hasan Bisri, S.Pd.I." },
+  { id: "8A", nama: "Kelas 8A", waliKelas: "Rima Farikhatus S. S.Pd" },
+  { id: "8B", nama: "Kelas 8B", waliKelas: "Fety Nur Laily, S.Pd" },
+  { id: "8C", nama: "Kelas 8C", waliKelas: "Luthfiya Rafika Rahmah, S.Pd" },
+  { id: "8D", nama: "Kelas 8D", waliKelas: "Laili Muhlishoh, S.Pd" },
+  { id: "8E", nama: "Kelas 8E", waliKelas: "Nur Fadilla, M.Pd.I" },
 
   // Kelas 9 (9A - 9E)
-  { id: "9A", nama: "Kelas 9A", waliKelas: "Ust. Badrus Sholeh, M.Pd." },
-  { id: "9B", nama: "Kelas 9B", waliKelas: "Ustadzah Lailatul Qodriyah, S.Pd." },
-  { id: "9C", nama: "Kelas 9C", waliKelas: "Ust. M. Zaini, S.Pd." },
-  { id: "9D", nama: "Kelas 9D", waliKelas: "Ustadzah Rina Wardani, S.Pd." },
-  { id: "9E", nama: "Kelas 9E", waliKelas: "Ust. Zaenal Abidin, S.Ag." }
+  { id: "9A", nama: "Kelas 9A", waliKelas: "Shofiyatud Diyana, S.Pd" },
+  { id: "9B", nama: "Kelas 9B", waliKelas: "Anis Hidayatullah, S.Pd" },
+  { id: "9C", nama: "Kelas 9C", waliKelas: "Syifaa'ul Afidah, S.Pd" },
+  { id: "9D", nama: "Kelas 9D", waliKelas: "Ardiani Swastika Prameswari, S. Pd" },
+  { id: "9E", nama: "Kelas 9E", waliKelas: "Izza Rahmawati, S.Pd" }
 ];
 
 export const INITIAL_STUDENTS = [
