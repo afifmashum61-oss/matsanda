@@ -1,4 +1,10 @@
 import { INITIAL_SCHOOL_PROFILE, INITIAL_CLASSES, INITIAL_STUDENTS, INITIAL_ATTENDANCE } from '../data/initialData';
+import { 
+  syncSchoolProfileToCloud, 
+  syncClassesToCloud, 
+  syncStudentsToCloud, 
+  syncAttendanceToCloud 
+} from '../firebase';
 
 const KEYS = {
   SCHOOL: 'mts_school_profile',
@@ -24,6 +30,7 @@ export const getSchoolProfile = () => {
 
 export const saveSchoolProfile = (profile) => {
   localStorage.setItem(KEYS.SCHOOL, JSON.stringify(profile));
+  syncSchoolProfileToCloud(profile);
 };
 
 export const getClasses = () => {
@@ -36,6 +43,7 @@ export const getClasses = () => {
     if (missing.length > 0) {
       const merged = [...stored, ...missing];
       localStorage.setItem(KEYS.CLASSES, JSON.stringify(merged));
+      syncClassesToCloud(merged);
       return merged;
     }
     return stored;
@@ -46,6 +54,7 @@ export const getClasses = () => {
 
 export const saveClasses = (classes) => {
   localStorage.setItem(KEYS.CLASSES, JSON.stringify(classes));
+  syncClassesToCloud(classes);
 };
 
 export const getStudents = () => {
@@ -58,6 +67,7 @@ export const getStudents = () => {
     if (missing.length > 0) {
       const merged = [...stored, ...missing];
       localStorage.setItem(KEYS.STUDENTS, JSON.stringify(merged));
+      syncStudentsToCloud(merged);
       return merged;
     }
     return stored;
@@ -68,6 +78,7 @@ export const getStudents = () => {
 
 export const saveStudents = (students) => {
   localStorage.setItem(KEYS.STUDENTS, JSON.stringify(students));
+  syncStudentsToCloud(students);
 };
 
 export const getAttendance = () => {
@@ -77,6 +88,7 @@ export const getAttendance = () => {
 
 export const saveAttendance = (records) => {
   localStorage.setItem(KEYS.ATTENDANCE, JSON.stringify(records));
+  syncAttendanceToCloud(records);
 };
 
 export const resetDataToDefault = () => {
@@ -84,6 +96,11 @@ export const resetDataToDefault = () => {
   localStorage.setItem(KEYS.CLASSES, JSON.stringify(INITIAL_CLASSES));
   localStorage.setItem(KEYS.STUDENTS, JSON.stringify(INITIAL_STUDENTS));
   localStorage.setItem(KEYS.ATTENDANCE, JSON.stringify(INITIAL_ATTENDANCE));
+
+  syncSchoolProfileToCloud(INITIAL_SCHOOL_PROFILE);
+  syncClassesToCloud(INITIAL_CLASSES);
+  syncStudentsToCloud(INITIAL_STUDENTS);
+  syncAttendanceToCloud(INITIAL_ATTENDANCE);
 };
 
 export const exportFullBackup = () => {
