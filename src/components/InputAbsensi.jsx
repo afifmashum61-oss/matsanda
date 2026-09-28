@@ -227,46 +227,6 @@ export default function InputAbsensi({
               <Clock className="w-4 h-4 text-emerald-600" />
               Pilih Jam Pelajaran (Bisa pilih lebih dari 1):
             </label>
-            
-            {/* Quick Preset Buttons */}
-            <div className="flex flex-wrap items-center gap-1.5 text-[11px]">
-              <span className="text-slate-400 font-medium">Pintas:</span>
-              <button
-                type="button"
-                onClick={() => setSelectedJams([1, 2])}
-                className="bg-slate-100 hover:bg-emerald-50 text-slate-700 hover:text-emerald-700 px-2.5 py-1 rounded-lg font-medium border border-slate-200 transition"
-              >
-                Jam 1-2
-              </button>
-              <button
-                type="button"
-                onClick={() => setSelectedJams([3, 4])}
-                className="bg-slate-100 hover:bg-emerald-50 text-slate-700 hover:text-emerald-700 px-2.5 py-1 rounded-lg font-medium border border-slate-200 transition"
-              >
-                Jam 3-4
-              </button>
-              <button
-                type="button"
-                onClick={() => setSelectedJams([5, 6])}
-                className="bg-slate-100 hover:bg-emerald-50 text-slate-700 hover:text-emerald-700 px-2.5 py-1 rounded-lg font-medium border border-slate-200 transition"
-              >
-                Jam 5-6
-              </button>
-              <button
-                type="button"
-                onClick={() => setSelectedJams([7, 8])}
-                className="bg-slate-100 hover:bg-emerald-50 text-slate-700 hover:text-emerald-700 px-2.5 py-1 rounded-lg font-medium border border-slate-200 transition"
-              >
-                Jam 7-8
-              </button>
-              <button
-                type="button"
-                onClick={() => setSelectedJams([1, 2, 3, 4, 5, 6, 7, 8])}
-                className="bg-emerald-100 hover:bg-emerald-200 text-emerald-800 px-2.5 py-1 rounded-lg font-bold border border-emerald-300 transition"
-              >
-                Semua Jam (1-8)
-              </button>
-            </div>
           </div>
 
           <div className="grid grid-cols-4 sm:grid-cols-8 gap-1.5 sm:gap-2">
