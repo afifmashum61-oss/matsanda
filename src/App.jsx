@@ -82,16 +82,11 @@ export default function App() {
           <div className="flex items-center gap-3">
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="p-2.5 rounded-xl bg-emerald-800/80 hover:bg-emerald-700 text-emerald-100 hover:text-white transition flex items-center gap-2 border border-emerald-700/50 shadow-sm focus:outline-none"
+              className="p-2.5 rounded-xl bg-emerald-800/80 hover:bg-emerald-700 text-emerald-100 hover:text-white transition flex items-center justify-center border border-emerald-700/50 shadow-sm focus:outline-none"
               title="Buka Navigasi Utama"
             >
               {isMenuOpen ? <X className="w-5 h-5 text-emerald-200" /> : <Menu className="w-5 h-5 text-emerald-200" />}
-              <span className="text-xs font-bold tracking-wide uppercase pr-0.5">Menu</span>
             </button>
-
-            <div className="bg-white p-1 rounded-lg shadow-sm flex items-center justify-center">
-              <img src="/logo.png" alt="Logo MTs Darussalam" className="w-8 h-8 object-contain" />
-            </div>
             
             <div>
               <h1 className="font-bold text-base md:text-lg leading-tight tracking-tight text-emerald-50">
