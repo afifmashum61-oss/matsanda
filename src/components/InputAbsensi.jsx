@@ -140,11 +140,11 @@ export default function InputAbsensi({
             <p className="text-xs text-slate-500">Bisa memilih lebih dari 1 Jam Pelajaran sekaligus untuk pengisian cepat dan praktis.</p>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-2.5 w-full sm:w-auto">
             <button
               type="button"
               onClick={markAllHadir}
-              className="inline-flex items-center gap-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 font-semibold px-3 py-2 rounded-xl text-xs transition"
+              className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 font-semibold px-3 py-2.5 rounded-xl text-xs transition"
             >
               <CheckCheck className="w-4 h-4 text-emerald-600" />
               Tandai Semua Hadir
@@ -153,7 +153,7 @@ export default function InputAbsensi({
             <button
               type="button"
               onClick={handleSave}
-              className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-5 py-2.5 rounded-xl text-xs shadow-md transition"
+              className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-5 py-2.5 rounded-xl text-xs shadow-md transition"
             >
               <Save className="w-4 h-4" />
               Simpan {selectedJams.length} Jam Pelajaran
@@ -253,13 +253,6 @@ export default function InputAbsensi({
                 </button>
               );
             })}
-          </div>
-
-          <div className="bg-emerald-50/70 border border-emerald-200 p-2.5 rounded-xl text-xs text-emerald-900 flex items-center justify-between">
-            <span className="font-semibold flex items-center gap-1.5">
-              <Zap className="w-4 h-4 text-emerald-600 fill-emerald-500" />
-              Menyimpan absensi untuk <strong>{selectedJams.length} Jam Pelajaran sekaligus</strong>: {selectedJamLabels}
-            </span>
           </div>
         </div>
 
