@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getFirestore, doc, setDoc, getDoc, collection, getDocs } from "firebase/firestore";
+import { getFirestore, doc, setDoc, getDoc, collection, getDocs, onSnapshot } from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: "AIzaSyC_wTNntZUVtyXVMdakfCXRGrwurIh_08",
@@ -46,4 +46,45 @@ export const syncAttendanceToCloud = async (attendance) => {
   } catch (err) {
     console.warn("Cloud sync warning (attendance):", err);
   }
+};
+
+// Real-time subscriptions for multi-device sync
+export const subscribeSchoolProfile = (onUpdate, initialData) => {
+  return onSnapshot(doc(db, "school", "profile"), (docSnap) => {
+    if (docSnap.exists()) {
+      onUpdate(docSnap.data());
+    } else if (initialData) {
+      syncSchoolProfileToCloud(initialData);
+    }
+  }, (err) => console.warn("Realtime error (profile):", err));
+};
+
+export const subscribeClasses = (onUpdate, initialData) => {
+  return onSnapshot(doc(db, "school", "classes"), (docSnap) => {
+    if (docSnap.exists() && Array.isArray(docSnap.data().list)) {
+      onUpdate(docSnap.data().list);
+    } else if (initialData) {
+      syncClassesToCloud(initialData);
+    }
+  }, (err) => console.warn("Realtime error (classes):", err));
+};
+
+export const subscribeStudents = (onUpdate, initialData) => {
+  return onSnapshot(doc(db, "school", "students"), (docSnap) => {
+    if (docSnap.exists() && Array.isArray(docSnap.data().list)) {
+      onUpdate(docSnap.data().list);
+    } else if (initialData) {
+      syncStudentsToCloud(initialData);
+    }
+  }, (err) => console.warn("Realtime error (students):", err));
+};
+
+export const subscribeAttendance = (onUpdate, initialData) => {
+  return onSnapshot(doc(db, "school", "attendance"), (docSnap) => {
+    if (docSnap.exists() && Array.isArray(docSnap.data().list)) {
+      onUpdate(docSnap.data().list);
+    } else if (initialData) {
+      syncAttendanceToCloud(initialData);
+    }
+  }, (err) => console.warn("Realtime error (attendance):", err));
 };

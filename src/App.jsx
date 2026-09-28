@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   LayoutDashboard, 
   UserCheck, 
@@ -8,7 +8,8 @@ import {
   Menu, 
   X,
   School,
-  ChevronRight
+  ChevronRight,
+  Cloud
 } from 'lucide-react';
 
 import Dashboard from './components/Dashboard';
@@ -24,9 +25,17 @@ import {
   getAttendance, saveAttendance
 } from './utils/storage';
 
+import {
+  subscribeSchoolProfile,
+  subscribeClasses,
+  subscribeStudents,
+  subscribeAttendance
+} from './firebase';
+
 export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isCloudConnected, setIsCloudConnected] = useState(false);
 
   // Persistent States
   const [schoolProfile, setSchoolProfileState] = useState(getSchoolProfile);
@@ -35,6 +44,40 @@ export default function App() {
   const [attendance, setAttendanceState] = useState(getAttendance);
 
   const [selectedClass, setSelectedClass] = useState(classes[0]?.id || '7A');
+
+  // Real-time Firestore Listeners across all devices
+  useEffect(() => {
+    const unsubProfile = subscribeSchoolProfile((profile) => {
+      setSchoolProfileState(profile);
+      localStorage.setItem('mts_school_profile', JSON.stringify(profile));
+      setIsCloudConnected(true);
+    }, schoolProfile);
+
+    const unsubClasses = subscribeClasses((classList) => {
+      setClassesState(classList);
+      localStorage.setItem('mts_classes', JSON.stringify(classList));
+      setIsCloudConnected(true);
+    }, classes);
+
+    const unsubStudents = subscribeStudents((studentList) => {
+      setStudentsState(studentList);
+      localStorage.setItem('mts_students', JSON.stringify(studentList));
+      setIsCloudConnected(true);
+    }, students);
+
+    const unsubAttendance = subscribeAttendance((attendanceList) => {
+      setAttendanceState(attendanceList);
+      localStorage.setItem('mts_attendance', JSON.stringify(attendanceList));
+      setIsCloudConnected(true);
+    }, attendance);
+
+    return () => {
+      unsubProfile();
+      unsubClasses();
+      unsubStudents();
+      unsubAttendance();
+    };
+  }, []);
 
   // Handlers for state update + LocalStorage persistence
   const handleSaveSchoolProfile = (profile) => {
@@ -95,6 +138,17 @@ export default function App() {
               <p className="text-[11px] text-emerald-300 font-medium hidden sm:block">
                 Sistem Informasi Absensi Digital • Ngesong - Jombang
               </p>
+            </div>
+          </div>
+
+          {/* Right: Cloud Sync Status Indicator */}
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-800/80 border border-emerald-700/60 text-emerald-100 text-xs font-medium shadow-inner">
+              <span className={`w-2.5 h-2.5 rounded-full ${isCloudConnected ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400 animate-ping'}`}></span>
+              <Cloud className="w-3.5 h-3.5 text-emerald-300" />
+              <span className="hidden sm:inline">
+                {isCloudConnected ? 'Realtime Cloud' : 'Menghubungkan Cloud...'}
+              </span>
             </div>
           </div>
 
