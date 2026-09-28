@@ -1,5 +1,10 @@
 import { initializeApp } from "firebase/app";
-import { getFirestore, doc, setDoc, getDoc, collection, getDocs, onSnapshot } from "firebase/firestore";
+import { 
+  initializeFirestore, 
+  persistentLocalCache, 
+  persistentMultipleTabManager,
+  doc, setDoc, getDoc, collection, getDocs, onSnapshot 
+} from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: "AIzaSyC_wTNntZUVtyXVMdakfCXRGrwurIh_08",
@@ -11,9 +16,13 @@ const firebaseConfig = {
   measurementId: "G-6C4PWQZY1W"
 };
 
-// Initialize Firebase
+// Initialize Firebase with multi-tab IndexedDB offline persistence
 const app = initializeApp(firebaseConfig);
-export const db = getFirestore(app);
+export const db = initializeFirestore(app, {
+  localCache: persistentLocalCache({
+    tabManager: persistentMultipleTabManager()
+  })
+});
 
 // Helper functions for cloud synchronization
 export const syncSchoolProfileToCloud = async (profile) => {
