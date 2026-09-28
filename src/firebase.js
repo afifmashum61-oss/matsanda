@@ -49,9 +49,54 @@ export const syncStudentsToCloud = async (students) => {
   }
 };
 
-export const syncAttendanceToCloud = async (attendance) => {
+export const syncAttendanceToCloud = async (attendance, targetDate) => {
   try {
+    // 1. Sync full master list for fast global realtime app sync
     await setDoc(doc(db, "school", "attendance"), { list: attendance });
+
+    // 2. Save structured daily attendance documents in 'daily_attendance' collection
+    if (targetDate) {
+      const dayRecords = attendance.filter(a => a.date === targetDate);
+      if (dayRecords.length > 0) {
+        const stats = {
+          hadir: dayRecords.filter(r => r.status === 'H').length,
+          sakit: dayRecords.filter(r => r.status === 'S').length,
+          izin: dayRecords.filter(r => r.status === 'I').length,
+          alpha: dayRecords.filter(r => r.status === 'A').length,
+        };
+        await setDoc(doc(db, "daily_attendance", targetDate), {
+          date: targetDate,
+          updatedAt: new Date().toISOString(),
+          stats,
+          totalStudents: dayRecords.length,
+          records: dayRecords
+        }, { merge: true });
+      }
+    } else {
+      // Group all attendance records by date and save each date neatly to Firestore
+      const recordsByDate = {};
+      attendance.forEach(rec => {
+        if (!rec.date) return;
+        if (!recordsByDate[rec.date]) recordsByDate[rec.date] = [];
+        recordsByDate[rec.date].push(rec);
+      });
+
+      for (const [dStr, dayRecords] of Object.entries(recordsByDate)) {
+        const stats = {
+          hadir: dayRecords.filter(r => r.status === 'H').length,
+          sakit: dayRecords.filter(r => r.status === 'S').length,
+          izin: dayRecords.filter(r => r.status === 'I').length,
+          alpha: dayRecords.filter(r => r.status === 'A').length,
+        };
+        await setDoc(doc(db, "daily_attendance", dStr), {
+          date: dStr,
+          updatedAt: new Date().toISOString(),
+          stats,
+          totalStudents: dayRecords.length,
+          records: dayRecords
+        }, { merge: true });
+      }
+    }
   } catch (err) {
     console.warn("Cloud sync warning (attendance):", err);
   }

@@ -101,7 +101,7 @@ export default function App() {
     );
     const updated = [...filteredExisting, ...newRecords];
     setAttendanceState(updated);
-    saveAttendance(updated);
+    saveAttendance(updated, dateStr);
   };
 
   const navItems = [
