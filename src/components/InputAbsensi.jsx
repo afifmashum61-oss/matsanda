@@ -256,17 +256,33 @@ export default function InputAbsensi({
           </div>
         </div>
 
-        {/* Summary Badges */}
-        <div className="flex flex-wrap items-center justify-between bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs">
-          <div className="flex items-center gap-2 text-slate-600 font-medium">
-            <Users className="w-4 h-4 text-slate-500" />
-            <span>Kelas <strong>{selectedClass}</strong> • Total <strong>{classStudents.length} Siswa</strong></span>
+        {/* Summary Badges - Mobile Optimized */}
+        <div className="bg-slate-50/90 p-3 rounded-xl border border-slate-200/80 text-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5">
+          <div className="flex items-center gap-2 text-slate-700 font-bold">
+            <div className="p-1 bg-emerald-100 text-emerald-700 rounded-lg">
+              <Users className="w-4 h-4" />
+            </div>
+            <span>Kelas <strong className="text-emerald-800 font-black">{selectedClass}</strong> • <span className="font-medium text-slate-600">Total {classStudents.length} Siswa</span></span>
           </div>
-          <div className="flex items-center gap-4 font-semibold">
-            <span className="text-emerald-700">Hadir: {hadirCount}</span>
-            <span className="text-amber-700">Sakit: {sakitCount}</span>
-            <span className="text-blue-700">Izin: {izinCount}</span>
-            <span className="text-rose-700 font-bold">Alpa: {alpaCount}</span>
+
+          {/* Stats Badges Grid on Mobile / Flex on Desktop */}
+          <div className="grid grid-cols-4 sm:flex items-center gap-1.5 sm:gap-3 w-full sm:w-auto text-center font-bold">
+            <div className="bg-emerald-100/70 border border-emerald-200 text-emerald-800 px-2 py-1 rounded-lg">
+              <span className="text-[10px] text-emerald-600 block sm:inline font-normal sm:mr-1">Hadir:</span>
+              <span>{hadirCount}</span>
+            </div>
+            <div className="bg-amber-100/70 border border-amber-200 text-amber-800 px-2 py-1 rounded-lg">
+              <span className="text-[10px] text-amber-600 block sm:inline font-normal sm:mr-1">Sakit:</span>
+              <span>{sakitCount}</span>
+            </div>
+            <div className="bg-blue-100/70 border border-blue-200 text-blue-800 px-2 py-1 rounded-lg">
+              <span className="text-[10px] text-blue-600 block sm:inline font-normal sm:mr-1">Izin:</span>
+              <span>{izinCount}</span>
+            </div>
+            <div className="bg-rose-100/70 border border-rose-200 text-rose-800 px-2 py-1 rounded-lg">
+              <span className="text-[10px] text-rose-600 block sm:inline font-normal sm:mr-1">Alpa:</span>
+              <span>{alpaCount}</span>
+            </div>
           </div>
         </div>
       </div>
