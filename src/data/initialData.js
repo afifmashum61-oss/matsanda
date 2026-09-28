@@ -5,7 +5,7 @@ export const INITIAL_SCHOOL_PROFILE = {
   alamat: "Jl. Maspait No. 04 Ngesong, Sengon, Kec. Jombang, Kab. Jombang",
   kepalaSekolah: "H. Ahmad Syarifuddin, S.Pd.I.",
   nipKepalaSekolah: "19780512 200501 1 003",
-  tahunAjaran: "2025/2026",
+  tahunAjaran: "2026/2027",
   semester: "Ganjil",
 };
 

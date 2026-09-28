@@ -9,7 +9,17 @@ const KEYS = {
 
 export const getSchoolProfile = () => {
   const data = localStorage.getItem(KEYS.SCHOOL);
-  return data ? JSON.parse(data) : INITIAL_SCHOOL_PROFILE;
+  if (!data) return INITIAL_SCHOOL_PROFILE;
+  try {
+    const profile = JSON.parse(data);
+    if (profile.tahunAjaran === '2025/2026') {
+      profile.tahunAjaran = '2026/2027';
+      localStorage.setItem(KEYS.SCHOOL, JSON.stringify(profile));
+    }
+    return profile;
+  } catch (err) {
+    return INITIAL_SCHOOL_PROFILE;
+  }
 };
 
 export const saveSchoolProfile = (profile) => {
