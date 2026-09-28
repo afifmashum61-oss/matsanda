@@ -35,7 +35,11 @@ export const saveSchoolProfile = (profile) => {
 
 export const getClasses = () => {
   const data = localStorage.getItem(KEYS.CLASSES);
-  if (!data) return INITIAL_CLASSES;
+  if (!data) {
+    localStorage.setItem(KEYS.CLASSES, JSON.stringify(INITIAL_CLASSES));
+    syncClassesToCloud(INITIAL_CLASSES);
+    return INITIAL_CLASSES;
+  }
   try {
     const stored = JSON.parse(data);
     let updated = false;
@@ -48,15 +52,11 @@ export const getClasses = () => {
       return c;
     });
 
-    const existingIds = updatedStored.map(c => c.id);
-    const missing = INITIAL_CLASSES.filter(c => !existingIds.includes(c.id));
-    if (missing.length > 0 || updated) {
-      const merged = [...updatedStored, ...missing];
-      localStorage.setItem(KEYS.CLASSES, JSON.stringify(merged));
-      syncClassesToCloud(merged);
-      return merged;
+    if (updated) {
+      localStorage.setItem(KEYS.CLASSES, JSON.stringify(updatedStored));
+      syncClassesToCloud(updatedStored);
     }
-    return stored;
+    return updatedStored;
   } catch (err) {
     return INITIAL_CLASSES;
   }
@@ -69,18 +69,13 @@ export const saveClasses = (classes) => {
 
 export const getStudents = () => {
   const data = localStorage.getItem(KEYS.STUDENTS);
-  if (!data) return INITIAL_STUDENTS;
+  if (!data) {
+    localStorage.setItem(KEYS.STUDENTS, JSON.stringify(INITIAL_STUDENTS));
+    syncStudentsToCloud(INITIAL_STUDENTS);
+    return INITIAL_STUDENTS;
+  }
   try {
-    const stored = JSON.parse(data);
-    const existingIds = stored.map(s => s.id);
-    const missing = INITIAL_STUDENTS.filter(s => !existingIds.includes(s.id));
-    if (missing.length > 0) {
-      const merged = [...stored, ...missing];
-      localStorage.setItem(KEYS.STUDENTS, JSON.stringify(merged));
-      syncStudentsToCloud(merged);
-      return merged;
-    }
-    return stored;
+    return JSON.parse(data);
   } catch (err) {
     return INITIAL_STUDENTS;
   }
