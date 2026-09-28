@@ -8,7 +8,8 @@ import {
   Clock, 
   AlertCircle, 
   Search,
-  BookOpen
+  Check,
+  Zap
 } from 'lucide-react';
 import { JAM_PELAJARAN } from '../data/initialData';
 
@@ -21,7 +22,10 @@ export default function InputAbsensi({
   setSelectedClass 
 }) {
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
-  const [selectedJam, setSelectedJam] = useState(1); // Jam Ke-1 s/d Jam Ke-8
+  
+  // Multi-select Jam Pelajaran IDs, e.g. [1, 2] or [3, 4]
+  const [selectedJams, setSelectedJams] = useState([1, 2]);
+  
   const [searchTerm, setSearchTerm] = useState('');
   const [saveSuccess, setSaveSuccess] = useState(false);
 
@@ -35,12 +39,15 @@ export default function InputAbsensi({
   // Form state for current attendance records
   const [attendanceMap, setAttendanceMap] = useState({});
 
-  // Load existing records for this class, date, & jamKe when parameters change
+  // Primary JP for loading initial state (first selected JP)
+  const primaryJam = selectedJams[0] || 1;
+
+  // Load existing records for this class, date, & primary selected jamKe when parameters change
   useEffect(() => {
     const map = {};
     classStudents.forEach(s => {
       const existing = attendance.find(
-        a => a.studentId === s.id && a.date === selectedDate && (a.jamKe === selectedJam || !a.jamKe)
+        a => a.studentId === s.id && a.date === selectedDate && (a.jamKe === primaryJam || !a.jamKe)
       );
       if (existing) {
         map[s.id] = { status: existing.status, catatan: existing.catatan || '' };
@@ -49,7 +56,18 @@ export default function InputAbsensi({
       }
     });
     setAttendanceMap(map);
-  }, [selectedClass, selectedDate, selectedJam, students, attendance]);
+  }, [selectedClass, selectedDate, primaryJam, students, attendance]);
+
+  // Toggle individual Jam Pelajaran in multi-select list
+  const toggleJamSelection = (jamId) => {
+    if (selectedJams.includes(jamId)) {
+      if (selectedJams.length > 1) {
+        setSelectedJams(selectedJams.filter(id => id !== jamId));
+      }
+    } else {
+      setSelectedJams([...selectedJams, jamId].sort((a, b) => a - b));
+    }
+  };
 
   const handleStatusChange = (studentId, status) => {
     setAttendanceMap(prev => ({
@@ -79,15 +97,23 @@ export default function InputAbsensi({
     setAttendanceMap(newMap);
   };
 
+  // Multi-Jam Pelajaran Save
   const handleSave = (e) => {
     e.preventDefault();
-    const newRecords = Object.keys(attendanceMap).map(studentId => ({
-      studentId,
-      date: selectedDate,
-      jamKe: selectedJam,
-      status: attendanceMap[studentId]?.status || 'Hadir',
-      catatan: attendanceMap[studentId]?.catatan || ''
-    }));
+    const newRecords = [];
+
+    // Save attendance for EVERY selected Jam Pelajaran at once!
+    selectedJams.forEach(jamId => {
+      Object.keys(attendanceMap).forEach(studentId => {
+        newRecords.push({
+          studentId,
+          date: selectedDate,
+          jamKe: jamId,
+          status: attendanceMap[studentId]?.status || 'Hadir',
+          catatan: attendanceMap[studentId]?.catatan || ''
+        });
+      });
+    });
 
     onSaveAttendance(newRecords, selectedClass, selectedDate);
     setSaveSuccess(true);
@@ -101,9 +127,8 @@ export default function InputAbsensi({
   const izinCount = values.filter(v => v.status === 'Izin').length;
   const alpaCount = values.filter(v => v.status === 'Alpa').length;
 
-  const currentJamInfo = JAM_PELAJARAN.find(j => j.id === Number(selectedJam)) || JAM_PELAJARAN[0];
-
   const currentClassObj = classes.find(c => c.id === selectedClass);
+  const selectedJamLabels = selectedJams.map(id => `Jam Ke-${id}`).join(', ');
 
   return (
     <div className="space-y-6">
@@ -111,8 +136,8 @@ export default function InputAbsensi({
       <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-4">
           <div>
-            <h1 className="text-xl font-bold text-slate-900">Form Absensi Siswa (Jam Ke-1 s/d Ke-8)</h1>
-            <p className="text-xs text-slate-500">Input dan kelola data kehadiran siswa berdasarkan jam pelajaran harian.</p>
+            <h1 className="text-xl font-bold text-slate-900">Form Absensi Siswa Multi-Jam Pelajaran</h1>
+            <p className="text-xs text-slate-500">Bisa memilih lebih dari 1 Jam Pelajaran sekaligus untuk pengisian cepat dan praktis.</p>
           </div>
 
           <div className="flex items-center gap-3">
@@ -128,10 +153,10 @@ export default function InputAbsensi({
             <button
               type="button"
               onClick={handleSave}
-              className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2 rounded-xl text-xs shadow-md transition"
+              className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-5 py-2.5 rounded-xl text-xs shadow-md transition"
             >
               <Save className="w-4 h-4" />
-              Simpan Absensi
+              Simpan {selectedJams.length} Jam Pelajaran
             </button>
           </div>
         </div>
@@ -140,12 +165,14 @@ export default function InputAbsensi({
         {saveSuccess && (
           <div className="bg-emerald-50 border border-emerald-300 text-emerald-800 p-3.5 rounded-xl text-xs font-semibold flex items-center gap-2 animate-fadeIn">
             <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0" />
-            <span>Data absensi Kelas {selectedClass} Jam Ke-{selectedJam} ({selectedDate}) berhasil disimpan!</span>
+            <span>
+              Berhasil menyimpan absensi Kelas {selectedClass} untuk <strong>{selectedJams.length} Jam Pelajaran ({selectedJamLabels})</strong> sekaligus pada tanggal {selectedDate}!
+            </span>
           </div>
         )}
 
         {/* Inputs row with separated Kelas & Wali Kelas */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5 pt-1">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 pt-1">
           <div>
             <label className="block text-xs font-bold text-slate-700 mb-1.5">Pilih Kelas</label>
             <select
@@ -166,21 +193,6 @@ export default function InputAbsensi({
             <div className="w-full bg-slate-100/90 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-700 truncate flex items-center h-[38px]">
               {currentClassObj?.waliKelas || '-'}
             </div>
-          </div>
-
-          <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1.5">Jam Pelajaran</label>
-            <select
-              value={selectedJam}
-              onChange={(e) => setSelectedJam(Number(e.target.value))}
-              className="w-full bg-emerald-50 border border-emerald-300 text-emerald-900 rounded-xl px-3 py-2 text-xs font-bold focus:ring-2 focus:ring-emerald-500 focus:outline-none"
-            >
-              {JAM_PELAJARAN.map(j => (
-                <option key={j.id} value={j.id}>
-                  {j.label} ({j.waktu})
-                </option>
-              ))}
-            </select>
           </div>
 
           <div>
@@ -208,31 +220,86 @@ export default function InputAbsensi({
           </div>
         </div>
 
-        {/* Interactive Jam Pelajaran Pills Bar (1 - 8) */}
-        <div className="pt-2">
-          <label className="block text-xs font-bold text-slate-600 mb-2 flex items-center gap-1.5">
-            <Clock className="w-4 h-4 text-emerald-600" />
-            Pilih Jam Pelajaran:
-          </label>
+        {/* Multi-Select Jam Pelajaran Pills Bar (1 - 8) */}
+        <div className="pt-2 space-y-2">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+              <Clock className="w-4 h-4 text-emerald-600" />
+              Pilih Jam Pelajaran (Bisa pilih lebih dari 1):
+            </label>
+            
+            {/* Quick Preset Buttons */}
+            <div className="flex flex-wrap items-center gap-1.5 text-[11px]">
+              <span className="text-slate-400 font-medium">Pintas:</span>
+              <button
+                type="button"
+                onClick={() => setSelectedJams([1, 2])}
+                className="bg-slate-100 hover:bg-emerald-50 text-slate-700 hover:text-emerald-700 px-2.5 py-1 rounded-lg font-medium border border-slate-200 transition"
+              >
+                Jam 1-2
+              </button>
+              <button
+                type="button"
+                onClick={() => setSelectedJams([3, 4])}
+                className="bg-slate-100 hover:bg-emerald-50 text-slate-700 hover:text-emerald-700 px-2.5 py-1 rounded-lg font-medium border border-slate-200 transition"
+              >
+                Jam 3-4
+              </button>
+              <button
+                type="button"
+                onClick={() => setSelectedJams([5, 6])}
+                className="bg-slate-100 hover:bg-emerald-50 text-slate-700 hover:text-emerald-700 px-2.5 py-1 rounded-lg font-medium border border-slate-200 transition"
+              >
+                Jam 5-6
+              </button>
+              <button
+                type="button"
+                onClick={() => setSelectedJams([7, 8])}
+                className="bg-slate-100 hover:bg-emerald-50 text-slate-700 hover:text-emerald-700 px-2.5 py-1 rounded-lg font-medium border border-slate-200 transition"
+              >
+                Jam 7-8
+              </button>
+              <button
+                type="button"
+                onClick={() => setSelectedJams([1, 2, 3, 4, 5, 6, 7, 8])}
+                className="bg-emerald-100 hover:bg-emerald-200 text-emerald-800 px-2.5 py-1 rounded-lg font-bold border border-emerald-300 transition"
+              >
+                Semua Jam (1-8)
+              </button>
+            </div>
+          </div>
+
           <div className="grid grid-cols-4 sm:grid-cols-8 gap-1.5 sm:gap-2">
             {JAM_PELAJARAN.map(j => {
-              const isSelected = selectedJam === j.id;
+              const isSelected = selectedJams.includes(j.id);
               return (
                 <button
                   key={j.id}
                   type="button"
-                  onClick={() => setSelectedJam(j.id)}
-                  className={`p-2 rounded-xl text-center transition border ${
+                  onClick={() => toggleJamSelection(j.id)}
+                  className={`p-2 rounded-xl text-center transition border relative ${
                     isSelected
                       ? 'bg-emerald-700 text-white border-emerald-700 shadow-md font-bold'
                       : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-emerald-50 hover:border-emerald-300'
                   }`}
                 >
+                  {isSelected && (
+                    <span className="absolute right-1 top-1 bg-white text-emerald-700 rounded-full p-0.5">
+                      <Check className="w-3 h-3 stroke-[3]" />
+                    </span>
+                  )}
                   <p className="text-xs font-bold">{j.label}</p>
                   <p className={`text-[10px] ${isSelected ? 'text-emerald-100' : 'text-slate-400'}`}>{j.waktu}</p>
                 </button>
               );
             })}
+          </div>
+
+          <div className="bg-emerald-50/70 border border-emerald-200 p-2.5 rounded-xl text-xs text-emerald-900 flex items-center justify-between">
+            <span className="font-semibold flex items-center gap-1.5">
+              <Zap className="w-4 h-4 text-emerald-600 fill-emerald-500" />
+              Menyimpan absensi untuk <strong>{selectedJams.length} Jam Pelajaran sekaligus</strong>: {selectedJamLabels}
+            </span>
           </div>
         </div>
 
@@ -240,7 +307,7 @@ export default function InputAbsensi({
         <div className="flex flex-wrap items-center justify-between bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs">
           <div className="flex items-center gap-2 text-slate-600 font-medium">
             <Users className="w-4 h-4 text-slate-500" />
-            <span>Kelas <strong>{selectedClass}</strong> • <strong>{currentJamInfo.label}</strong> ({currentJamInfo.waktu}): <strong>{classStudents.length} Siswa</strong></span>
+            <span>Kelas <strong>{selectedClass}</strong> • Total <strong>{classStudents.length} Siswa</strong></span>
           </div>
           <div className="flex items-center gap-4 font-semibold">
             <span className="text-emerald-700">Hadir: {hadirCount}</span>
@@ -267,7 +334,7 @@ export default function InputAbsensi({
                   <th className="py-3.5 px-4 w-28">NIS</th>
                   <th className="py-3.5 px-4">Nama Lengkap</th>
                   <th className="py-3.5 px-4 w-16 text-center">L/P</th>
-                  <th className="py-3.5 px-4 w-80 text-center">Status ({currentJamInfo.label})</th>
+                  <th className="py-3.5 px-4 w-80 text-center">Status Kehadiran</th>
                   <th className="py-3.5 px-4">Catatan / Keterangan</th>
                 </tr>
               </thead>
@@ -365,7 +432,7 @@ export default function InputAbsensi({
             className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-2.5 rounded-xl text-sm shadow-md transition"
           >
             <Save className="w-4 h-4" />
-            Simpan Absensi Kelas {selectedClass} - {currentJamInfo.label}
+            Simpan Absensi Kelas {selectedClass} ({selectedJams.length} Jam Pelajaran)
           </button>
         </div>
       </div>
