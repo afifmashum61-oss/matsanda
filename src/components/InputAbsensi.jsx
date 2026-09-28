@@ -205,7 +205,7 @@ export default function InputAbsensi({
             <Clock className="w-4 h-4 text-emerald-600" />
             Pilih Jam Pelajaran:
           </label>
-          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2">
+          <div className="grid grid-cols-4 sm:grid-cols-8 gap-1.5 sm:gap-2">
             {JAM_PELAJARAN.map(j => {
               const isSelected = selectedJam === j.id;
               return (

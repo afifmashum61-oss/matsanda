@@ -98,17 +98,6 @@ export default function App() {
             </div>
           </div>
 
-          {/* Right: Academic Info */}
-          <div className="flex items-center gap-3">
-            <div className="text-right text-xs">
-              <span className="bg-emerald-800/80 text-emerald-100 font-semibold px-2.5 py-1 rounded-full border border-emerald-700/50 text-[11px]">
-                {activeNavItem?.label}
-              </span>
-              <p className="text-[11px] text-emerald-300 mt-1 hidden sm:block">
-                T.A {schoolProfile.tahunAjaran} ({schoolProfile.semester})
-              </p>
-            </div>
-          </div>
         </div>
       </header>
 
