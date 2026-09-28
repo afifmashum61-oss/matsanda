@@ -5,6 +5,7 @@ import {
   persistentMultipleTabManager,
   doc, setDoc, getDoc, collection, getDocs, onSnapshot 
 } from "firebase/firestore";
+import { INITIAL_SCHOOL_PROFILE, INITIAL_CLASSES, INITIAL_STUDENTS, INITIAL_ATTENDANCE } from './data/initialData';
 
 const firebaseConfig = {
   apiKey: "AIzaSyC_wTNntZUVtyXVMdakfCXRGrwurIh_08",
@@ -103,42 +104,46 @@ export const syncAttendanceToCloud = async (attendance, targetDate) => {
 };
 
 // Real-time subscriptions for multi-device sync
-export const subscribeSchoolProfile = (onUpdate, initialData) => {
+export const subscribeSchoolProfile = (onUpdate) => {
   return onSnapshot(doc(db, "school", "profile"), (docSnap) => {
+    if (docSnap.metadata.hasPendingWrites) return;
     if (docSnap.exists()) {
       onUpdate(docSnap.data());
-    } else if (initialData) {
-      syncSchoolProfileToCloud(initialData);
+    } else {
+      syncSchoolProfileToCloud(INITIAL_SCHOOL_PROFILE);
     }
   }, (err) => console.warn("Realtime error (profile):", err));
 };
 
-export const subscribeClasses = (onUpdate, initialData) => {
+export const subscribeClasses = (onUpdate) => {
   return onSnapshot(doc(db, "school", "classes"), (docSnap) => {
+    if (docSnap.metadata.hasPendingWrites) return;
     if (docSnap.exists() && Array.isArray(docSnap.data().list)) {
       onUpdate(docSnap.data().list);
-    } else if (initialData) {
-      syncClassesToCloud(initialData);
+    } else {
+      syncClassesToCloud(INITIAL_CLASSES);
     }
   }, (err) => console.warn("Realtime error (classes):", err));
 };
 
-export const subscribeStudents = (onUpdate, initialData) => {
+export const subscribeStudents = (onUpdate) => {
   return onSnapshot(doc(db, "school", "students"), (docSnap) => {
+    if (docSnap.metadata.hasPendingWrites) return;
     if (docSnap.exists() && Array.isArray(docSnap.data().list)) {
       onUpdate(docSnap.data().list);
-    } else if (initialData) {
-      syncStudentsToCloud(initialData);
+    } else {
+      syncStudentsToCloud(INITIAL_STUDENTS);
     }
   }, (err) => console.warn("Realtime error (students):", err));
 };
 
-export const subscribeAttendance = (onUpdate, initialData) => {
+export const subscribeAttendance = (onUpdate) => {
   return onSnapshot(doc(db, "school", "attendance"), (docSnap) => {
+    if (docSnap.metadata.hasPendingWrites) return;
     if (docSnap.exists() && Array.isArray(docSnap.data().list)) {
       onUpdate(docSnap.data().list);
-    } else if (initialData) {
-      syncAttendanceToCloud(initialData);
+    } else {
+      syncAttendanceToCloud(INITIAL_ATTENDANCE);
     }
   }, (err) => console.warn("Realtime error (attendance):", err));
 };

@@ -35,11 +35,7 @@ export const saveSchoolProfile = (profile) => {
 
 export const getClasses = () => {
   const data = localStorage.getItem(KEYS.CLASSES);
-  if (!data) {
-    localStorage.setItem(KEYS.CLASSES, JSON.stringify(INITIAL_CLASSES));
-    syncClassesToCloud(INITIAL_CLASSES);
-    return INITIAL_CLASSES;
-  }
+  if (!data) return INITIAL_CLASSES;
   try {
     const stored = JSON.parse(data);
     let updated = false;
@@ -54,7 +50,6 @@ export const getClasses = () => {
 
     if (updated) {
       localStorage.setItem(KEYS.CLASSES, JSON.stringify(updatedStored));
-      syncClassesToCloud(updatedStored);
     }
     return updatedStored;
   } catch (err) {
@@ -69,11 +64,7 @@ export const saveClasses = (classes) => {
 
 export const getStudents = () => {
   const data = localStorage.getItem(KEYS.STUDENTS);
-  if (!data) {
-    localStorage.setItem(KEYS.STUDENTS, JSON.stringify(INITIAL_STUDENTS));
-    syncStudentsToCloud(INITIAL_STUDENTS);
-    return INITIAL_STUDENTS;
-  }
+  if (!data) return INITIAL_STUDENTS;
   try {
     return JSON.parse(data);
   } catch (err) {

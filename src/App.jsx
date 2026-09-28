@@ -50,25 +50,25 @@ export default function App() {
       setSchoolProfileState(profile);
       localStorage.setItem('mts_school_profile', JSON.stringify(profile));
       setIsCloudConnected(true);
-    }, schoolProfile);
+    });
 
     const unsubClasses = subscribeClasses((classList) => {
       setClassesState(classList);
       localStorage.setItem('mts_classes', JSON.stringify(classList));
       setIsCloudConnected(true);
-    }, classes);
+    });
 
     const unsubStudents = subscribeStudents((studentList) => {
       setStudentsState(studentList);
       localStorage.setItem('mts_students', JSON.stringify(studentList));
       setIsCloudConnected(true);
-    }, students);
+    });
 
     const unsubAttendance = subscribeAttendance((attendanceList) => {
       setAttendanceState(attendanceList);
       localStorage.setItem('mts_attendance', JSON.stringify(attendanceList));
       setIsCloudConnected(true);
-    }, attendance);
+    });
 
     return () => {
       unsubProfile();
