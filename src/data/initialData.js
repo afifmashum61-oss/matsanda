@@ -32,11 +32,25 @@ export const JAM_PELAJARAN_SENIN = [
   { id: 8, label: "Jam Ke-8", waktu: "12.10 - 12.45" },
 ];
 
+// Special Schedule for Hari Jum'at (30 min JP, Selesai 11.20)
+export const JAM_PELAJARAN_JUMAT = [
+  { id: 1, label: "Jam Ke-1", waktu: "07.00 - 07.30" },
+  { id: 2, label: "Jam Ke-2", waktu: "07.30 - 08.00" },
+  { id: 3, label: "Jam Ke-3", waktu: "08.00 - 08.30" },
+  { id: 4, label: "Jam Ke-4", waktu: "08.30 - 09.00" },
+  { id: 5, label: "Jam Ke-5", waktu: "09.20 - 09.50", info: "Istirahat: 09.00 - 09.20" },
+  { id: 6, label: "Jam Ke-6", waktu: "09.50 - 10.20" },
+  { id: 7, label: "Jam Ke-7", waktu: "10.20 - 10.50" },
+  { id: 8, label: "Jam Ke-8", waktu: "10.50 - 11.20" },
+];
+
 export const getJamPelajaranByDate = (dateStr) => {
   if (!dateStr) return JAM_PELAJARAN_REGULAR;
   const date = new Date(dateStr);
-  const day = date.getDay(); // 1 = Monday
-  return day === 1 ? JAM_PELAJARAN_SENIN : JAM_PELAJARAN_REGULAR;
+  const day = date.getDay(); // 1 = Monday, 5 = Friday
+  if (day === 1) return JAM_PELAJARAN_SENIN;
+  if (day === 5) return JAM_PELAJARAN_JUMAT;
+  return JAM_PELAJARAN_REGULAR;
 };
 
 export const JAM_PELAJARAN = JAM_PELAJARAN_REGULAR;

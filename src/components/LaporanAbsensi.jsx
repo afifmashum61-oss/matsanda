@@ -27,6 +27,7 @@ export default function LaporanAbsensi({ students, attendance, classes, schoolPr
 
   const currentJamList = getJamPelajaranByDate(selectedDate);
   const isMondaySelected = new Date(selectedDate).getDay() === 1;
+  const isFridaySelected = new Date(selectedDate).getDay() === 5;
 
   const currentClassInfo = classes.find(c => c.id === selectedClass) || { nama: `Kelas ${selectedClass}`, waliKelas: '-' };
   const classStudents = students.filter(s => s.kelas === selectedClass);
@@ -412,7 +413,12 @@ export default function LaporanAbsensi({ students, attendance, classes, schoolPr
             <span>Keterangan Waktu Jam Pelajaran MTs Darussalam:</span>
             {isMondaySelected && (
               <span className="text-amber-800 font-semibold bg-amber-50 border border-amber-200 px-2 py-0.5 rounded text-[11px]">
-                * Upacara Bendera: 06.40 - 07.30 • Istirahat: 09.50 - 10.25
+                * Upacara Bendera: 06.40 - 07.30 • Istirahat: 09.50 - 10.25 (Senin)
+              </span>
+            )}
+            {isFridaySelected && (
+              <span className="text-emerald-800 font-semibold bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded text-[11px]">
+                * Istirahat: 09.00 - 09.20 • Selesai 11.20 (Jum'at 30 Menit/JP)
               </span>
             )}
           </p>
