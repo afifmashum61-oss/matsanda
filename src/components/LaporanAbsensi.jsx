@@ -186,8 +186,8 @@ export default function LaporanAbsensi({ students, attendance, classes, schoolPr
                   onChange={(e) => setSelectedYear(Number(e.target.value))}
                   className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-medium text-slate-800 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
                 >
-                  <option value={2025}>2025</option>
                   <option value={2026}>2026</option>
+                  <option value={2027}>2027</option>
                 </select>
               </div>
             </>
