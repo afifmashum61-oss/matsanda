@@ -7,6 +7,7 @@ export const INITIAL_SCHOOL_PROFILE = {
   nipKepalaSekolah: "19780512 200501 1 003",
   tahunAjaran: "2026/2027",
   semester: "Ganjil",
+  adminPin: "1234",
 };
 
 export const JAM_PELAJARAN_REGULAR = [

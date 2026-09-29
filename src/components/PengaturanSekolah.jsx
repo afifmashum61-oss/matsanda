@@ -8,7 +8,8 @@ import {
   Trash2, 
   Edit2, 
   CheckCircle2, 
-  AlertTriangle 
+  AlertTriangle,
+  Lock
 } from 'lucide-react';
 import { exportFullBackup, resetDataToDefault } from '../utils/storage';
 
@@ -16,7 +17,8 @@ export default function PengaturanSekolah({
   schoolProfile, 
   onSaveProfile, 
   classes, 
-  onSaveClasses 
+  onSaveClasses,
+  onLockAdmin
 }) {
   const [profile, setProfile] = useState({ ...schoolProfile });
   const [successMsg, setSuccessMsg] = useState('');
@@ -70,9 +72,21 @@ export default function PengaturanSekolah({
   return (
     <div className="space-y-6 max-w-4xl mx-auto">
       {/* Header */}
-      <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-        <h1 className="text-xl font-bold text-slate-900">Pengaturan Identitas & Data Sekolah</h1>
-        <p className="text-xs text-slate-500">Sesuaikan profil MTs Darussalam Ngesong Jombang, wali kelas, dan manajemen data.</p>
+      <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-xl font-bold text-slate-900">Pengaturan Identitas & Data Sekolah</h1>
+          <p className="text-xs text-slate-500">Sesuaikan profil MTs Darussalam Ngesong Jombang, PIN Admin, wali kelas, dan manajemen data.</p>
+        </div>
+        {onLockAdmin && (
+          <button
+            type="button"
+            onClick={onLockAdmin}
+            className="inline-flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold px-3.5 py-2 rounded-xl text-xs transition border border-slate-200 shadow-sm"
+          >
+            <Lock className="w-4 h-4 text-slate-500" />
+            Kunci Akses Admin
+          </button>
+        )}
       </div>
 
       {successMsg && (
@@ -174,6 +188,21 @@ export default function PengaturanSekolah({
                 <option value="Ganjil">Ganjil</option>
                 <option value="Genap">Genap</option>
               </select>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-emerald-800 mb-1 flex items-center gap-1">
+                <Lock className="w-3.5 h-3.5 text-emerald-600" />
+                PIN Admin / Password Pengaturan
+              </label>
+              <input
+                type="text"
+                required
+                value={profile.adminPin || '1234'}
+                onChange={(e) => setProfile({ ...profile, adminPin: e.target.value })}
+                className="w-full bg-emerald-50/50 border border-emerald-300 rounded-xl px-3.5 py-2 text-sm font-mono font-bold text-emerald-900 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+              />
+              <p className="text-[11px] text-slate-400 mt-1">Gunakan PIN ini untuk mengunci & membuka menu Pengaturan Sekolah.</p>
             </div>
           </div>
 

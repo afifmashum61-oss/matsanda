@@ -8,7 +8,12 @@ import {
   Menu, 
   X,
   School,
-  ChevronRight
+  ChevronRight,
+  Lock,
+  ShieldCheck,
+  AlertCircle,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 
 import Dashboard from './components/Dashboard';
@@ -43,6 +48,41 @@ export default function App() {
   const [attendance, setAttendanceState] = useState(getAttendance);
 
   const [selectedClass, setSelectedClass] = useState(classes[0]?.id || '7A');
+
+  // Admin PIN Protection State
+  const [isAdminUnlocked, setIsAdminUnlocked] = useState(false);
+  const [showAdminPinModal, setShowAdminPinModal] = useState(false);
+  const [pinInput, setPinInput] = useState('');
+  const [pinError, setPinError] = useState('');
+  const [showPinText, setShowPinText] = useState(false);
+
+  const handleSelectTab = (tabId) => {
+    if (tabId === 'pengaturan' && !isAdminUnlocked) {
+      setPinInput('');
+      setPinError('');
+      setShowAdminPinModal(true);
+    } else {
+      setActiveTab(tabId);
+    }
+  };
+
+  const handleVerifyPin = (e) => {
+    e.preventDefault();
+    const correctPin = schoolProfile?.adminPin || '1234';
+    if (pinInput.trim() === correctPin) {
+      setIsAdminUnlocked(true);
+      setShowAdminPinModal(false);
+      setActiveTab('pengaturan');
+      setPinError('');
+    } else {
+      setPinError('PIN Admin / Password salah! Silakan periksa kembali.');
+    }
+  };
+
+  const handleLockAdmin = () => {
+    setIsAdminUnlocked(false);
+    setActiveTab('dashboard');
+  };
 
   // Real-time Firestore Listeners across all devices
   useEffect(() => {
@@ -184,7 +224,7 @@ export default function App() {
                     <button
                       key={item.id}
                       onClick={() => {
-                        setActiveTab(item.id);
+                        handleSelectTab(item.id);
                         setIsMenuOpen(false);
                       }}
                       className={`w-full flex items-center justify-between p-3 rounded-xl transition text-left ${
@@ -268,10 +308,90 @@ export default function App() {
               onSaveProfile={handleSaveSchoolProfile}
               classes={classes}
               onSaveClasses={handleSaveClasses}
+              onLockAdmin={handleLockAdmin}
             />
           )}
         </main>
       </div>
+
+      {/* Modal Lock / Input PIN Admin */}
+      {showAdminPinModal && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 no-print animate-fadeIn">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-5 border border-slate-100">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 bg-emerald-50 text-emerald-700 rounded-xl border border-emerald-100">
+                  <Lock className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-base text-slate-900">Akses Pengaturan Terkunci</h3>
+                  <p className="text-xs text-slate-500">Masukkan PIN Admin untuk membuka pengaturan</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowAdminPinModal(false)}
+                className="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-100 transition"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {pinError && (
+              <div className="bg-rose-50 border border-rose-200 text-rose-800 p-3 rounded-xl text-xs font-semibold flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 text-rose-600 flex-shrink-0" />
+                <span>{pinError}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleVerifyPin} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1.5">PIN Admin / Password</label>
+                <div className="relative">
+                  <input
+                    type={showPinText ? 'text' : 'password'}
+                    required
+                    autoFocus
+                    placeholder="Masukkan PIN Admin..."
+                    value={pinInput}
+                    onChange={(e) => {
+                      setPinInput(e.target.value);
+                      if (pinError) setPinError('');
+                    }}
+                    className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 pr-10 text-sm font-bold text-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-none tracking-wider"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPinText(!showPinText)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1"
+                  >
+                    {showPinText ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+                <p className="text-[11px] text-slate-400 mt-1.5">
+                  💡 Default PIN: <strong className="text-slate-700 font-mono">1234</strong> (Dapat diubah di menu Pengaturan Sekolah).
+                </p>
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowAdminPinModal(false)}
+                  className="px-4 py-2 rounded-xl border border-slate-300 text-slate-700 text-xs font-semibold hover:bg-slate-50 transition"
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  className="inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-md transition"
+                >
+                  <ShieldCheck className="w-4 h-4" />
+                  Buka Pengaturan
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Footer (Hidden during print) */}
       <footer className="bg-white border-t border-slate-200 mt-auto py-4 text-center text-xs text-slate-500 no-print">
