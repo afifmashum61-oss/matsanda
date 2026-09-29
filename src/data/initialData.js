@@ -14,10 +14,10 @@ export const JAM_PELAJARAN_REGULAR = [
   { id: 2, label: "Jam Ke-2", waktu: "07.40 - 08.20" },
   { id: 3, label: "Jam Ke-3", waktu: "08.20 - 09.00" },
   { id: 4, label: "Jam Ke-4", waktu: "09.00 - 09.40" },
-  { id: 5, label: "Jam Ke-5", waktu: "10.00 - 10.40" },
-  { id: 6, label: "Jam Ke-6", waktu: "10.40 - 11.20" },
-  { id: 7, label: "Jam Ke-7", waktu: "11.20 - 12.00" },
-  { id: 8, label: "Jam Ke-8", waktu: "12.30 - 13.10" },
+  { id: 5, label: "Jam Ke-5", waktu: "10.10 - 10.50", info: "Istirahat: 09.40 - 10.10" },
+  { id: 6, label: "Jam Ke-6", waktu: "10.50 - 11.30" },
+  { id: 7, label: "Jam Ke-7", waktu: "11.30 - 12.10" },
+  { id: 8, label: "Jam Ke-8", waktu: "12.10 - 12.50" },
 ];
 
 // Special Schedule for Hari Senin (Upacara 06.40 - 07.30, 35 min JP)
