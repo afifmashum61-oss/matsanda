@@ -231,13 +231,6 @@ export default function InputAbsensi({
               <Clock className="w-4 h-4 text-emerald-600" />
               Pilih Jam Pelajaran (Bisa pilih lebih dari 1):
             </label>
-
-            {isMonday && (
-              <span className="inline-flex items-center gap-1.5 text-[11px] font-bold bg-amber-100 text-amber-900 px-2.5 py-1 rounded-lg border border-amber-300">
-                <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
-                Jadwal Khusus Hari Senin (Upacara 06.40 - 07.30 • JP 35 Menit)
-              </span>
-            )}
           </div>
 
           <div className="grid grid-cols-4 sm:grid-cols-8 gap-1.5 sm:gap-2">
