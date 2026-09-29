@@ -72,15 +72,13 @@ export default function LaporanAbsensi({ students, attendance, classes, schoolPr
           const hasIzin = dayRecs.some(r => r.status === 'Izin');
           const hasHadir = dayRecs.some(r => r.status === 'Hadir');
 
-          if (hasAlpa) {
-            code = 'A';
-            aCount++;
-          } else if (hasSakit) {
-            code = 'S';
-            sCount++;
-          } else if (hasIzin) {
-            code = 'I';
-            iCount++;
+          const nonHadirCodes = [];
+          if (hasSakit) { nonHadirCodes.push('S'); sCount++; }
+          if (hasIzin) { nonHadirCodes.push('I'); iCount++; }
+          if (hasAlpa) { nonHadirCodes.push('A'); aCount++; }
+
+          if (nonHadirCodes.length > 0) {
+            code = nonHadirCodes.join('/');
           } else if (hasHadir) {
             code = 'H';
             hCount++;
@@ -308,18 +306,20 @@ export default function LaporanAbsensi({ students, attendance, classes, schoolPr
                           const jpDetails = dayRecs.map(r => `Jam ${r.jamKe || 1}: ${r.status}`).join(', ');
                           titleText = `Tgl ${day}: ${jpDetails}`;
 
-                          if (hasAlpa) {
-                            char = 'A';
-                            alpa++;
-                            colorClass = 'bg-rose-200 font-extrabold text-rose-900';
-                          } else if (hasSakit) {
-                            char = 'S';
-                            sakit++;
-                            colorClass = 'bg-amber-100 font-bold text-amber-900';
-                          } else if (hasIzin) {
-                            char = 'I';
-                            izin++;
-                            colorClass = 'bg-blue-100 font-bold text-blue-900';
+                          const nonHadirCodes = [];
+                          if (hasSakit) { nonHadirCodes.push('S'); sakit++; }
+                          if (hasIzin) { nonHadirCodes.push('I'); izin++; }
+                          if (hasAlpa) { nonHadirCodes.push('A'); alpa++; }
+
+                          if (nonHadirCodes.length > 0) {
+                            char = nonHadirCodes.join('/');
+                            if (hasAlpa) {
+                              colorClass = 'bg-rose-200 font-extrabold text-rose-900';
+                            } else if (hasSakit) {
+                              colorClass = 'bg-amber-100 font-bold text-amber-900';
+                            } else if (hasIzin) {
+                              colorClass = 'bg-blue-100 font-bold text-blue-900';
+                            }
                           } else if (hasHadir) {
                             char = 'H';
                             h++;
