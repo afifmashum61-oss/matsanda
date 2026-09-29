@@ -446,7 +446,6 @@ export default function LaporanAbsensi({ students, attendance, classes, schoolPr
             <p className="font-bold">Wali Kelas {selectedClass}</p>
             <div className="h-16"></div>
             <p className="font-bold underline">{currentClassInfo.waliKelas}</p>
-            <p className="text-slate-600">Guru NUPTK / NIP</p>
           </div>
         </div>
 
