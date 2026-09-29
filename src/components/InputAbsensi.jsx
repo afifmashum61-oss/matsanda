@@ -316,7 +316,32 @@ export default function InputAbsensi({
                     <tr key={s.id} className="hover:bg-slate-50/80 transition">
                       <td className="py-3.5 px-4 text-center font-mono text-xs text-slate-500">{index + 1}</td>
                       <td className="py-3.5 px-4 font-mono text-xs text-slate-600">{s.nis}</td>
-                      <td className="py-3.5 px-4 font-bold text-slate-900">{s.nama}</td>
+                      <td className="py-3.5 px-4 font-bold text-slate-900">
+                        <div>{s.nama}</div>
+                        {(() => {
+                          const todayJpRecs = attendance.filter(a => a.studentId === s.id && a.date === selectedDate);
+                          if (todayJpRecs.length > 0) {
+                            return (
+                              <div className="flex flex-wrap gap-1 mt-1 text-[10px] font-normal">
+                                {todayJpRecs.sort((a,b) => (a.jamKe || 1) - (b.jamKe || 1)).map(r => (
+                                  <span 
+                                    key={r.jamKe || 1} 
+                                    className={`px-1.5 py-0.5 rounded border ${
+                                      r.status === 'Hadir' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
+                                      r.status === 'Sakit' ? 'bg-amber-50 text-amber-800 border-amber-200 font-bold' :
+                                      r.status === 'Izin' ? 'bg-blue-50 text-blue-800 border-blue-200 font-bold' :
+                                      'bg-rose-100 text-rose-800 border-rose-300 font-bold'
+                                    }`}
+                                  >
+                                    JP {r.jamKe || 1}: {r.status}
+                                  </span>
+                                ))}
+                              </div>
+                            );
+                          }
+                          return null;
+                        })()}
+                      </td>
                       <td className="py-3.5 px-4 text-center text-xs font-semibold text-slate-500">
                         <span className={`px-2 py-0.5 rounded ${s.gender === 'L' ? 'bg-blue-50 text-blue-700' : 'bg-pink-50 text-pink-700'}`}>
                           {s.gender}

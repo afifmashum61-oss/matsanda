@@ -95,10 +95,12 @@ export default function App() {
   };
 
   const handleSaveAttendance = (newRecords, classId, dateStr) => {
-    const studentIds = newRecords.map(r => r.studentId);
-    const filteredExisting = attendance.filter(
-      a => !(a.date === dateStr && studentIds.includes(a.studentId))
-    );
+    // Preserve other Jam Pelajaran records by filtering only matching (studentId + date + jamKe)
+    const newKeys = new Set(newRecords.map(r => `${r.studentId}_${r.date}_${r.jamKe || 1}`));
+    const filteredExisting = attendance.filter(a => {
+      const key = `${a.studentId}_${a.date}_${a.jamKe || 1}`;
+      return !newKeys.has(key);
+    });
     const updated = [...filteredExisting, ...newRecords];
     setAttendanceState(updated);
     saveAttendance(updated, dateStr);

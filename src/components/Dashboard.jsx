@@ -38,14 +38,46 @@ export default function Dashboard({
 
   const attendanceRate = totalStudents > 0 ? Math.round((presentCount / totalStudents) * 100) : 0;
 
-  // List of absent students today
-  const absentToday = todayRecords
-    .filter(a => a.status !== 'Hadir')
-    .map(a => {
-      const student = students.find(s => s.id === a.studentId);
-      return { ...a, student };
+  // List of absent students today (checking all JPs today)
+  const absentToday = students
+    .map(student => {
+      const dayRecs = attendance.filter(a => a.studentId === student.id && a.date === todayStr);
+      if (dayRecs.length === 0) return null;
+
+      const hasAlpa = dayRecs.filter(r => r.status === 'Alpa');
+      const hasSakit = dayRecs.filter(r => r.status === 'Sakit');
+      const hasIzin = dayRecs.filter(r => r.status === 'Izin');
+
+      if (hasAlpa.length > 0) {
+        const jams = hasAlpa.map(r => `Jam ${r.jamKe || 1}`).join(', ');
+        return { 
+          student, 
+          status: 'Alpa', 
+          jamDetail: jams, 
+          catatan: hasAlpa.map(r => r.catatan).filter(Boolean).join('; ') 
+        };
+      }
+      if (hasSakit.length > 0) {
+        const jams = hasSakit.map(r => `Jam ${r.jamKe || 1}`).join(', ');
+        return { 
+          student, 
+          status: 'Sakit', 
+          jamDetail: jams, 
+          catatan: hasSakit.map(r => r.catatan).filter(Boolean).join('; ') 
+        };
+      }
+      if (hasIzin.length > 0) {
+        const jams = hasIzin.map(r => `Jam ${r.jamKe || 1}`).join(', ');
+        return { 
+          student, 
+          status: 'Izin', 
+          jamDetail: jams, 
+          catatan: hasIzin.map(r => r.catatan).filter(Boolean).join('; ') 
+        };
+      }
+      return null;
     })
-    .filter(item => item.student);
+    .filter(Boolean);
 
   // Today date formatted in Indonesian
   const formattedToday = new Date().toLocaleDateString('id-ID', {
@@ -287,7 +319,7 @@ export default function Dashboard({
                           <p className="text-xs text-slate-500">Kelas {item.student.kelas} • NIS: {item.student.nis}</p>
                         </div>
                         <span className={`text-xs px-2.5 py-0.5 rounded-full font-bold border ${badgeBg}`}>
-                          {item.status}
+                          {item.status} ({item.jamDetail})
                         </span>
                       </div>
                       

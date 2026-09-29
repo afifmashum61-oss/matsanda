@@ -59,14 +59,31 @@ export default function LaporanAbsensi({ students, attendance, classes, schoolPr
 
       daysArray.forEach(day => {
         const dStr = getFormattedDayDate(day);
-        const rec = attendance.find(a => a.studentId === s.id && a.date === dStr);
-        const code = rec ? rec.status[0] : '-';
-        row[`Tgl ${day}`] = code;
+        const dayRecs = attendance.filter(a => a.studentId === s.id && a.date === dStr);
+        let code = '-';
 
-        if (rec?.status === 'Hadir') hCount++;
-        if (rec?.status === 'Sakit') sCount++;
-        if (rec?.status === 'Izin') iCount++;
-        if (rec?.status === 'Alpa') aCount++;
+        if (dayRecs.length > 0) {
+          const hasAlpa = dayRecs.some(r => r.status === 'Alpa');
+          const hasSakit = dayRecs.some(r => r.status === 'Sakit');
+          const hasIzin = dayRecs.some(r => r.status === 'Izin');
+          const hasHadir = dayRecs.some(r => r.status === 'Hadir');
+
+          if (hasAlpa) {
+            code = 'A';
+            aCount++;
+          } else if (hasSakit) {
+            code = 'S';
+            sCount++;
+          } else if (hasIzin) {
+            code = 'I';
+            iCount++;
+          } else if (hasHadir) {
+            code = 'H';
+            hCount++;
+          }
+        }
+
+        row[`Tgl ${day}`] = code;
       });
 
       row['Hadir (H)'] = hCount;
@@ -273,19 +290,40 @@ export default function LaporanAbsensi({ students, attendance, classes, schoolPr
 
                       {daysArray.map(day => {
                         const dStr = getFormattedDayDate(day);
-                        const rec = attendance.find(a => a.studentId === s.id && a.date === dStr);
+                        const dayRecs = attendance.filter(a => a.studentId === s.id && a.date === dStr);
                         let char = '';
                         let colorClass = '';
+                        let titleText = '';
 
-                        if (rec) {
-                          if (rec.status === 'Hadir') { char = 'H'; h++; }
-                          if (rec.status === 'Sakit') { char = 'S'; sakit++; colorClass = 'bg-amber-100 font-bold text-amber-900'; }
-                          if (rec.status === 'Izin') { char = 'I'; izin++; colorClass = 'bg-blue-100 font-bold text-blue-900'; }
-                          if (rec.status === 'Alpa') { char = 'A'; alpa++; colorClass = 'bg-rose-200 font-extrabold text-rose-900'; }
+                        if (dayRecs.length > 0) {
+                          const hasAlpa = dayRecs.some(r => r.status === 'Alpa');
+                          const hasSakit = dayRecs.some(r => r.status === 'Sakit');
+                          const hasIzin = dayRecs.some(r => r.status === 'Izin');
+                          const hasHadir = dayRecs.some(r => r.status === 'Hadir');
+
+                          const jpDetails = dayRecs.map(r => `Jam ${r.jamKe || 1}: ${r.status}`).join(', ');
+                          titleText = `Tgl ${day}: ${jpDetails}`;
+
+                          if (hasAlpa) {
+                            char = 'A';
+                            alpa++;
+                            colorClass = 'bg-rose-200 font-extrabold text-rose-900';
+                          } else if (hasSakit) {
+                            char = 'S';
+                            sakit++;
+                            colorClass = 'bg-amber-100 font-bold text-amber-900';
+                          } else if (hasIzin) {
+                            char = 'I';
+                            izin++;
+                            colorClass = 'bg-blue-100 font-bold text-blue-900';
+                          } else if (hasHadir) {
+                            char = 'H';
+                            h++;
+                          }
                         }
 
                         return (
-                          <td key={day} className={`border border-slate-900 p-0.5 text-center text-[10px] ${colorClass}`}>
+                          <td key={day} className={`border border-slate-900 p-0.5 text-center text-[10px] ${colorClass}`} title={titleText}>
                             {char}
                           </td>
                         );
@@ -326,7 +364,7 @@ export default function LaporanAbsensi({ students, attendance, classes, schoolPr
               </thead>
               <tbody>
                 {classStudents.map((s, idx) => {
-                  let lastNotes = '';
+                  const notesList = [];
                   return (
                     <tr key={s.id} className="hover:bg-slate-50">
                       <td className="border border-slate-900 p-2 text-center">{idx + 1}</td>
@@ -336,17 +374,17 @@ export default function LaporanAbsensi({ students, attendance, classes, schoolPr
 
                       {JAM_PELAJARAN.map(j => {
                         const rec = attendance.find(
-                          a => a.studentId === s.id && a.date === selectedDate && (Number(a.jamKe) === j.id || (!a.jamKe && j.id === 1))
+                          a => a.studentId === s.id && a.date === selectedDate && Number(a.jamKe || 1) === j.id
                         );
-                        let char = 'H';
-                        let badgeClass = 'text-emerald-700';
+                        let char = '-';
+                        let badgeClass = 'text-slate-400 font-normal';
 
                         if (rec) {
-                          if (rec.status === 'Hadir') { char = 'H'; }
+                          if (rec.status === 'Hadir') { char = 'H'; badgeClass = 'bg-emerald-50 text-emerald-800 font-bold'; }
                           if (rec.status === 'Sakit') { char = 'S'; badgeClass = 'bg-amber-100 text-amber-900 font-bold'; }
                           if (rec.status === 'Izin') { char = 'I'; badgeClass = 'bg-blue-100 text-blue-900 font-bold'; }
-                          if (rec.status === 'Alpa') { char = 'A'; badgeClass = 'bg-rose-200 text-rose-900 font-bold'; }
-                          if (rec.catatan) lastNotes = rec.catatan;
+                          if (rec.status === 'Alpa') { char = 'A'; badgeClass = 'bg-rose-200 text-rose-900 font-extrabold'; }
+                          if (rec.catatan) notesList.push(`Jam ${j.id}: ${rec.catatan}`);
                         }
 
                         return (
@@ -356,7 +394,7 @@ export default function LaporanAbsensi({ students, attendance, classes, schoolPr
                         );
                       })}
 
-                      <td className="border border-slate-900 p-2 italic text-[11px]">{lastNotes || '-'}</td>
+                      <td className="border border-slate-900 p-2 italic text-[11px]">{notesList.join('; ') || '-'}</td>
                     </tr>
                   );
                 })}
