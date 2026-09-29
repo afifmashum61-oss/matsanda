@@ -9,7 +9,7 @@ export const INITIAL_SCHOOL_PROFILE = {
   semester: "Ganjil",
 };
 
-export const JAM_PELAJARAN = [
+export const JAM_PELAJARAN_REGULAR = [
   { id: 1, label: "Jam Ke-1", waktu: "07.00 - 07.40" },
   { id: 2, label: "Jam Ke-2", waktu: "07.40 - 08.20" },
   { id: 3, label: "Jam Ke-3", waktu: "08.20 - 09.00" },
@@ -19,6 +19,27 @@ export const JAM_PELAJARAN = [
   { id: 7, label: "Jam Ke-7", waktu: "11.20 - 12.00" },
   { id: 8, label: "Jam Ke-8", waktu: "12.30 - 13.10" },
 ];
+
+// Special Schedule for Hari Senin (Upacara 06.40 - 07.30, 35 min JP)
+export const JAM_PELAJARAN_SENIN = [
+  { id: 1, label: "Jam Ke-1", waktu: "07.30 - 08.05", info: "Upacara: 06.40 - 07.30" },
+  { id: 2, label: "Jam Ke-2", waktu: "08.05 - 08.40" },
+  { id: 3, label: "Jam Ke-3", waktu: "08.40 - 09.15" },
+  { id: 4, label: "Jam Ke-4", waktu: "09.15 - 09.50" },
+  { id: 5, label: "Jam Ke-5", waktu: "10.25 - 11.00", info: "Istirahat: 09.50 - 10.25" },
+  { id: 6, label: "Jam Ke-6", waktu: "11.00 - 11.35" },
+  { id: 7, label: "Jam Ke-7", waktu: "11.35 - 12.10" },
+  { id: 8, label: "Jam Ke-8", waktu: "12.10 - 12.45" },
+];
+
+export const getJamPelajaranByDate = (dateStr) => {
+  if (!dateStr) return JAM_PELAJARAN_REGULAR;
+  const date = new Date(dateStr);
+  const day = date.getDay(); // 1 = Monday
+  return day === 1 ? JAM_PELAJARAN_SENIN : JAM_PELAJARAN_REGULAR;
+};
+
+export const JAM_PELAJARAN = JAM_PELAJARAN_REGULAR;
 
 export const INITIAL_CLASSES = [
   // Kelas 7 (7A - 7E)

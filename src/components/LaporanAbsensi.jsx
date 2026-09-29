@@ -10,7 +10,7 @@ import {
   Clock
 } from 'lucide-react';
 import * as XLSX from 'xlsx';
-import { JAM_PELAJARAN } from '../data/initialData';
+import { JAM_PELAJARAN, getJamPelajaranByDate } from '../data/initialData';
 
 export default function LaporanAbsensi({ students, attendance, classes, schoolProfile }) {
   const [reportType, setReportType] = useState('monthly'); // 'monthly' | 'daily'
@@ -24,6 +24,9 @@ export default function LaporanAbsensi({ students, attendance, classes, schoolPr
   // Date & Jam state for daily report
   const [selectedDate, setSelectedDate] = useState(now.toISOString().split('T')[0]);
   const [selectedJamFilter, setSelectedJamFilter] = useState('ALL'); // 'ALL' | 1..8
+
+  const currentJamList = getJamPelajaranByDate(selectedDate);
+  const isMondaySelected = new Date(selectedDate).getDay() === 1;
 
   const currentClassInfo = classes.find(c => c.id === selectedClass) || { nama: `Kelas ${selectedClass}`, waliKelas: '-' };
   const classStudents = students.filter(s => s.kelas === selectedClass);
@@ -209,7 +212,7 @@ export default function LaporanAbsensi({ students, attendance, classes, schoolPr
                   className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-medium text-slate-800 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
                 >
                   <option value="ALL">Semua Jam (1 s/d 8)</option>
-                  {JAM_PELAJARAN.map(j => (
+                  {currentJamList.map(j => (
                     <option key={j.id} value={j.id}>
                       {j.label} ({j.waktu})
                     </option>
@@ -355,7 +358,7 @@ export default function LaporanAbsensi({ students, attendance, classes, schoolPr
                   <th className="border border-slate-900 p-2 text-left" rowSpan={2}>Catatan</th>
                 </tr>
                 <tr className="bg-slate-100 text-slate-900 font-bold text-center">
-                  {JAM_PELAJARAN.map(j => (
+                  {currentJamList.map(j => (
                     <th key={j.id} className="border border-slate-900 p-1 w-8 text-[11px]" title={`${j.label} (${j.waktu})`}>
                       {j.id}
                     </th>
@@ -372,7 +375,7 @@ export default function LaporanAbsensi({ students, attendance, classes, schoolPr
                       <td className="border border-slate-900 p-2 font-bold">{s.nama}</td>
                       <td className="border border-slate-900 p-2 text-center">{s.gender}</td>
 
-                      {JAM_PELAJARAN.map(j => {
+                      {currentJamList.map(j => {
                         const rec = attendance.find(
                           a => a.studentId === s.id && a.date === selectedDate && Number(a.jamKe || 1) === j.id
                         );
@@ -405,9 +408,16 @@ export default function LaporanAbsensi({ students, attendance, classes, schoolPr
 
         {/* Legenda Keterangan Jam Pelajaran */}
         <div className="text-xs text-slate-700 space-y-1.5 pt-2">
-          <p className="font-bold">Keterangan Jam Pelajaran MTs Darussalam:</p>
+          <p className="font-bold flex items-center justify-between">
+            <span>Keterangan Waktu Jam Pelajaran MTs Darussalam:</span>
+            {isMondaySelected && (
+              <span className="text-amber-800 font-semibold bg-amber-50 border border-amber-200 px-2 py-0.5 rounded text-[11px]">
+                * Upacara Bendera: 06.40 - 07.30 • Istirahat: 09.50 - 10.25
+              </span>
+            )}
+          </p>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px]">
-            {JAM_PELAJARAN.map(j => (
+            {currentJamList.map(j => (
               <span key={j.id} className="bg-slate-50 border border-slate-200 px-2 py-1 rounded">
                 <strong>Jam {j.id}:</strong> {j.waktu}
               </span>

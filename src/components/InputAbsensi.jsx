@@ -11,7 +11,7 @@ import {
   Check,
   Zap
 } from 'lucide-react';
-import { JAM_PELAJARAN } from '../data/initialData';
+import { JAM_PELAJARAN, getJamPelajaranByDate } from '../data/initialData';
 
 export default function InputAbsensi({ 
   classes, 
@@ -22,6 +22,10 @@ export default function InputAbsensi({
   setSelectedClass 
 }) {
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+  
+  // Dynamic Jam Pelajaran based on selected date (Monday vs Regular)
+  const currentJamPelajaran = getJamPelajaranByDate(selectedDate);
+  const isMonday = new Date(selectedDate).getDay() === 1;
   
   // Multi-select Jam Pelajaran IDs, e.g. [1, 2] or [3, 4]
   const [selectedJams, setSelectedJams] = useState([1, 2]);
@@ -227,10 +231,17 @@ export default function InputAbsensi({
               <Clock className="w-4 h-4 text-emerald-600" />
               Pilih Jam Pelajaran (Bisa pilih lebih dari 1):
             </label>
+
+            {isMonday && (
+              <span className="inline-flex items-center gap-1.5 text-[11px] font-bold bg-amber-100 text-amber-900 px-2.5 py-1 rounded-lg border border-amber-300">
+                <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+                Jadwal Khusus Hari Senin (Upacara 06.40 - 07.30 • JP 35 Menit)
+              </span>
+            )}
           </div>
 
           <div className="grid grid-cols-4 sm:grid-cols-8 gap-1.5 sm:gap-2">
-            {JAM_PELAJARAN.map(j => {
+            {currentJamPelajaran.map(j => {
               const isSelected = selectedJams.includes(j.id);
               return (
                 <button
@@ -242,6 +253,7 @@ export default function InputAbsensi({
                       ? 'bg-emerald-700 text-white border-emerald-700 shadow-md font-bold'
                       : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-emerald-50 hover:border-emerald-300'
                   }`}
+                  title={j.info ? `${j.label} (${j.waktu}) - ${j.info}` : `${j.label} (${j.waktu})`}
                 >
                   {isSelected && (
                     <span className="absolute right-1 top-1 bg-white text-emerald-700 rounded-full p-0.5">
