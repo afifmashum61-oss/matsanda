@@ -9,7 +9,9 @@ import {
   Edit2, 
   CheckCircle2, 
   AlertTriangle,
-  Lock
+  Lock,
+  Check,
+  X
 } from 'lucide-react';
 import { exportFullBackup, resetDataToDefault } from '../utils/storage';
 
@@ -27,6 +29,38 @@ export default function PengaturanSekolah({
   const [newClassId, setNewClassId] = useState('');
   const [newClassName, setNewClassName] = useState('');
   const [newClassWali, setNewClassWali] = useState('');
+
+  // Class inline edit state
+  const [editingClassId, setEditingClassId] = useState(null);
+  const [editClassName, setEditClassName] = useState('');
+  const [editClassWali, setEditClassWali] = useState('');
+
+  const handleStartEditClass = (c) => {
+    setEditingClassId(c.id);
+    setEditClassName(c.nama);
+    setEditClassWali(c.waliKelas);
+  };
+
+  const handleSaveEditClass = (cId) => {
+    const updated = classes.map(c => {
+      if (c.id === cId) {
+        return {
+          ...c,
+          nama: editClassName.trim() || c.nama,
+          waliKelas: editClassWali.trim() || 'Belum Ditentukan'
+        };
+      }
+      return c;
+    });
+    onSaveClasses(updated);
+    setEditingClassId(null);
+    setSuccessMsg(`Data Wali Kelas ${editClassName || cId} berhasil diperbarui!`);
+    setTimeout(() => setSuccessMsg(''), 3000);
+  };
+
+  const handleCancelEditClass = () => {
+    setEditingClassId(null);
+  };
 
   const handleProfileSubmit = (e) => {
     e.preventDefault();
@@ -262,20 +296,84 @@ export default function PengaturanSekolah({
         </form>
 
         <div className="divide-y divide-slate-100">
-          {classes.map(c => (
-            <div key={c.id} className="py-3 flex items-center justify-between">
-              <div>
-                <span className="font-bold text-slate-900 text-sm">{c.nama} ({c.id})</span>
-                <p className="text-xs text-slate-500">Wali Kelas: {c.waliKelas}</p>
+          {classes.map(c => {
+            const isEditing = editingClassId === c.id;
+            return (
+              <div key={c.id} className="py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                {isEditing ? (
+                  <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <div>
+                      <label className="block text-[10px] font-bold text-slate-500 mb-0.5">Nama Kelas</label>
+                      <input
+                        type="text"
+                        value={editClassName}
+                        onChange={(e) => setEditClassName(e.target.value)}
+                        className="w-full bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs font-bold text-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold text-slate-500 mb-0.5">Nama Wali Kelas</label>
+                      <input
+                        type="text"
+                        value={editClassWali}
+                        onChange={(e) => setEditClassWali(e.target.value)}
+                        className="w-full bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-slate-900 text-sm">{c.nama} ({c.id})</span>
+                    </div>
+                    <p className="text-xs text-slate-600 flex items-center gap-1 mt-0.5">
+                      <span className="text-slate-400">Wali Kelas:</span>
+                      <strong className="text-slate-800">{c.waliKelas}</strong>
+                    </p>
+                  </div>
+                )}
+
+                <div className="flex items-center gap-1.5 self-end sm:self-center">
+                  {isEditing ? (
+                    <>
+                      <button
+                        onClick={() => handleSaveEditClass(c.id)}
+                        className="inline-flex items-center gap-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-1.5 rounded-lg text-xs transition shadow-sm"
+                        title="Simpan Perubahan Wali Kelas"
+                      >
+                        <Check className="w-3.5 h-3.5" /> Simpan
+                      </button>
+                      <button
+                        onClick={handleCancelEditClass}
+                        className="inline-flex items-center gap-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold px-3 py-1.5 rounded-lg text-xs transition"
+                        title="Batal"
+                      >
+                        <X className="w-3.5 h-3.5" /> Batal
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button
+                        onClick={() => handleStartEditClass(c)}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-lg transition"
+                        title="Edit Nama & Wali Kelas"
+                      >
+                        <Edit2 className="w-3.5 h-3.5 text-emerald-600" />
+                        Edit Wali Kelas
+                      </button>
+                      <button
+                        onClick={() => handleDeleteClass(c.id)}
+                        className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition"
+                        title="Hapus Kelas"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </>
+                  )}
+                </div>
               </div>
-              <button
-                onClick={() => handleDeleteClass(c.id)}
-                className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
