@@ -367,9 +367,6 @@ export default function App() {
                     {showPinText ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 </div>
-                <p className="text-[11px] text-slate-400 mt-1.5">
-                  💡 Default PIN: <strong className="text-slate-700 font-mono">1234</strong> (Dapat diubah di menu Pengaturan Sekolah).
-                </p>
               </div>
 
               <div className="flex items-center justify-end gap-2 pt-2">
