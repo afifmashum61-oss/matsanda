@@ -28,15 +28,28 @@ export default function Dashboard({
 
   const totalStudents = students.length;
   
-  const presentCount = todayRecords.filter(a => a.status === 'Hadir').length;
-  const sickCount = todayRecords.filter(a => a.status === 'Sakit').length;
-  const permissionCount = todayRecords.filter(a => a.status === 'Izin').length;
-  const alphaCount = todayRecords.filter(a => a.status === 'Alpa').length;
-  
-  const recordedCount = todayRecords.length;
-  const unrecordedCount = totalStudents - recordedCount;
+  let presentCount = 0;
+  let sickCount = 0;
+  let permissionCount = 0;
+  let alphaCount = 0;
 
-  const attendanceRate = totalStudents > 0 ? Math.round((presentCount / totalStudents) * 100) : 0;
+  students.forEach(student => {
+    const dayRecs = todayRecords.filter(a => a.studentId === student.id);
+    if (dayRecs.length > 0) {
+      const hasAlpa = dayRecs.some(r => r.status === 'Alpa');
+      const hasSakit = dayRecs.some(r => r.status === 'Sakit');
+      const hasIzin = dayRecs.some(r => r.status === 'Izin');
+      const hasHadir = dayRecs.some(r => r.status === 'Hadir');
+
+      if (hasAlpa) alphaCount++;
+      if (hasSakit) sickCount++;
+      if (hasIzin) permissionCount++;
+      if (!hasAlpa && !hasSakit && !hasIzin && hasHadir) presentCount++;
+    }
+  });
+
+  const rawAttendanceRate = totalStudents > 0 ? Math.round((presentCount / totalStudents) * 100) : 0;
+  const attendanceRate = Math.min(100, Math.max(0, rawAttendanceRate));
 
   // List of absent students today (checking all JPs today)
   const absentToday = students
@@ -154,7 +167,7 @@ export default function Dashboard({
             <span className="text-3xl font-bold text-teal-700">{presentCount}</span>
             <span className="text-xs font-semibold text-teal-600">({attendanceRate}%)</span>
           </div>
-          <div className="w-full bg-slate-100 rounded-full h-1.5 mt-3">
+          <div className="w-full bg-slate-100 rounded-full h-1.5 mt-3 overflow-hidden">
             <div 
               className="bg-teal-600 h-1.5 rounded-full transition-all duration-500" 
               style={{ width: `${attendanceRate}%` }}
@@ -217,18 +230,32 @@ export default function Dashboard({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {classes.map(c => {
               const classStudents = students.filter(s => s.kelas === c.id);
-              const classStudentIds = classStudents.map(s => s.id);
-              
-              const classTodayRecords = todayRecords.filter(a => classStudentIds.includes(a.studentId));
-              const isFilled = classTodayRecords.length > 0;
-              const classPresent = classTodayRecords.filter(a => a.status === 'Hadir').length;
-              const classSick = classTodayRecords.filter(a => a.status === 'Sakit').length;
-              const classPermission = classTodayRecords.filter(a => a.status === 'Izin').length;
-              const classAlpha = classTodayRecords.filter(a => a.status === 'Alpa').length;
+              let classPresent = 0;
+              let classSick = 0;
+              let classPermission = 0;
+              let classAlpha = 0;
+              let isFilled = false;
 
-              const percent = classStudents.length > 0 && isFilled
+              classStudents.forEach(s => {
+                const sRecs = todayRecords.filter(a => a.studentId === s.id);
+                if (sRecs.length > 0) {
+                  isFilled = true;
+                  const hasAlpa = sRecs.some(r => r.status === 'Alpa');
+                  const hasSakit = sRecs.some(r => r.status === 'Sakit');
+                  const hasIzin = sRecs.some(r => r.status === 'Izin');
+                  const hasHadir = sRecs.some(r => r.status === 'Hadir');
+
+                  if (hasAlpa) classAlpha++;
+                  if (hasSakit) classSick++;
+                  if (hasIzin) classPermission++;
+                  if (!hasAlpa && !hasSakit && !hasIzin && hasHadir) classPresent++;
+                }
+              });
+
+              const rawPercent = classStudents.length > 0 && isFilled
                 ? Math.round((classPresent / classStudents.length) * 100) 
                 : 0;
+              const percent = Math.min(100, Math.max(0, rawPercent));
 
               return (
                 <div 
