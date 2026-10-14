@@ -33,8 +33,10 @@ export default function InputAbsensi({
   const [searchTerm, setSearchTerm] = useState('');
   const [saveSuccess, setSaveSuccess] = useState(false);
 
-  // Filter students by selected class
-  const classStudents = students.filter(s => s.kelas === selectedClass);
+  // Filter students by selected class and ensure strict alphabetical order (A-Z)
+  const classStudents = students
+    .filter(s => s.kelas === selectedClass)
+    .sort((a, b) => (a.nama || '').trim().localeCompare((b.nama || '').trim(), 'id', { sensitivity: 'base' }));
   const filteredStudents = classStudents.filter(s => 
     s.nama.toLowerCase().includes(searchTerm.toLowerCase()) ||
     s.nis.includes(searchTerm)

@@ -10,15 +10,18 @@ import {
   X, 
   Check, 
   Filter,
-  Users
+  Users,
+  CheckCircle2
 } from 'lucide-react';
 import * as XLSX from 'xlsx';
+import { sortStudentsAlphabetically } from '../utils/storage';
 
 export default function DataSiswa({ students, classes, onSaveStudents }) {
   const [selectedFilterClass, setSelectedFilterClass] = useState('ALL');
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingStudent, setEditingStudent] = useState(null);
+  const [successMsg, setSuccessMsg] = useState('');
 
   // Form state
   const [formData, setFormData] = useState({
@@ -30,14 +33,16 @@ export default function DataSiswa({ students, classes, onSaveStudents }) {
     noHp: ''
   });
 
-  // Filter students
-  const filteredStudents = students.filter(s => {
-    const matchesClass = selectedFilterClass === 'ALL' || s.kelas === selectedFilterClass;
-    const matchesSearch = s.nama.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          s.nis.includes(searchTerm) ||
-                          (s.nisn && s.nisn.includes(searchTerm));
-    return matchesClass && matchesSearch;
-  });
+  // Filter students and sort alphabetically by nama (and class if ALL)
+  const filteredStudents = sortStudentsAlphabetically(
+    students.filter(s => {
+      const matchesClass = selectedFilterClass === 'ALL' || s.kelas === selectedFilterClass;
+      const matchesSearch = s.nama.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                            s.nis.includes(searchTerm) ||
+                            (s.nisn && s.nisn.includes(searchTerm));
+      return matchesClass && matchesSearch;
+    })
+  );
 
   const handleOpenAddModal = () => {
     setEditingStudent(null);
@@ -66,9 +71,12 @@ export default function DataSiswa({ students, classes, onSaveStudents }) {
   };
 
   const handleDelete = (studentId) => {
-    if (window.confirm('Apakah Anda yakin ingin menghapus data siswa ini?')) {
+    const studentToDelete = students.find(s => s.id === studentId);
+    if (window.confirm(`Apakah Anda yakin ingin menghapus data siswa ${studentToDelete?.nama || ''}?`)) {
       const updated = students.filter(s => s.id !== studentId);
-      onSaveStudents(updated);
+      onSaveStudents(sortStudentsAlphabetically(updated));
+      setSuccessMsg('Data siswa berhasil dihapus!');
+      setTimeout(() => setSuccessMsg(''), 3000);
     }
   };
 
@@ -80,16 +88,28 @@ export default function DataSiswa({ students, classes, onSaveStudents }) {
     }
 
     if (editingStudent) {
+      const wasClass = editingStudent.kelas;
+      const isMoved = wasClass !== formData.kelas;
       const updated = students.map(s => 
         s.id === editingStudent.id ? { ...s, ...formData } : s
       );
-      onSaveStudents(updated);
+      const sorted = sortStudentsAlphabetically(updated);
+      onSaveStudents(sorted);
+      setSuccessMsg(
+        isMoved 
+          ? `Siswa "${formData.nama}" berhasil dipindahkan ke Kelas ${formData.kelas} dan urutan abjad telah disesuaikan secara otomatis!`
+          : `Data siswa "${formData.nama}" berhasil diperbarui!`
+      );
+      setTimeout(() => setSuccessMsg(''), 4000);
     } else {
       const newStudent = {
         id: `S${Date.now()}`,
         ...formData
       };
-      onSaveStudents([...students, newStudent]);
+      const sorted = sortStudentsAlphabetically([...students, newStudent]);
+      onSaveStudents(sorted);
+      setSuccessMsg(`Siswa baru "${formData.nama}" berhasil ditambahkan dan urutan abjad kelas telah disesuaikan!`);
+      setTimeout(() => setSuccessMsg(''), 4000);
     }
 
     setIsModalOpen(false);
@@ -150,8 +170,10 @@ export default function DataSiswa({ students, classes, onSaveStudents }) {
         })).filter(s => s.nama && s.nis);
 
         if (newStudents.length > 0) {
-          onSaveStudents([...students, ...newStudents]);
-          alert(`Berhasil mengimpor ${newStudents.length} data siswa!`);
+          const sorted = sortStudentsAlphabetically([...students, ...newStudents]);
+          onSaveStudents(sorted);
+          setSuccessMsg(`Berhasil mengimpor ${newStudents.length} data siswa! Urutan abjad kelas telah disesuaikan otomatis.`);
+          setTimeout(() => setSuccessMsg(''), 4000);
         } else {
           alert('Format file Excel tidak sesuai atau data kosong.');
         }
@@ -165,6 +187,13 @@ export default function DataSiswa({ students, classes, onSaveStudents }) {
 
   return (
     <div className="space-y-6">
+      {successMsg && (
+        <div className="bg-emerald-50 border border-emerald-300 text-emerald-800 p-4 rounded-2xl text-xs font-semibold flex items-center gap-2 shadow-sm animate-fadeIn">
+          <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0" />
+          <span>{successMsg}</span>
+        </div>
+      )}
+
       {/* Header Controls */}
       <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-4">

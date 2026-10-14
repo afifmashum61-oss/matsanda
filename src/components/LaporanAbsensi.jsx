@@ -30,7 +30,9 @@ export default function LaporanAbsensi({ students, attendance, classes, schoolPr
   const isFridaySelected = new Date(selectedDate).getDay() === 5;
 
   const currentClassInfo = classes.find(c => c.id === selectedClass) || { nama: `Kelas ${selectedClass}`, waliKelas: '-' };
-  const classStudents = students.filter(s => s.kelas === selectedClass);
+  const classStudents = students
+    .filter(s => s.kelas === selectedClass)
+    .sort((a, b) => (a.nama || '').trim().localeCompare((b.nama || '').trim(), 'id', { sensitivity: 'base' }));
 
   // Month names in Indonesian
   const monthNames = [

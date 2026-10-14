@@ -62,19 +62,42 @@ export const saveClasses = (classes) => {
   syncClassesToCloud(classes);
 };
 
+export const sortStudentsAlphabetically = (studentsList) => {
+  if (!Array.isArray(studentsList)) return [];
+  return [...studentsList].sort((a, b) => {
+    // 1. Urutkan berdasarkan Kelas terlebih dahulu (7A, 7B, ... 9E)
+    const classA = (a.kelas || '').trim();
+    const classB = (b.kelas || '').trim();
+    const classComp = classA.localeCompare(classB, 'id', { numeric: true, sensitivity: 'base' });
+    if (classComp !== 0) return classComp;
+
+    // 2. Urutkan berdasarkan Abjad Nama Siswa (A s/d Z)
+    const nameA = (a.nama || '').trim();
+    const nameB = (b.nama || '').trim();
+    const nameComp = nameA.localeCompare(nameB, 'id', { sensitivity: 'base' });
+    if (nameComp !== 0) return nameComp;
+
+    // 3. Fallback jika nama sama: urutkan berdasarkan NIS
+    const nisA = (a.nis || '').trim();
+    const nisB = (b.nis || '').trim();
+    return nisA.localeCompare(nisB, 'id', { numeric: true });
+  });
+};
+
 export const getStudents = () => {
   const data = localStorage.getItem(KEYS.STUDENTS);
-  if (!data) return INITIAL_STUDENTS;
+  if (!data) return sortStudentsAlphabetically(INITIAL_STUDENTS);
   try {
-    return JSON.parse(data);
+    return sortStudentsAlphabetically(JSON.parse(data));
   } catch (err) {
-    return INITIAL_STUDENTS;
+    return sortStudentsAlphabetically(INITIAL_STUDENTS);
   }
 };
 
 export const saveStudents = (students) => {
-  localStorage.setItem(KEYS.STUDENTS, JSON.stringify(students));
-  syncStudentsToCloud(students);
+  const sorted = sortStudentsAlphabetically(students);
+  localStorage.setItem(KEYS.STUDENTS, JSON.stringify(sorted));
+  syncStudentsToCloud(sorted);
 };
 
 export const getAttendance = () => {
@@ -88,14 +111,15 @@ export const saveAttendance = (records, targetDate) => {
 };
 
 export const resetDataToDefault = () => {
+  const sortedStudents = sortStudentsAlphabetically(INITIAL_STUDENTS);
   localStorage.setItem(KEYS.SCHOOL, JSON.stringify(INITIAL_SCHOOL_PROFILE));
   localStorage.setItem(KEYS.CLASSES, JSON.stringify(INITIAL_CLASSES));
-  localStorage.setItem(KEYS.STUDENTS, JSON.stringify(INITIAL_STUDENTS));
+  localStorage.setItem(KEYS.STUDENTS, JSON.stringify(sortedStudents));
   localStorage.setItem(KEYS.ATTENDANCE, JSON.stringify(INITIAL_ATTENDANCE));
 
   syncSchoolProfileToCloud(INITIAL_SCHOOL_PROFILE);
   syncClassesToCloud(INITIAL_CLASSES);
-  syncStudentsToCloud(INITIAL_STUDENTS);
+  syncStudentsToCloud(sortedStudents);
   syncAttendanceToCloud(INITIAL_ATTENDANCE);
 };
 

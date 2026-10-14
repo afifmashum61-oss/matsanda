@@ -25,7 +25,7 @@ import PengaturanSekolah from './components/PengaturanSekolah';
 import { 
   getSchoolProfile, saveSchoolProfile,
   getClasses, saveClasses,
-  getStudents, saveStudents,
+  getStudents, saveStudents, sortStudentsAlphabetically,
   getAttendance, saveAttendance
 } from './utils/storage';
 
@@ -44,7 +44,7 @@ export default function App() {
   // Persistent States
   const [schoolProfile, setSchoolProfileState] = useState(getSchoolProfile);
   const [classes, setClassesState] = useState(getClasses);
-  const [students, setStudentsState] = useState(getStudents);
+  const [students, setStudentsState] = useState(() => sortStudentsAlphabetically(getStudents()));
   const [attendance, setAttendanceState] = useState(getAttendance);
 
   const [selectedClass, setSelectedClass] = useState(classes[0]?.id || '7A');
@@ -99,8 +99,9 @@ export default function App() {
     });
 
     const unsubStudents = subscribeStudents((studentList) => {
-      setStudentsState(studentList);
-      localStorage.setItem('mts_students', JSON.stringify(studentList));
+      const sorted = sortStudentsAlphabetically(studentList);
+      setStudentsState(sorted);
+      localStorage.setItem('mts_students', JSON.stringify(sorted));
       setIsCloudConnected(true);
     });
 
@@ -130,8 +131,9 @@ export default function App() {
   };
 
   const handleSaveStudents = (newStudents) => {
-    setStudentsState(newStudents);
-    saveStudents(newStudents);
+    const sorted = sortStudentsAlphabetically(newStudents);
+    setStudentsState(sorted);
+    saveStudents(sorted);
   };
 
   const handleSaveAttendance = (newRecords, classId, dateStr) => {
