@@ -51,6 +51,30 @@ export default function Dashboard({
   const rawAttendanceRate = totalStudents > 0 ? Math.round((presentCount / totalStudents) * 100) : 0;
   const attendanceRate = Math.min(100, Math.max(0, rawAttendanceRate));
 
+  // Helper to format jam range cleanly (e.g. "Jam 1–4", "Jam 1", etc.)
+  const formatJamDetail = (records) => {
+    if (!records || records.length === 0) return '';
+    const jamNums = [...new Set(records.map(r => Number(r.jamKe || 1)))].sort((a, b) => a - b);
+    if (jamNums.length === 0) return '';
+    if (jamNums.length === 8) return 'Jam 1–8';
+
+    const ranges = [];
+    let start = jamNums[0];
+    let prev = jamNums[0];
+
+    for (let i = 1; i < jamNums.length; i++) {
+      if (jamNums[i] === prev + 1) {
+        prev = jamNums[i];
+      } else {
+        ranges.push(start === prev ? `Jam ${start}` : `Jam ${start}–${prev}`);
+        start = jamNums[i];
+        prev = jamNums[i];
+      }
+    }
+    ranges.push(start === prev ? `Jam ${start}` : `Jam ${start}–${prev}`);
+    return ranges.join(', ');
+  };
+
   // List of absent students today (checking all JPs today)
   const absentToday = students
     .map(student => {
@@ -61,30 +85,38 @@ export default function Dashboard({
       const hasSakit = dayRecs.filter(r => r.status === 'Sakit');
       const hasIzin = dayRecs.filter(r => r.status === 'Izin');
 
+      if (hasAlpa.length > 0 && hasSakit.length > 0) {
+        const jamA = formatJamDetail(hasAlpa);
+        const jamS = formatJamDetail(hasSakit);
+        return {
+          student,
+          status: 'Sakit & Alpa',
+          jamDetail: `${jamS}, ${jamA}`,
+          catatan: [...hasSakit, ...hasAlpa].map(r => r.catatan).filter(Boolean).join('; ')
+        };
+      }
+
       if (hasAlpa.length > 0) {
-        const jams = hasAlpa.map(r => `Jam ${r.jamKe || 1}`).join(', ');
         return { 
           student, 
           status: 'Alpa', 
-          jamDetail: jams, 
+          jamDetail: formatJamDetail(hasAlpa), 
           catatan: hasAlpa.map(r => r.catatan).filter(Boolean).join('; ') 
         };
       }
       if (hasSakit.length > 0) {
-        const jams = hasSakit.map(r => `Jam ${r.jamKe || 1}`).join(', ');
         return { 
           student, 
           status: 'Sakit', 
-          jamDetail: jams, 
+          jamDetail: formatJamDetail(hasSakit), 
           catatan: hasSakit.map(r => r.catatan).filter(Boolean).join('; ') 
         };
       }
       if (hasIzin.length > 0) {
-        const jams = hasIzin.map(r => `Jam ${r.jamKe || 1}`).join(', ');
         return { 
           student, 
           status: 'Izin', 
-          jamDetail: jams, 
+          jamDetail: formatJamDetail(hasIzin), 
           catatan: hasIzin.map(r => r.catatan).filter(Boolean).join('; ') 
         };
       }
@@ -337,15 +369,16 @@ export default function Dashboard({
                   let badgeBg = 'bg-rose-100 text-rose-800 border-rose-200';
                   if (item.status === 'Sakit') badgeBg = 'bg-amber-100 text-amber-800 border-amber-200';
                   if (item.status === 'Izin') badgeBg = 'bg-blue-100 text-blue-800 border-blue-200';
+                  if (item.status === 'Sakit & Alpa') badgeBg = 'bg-amber-100 text-rose-800 border-amber-300';
 
                   return (
-                    <div key={idx} className="p-3 bg-slate-50 border border-slate-200/80 rounded-xl space-y-1.5">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-sm font-bold text-slate-800">{item.student.nama}</p>
+                    <div key={idx} className="p-3 bg-slate-50 border border-slate-200/80 rounded-xl space-y-1.5 hover:bg-slate-100/60 transition">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-bold text-slate-800 truncate" title={item.student.nama}>{item.student.nama}</p>
                           <p className="text-xs text-slate-500">Kelas {item.student.kelas} • NIS: {item.student.nis}</p>
                         </div>
-                        <span className={`text-xs px-2.5 py-0.5 rounded-full font-bold border ${badgeBg}`}>
+                        <span className={`text-xs px-2.5 py-1 rounded-full font-bold border whitespace-nowrap flex-shrink-0 tracking-tight ${badgeBg}`}>
                           {item.status} ({item.jamDetail})
                         </span>
                       </div>
