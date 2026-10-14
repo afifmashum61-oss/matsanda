@@ -29,16 +29,19 @@ export default function PengaturanSekolah({
   const [newClassId, setNewClassId] = useState('');
   const [newClassName, setNewClassName] = useState('');
   const [newClassWali, setNewClassWali] = useState('');
+  const [newClassHp, setNewClassHp] = useState('');
 
   // Class inline edit state
   const [editingClassId, setEditingClassId] = useState(null);
   const [editClassName, setEditClassName] = useState('');
   const [editClassWali, setEditClassWali] = useState('');
+  const [editClassHp, setEditClassHp] = useState('');
 
   const handleStartEditClass = (c) => {
     setEditingClassId(c.id);
     setEditClassName(c.nama);
     setEditClassWali(c.waliKelas);
+    setEditClassHp(c.noHpWali || '');
   };
 
   const handleSaveEditClass = (cId) => {
@@ -47,7 +50,8 @@ export default function PengaturanSekolah({
         return {
           ...c,
           nama: editClassName.trim() || c.nama,
-          waliKelas: editClassWali.trim() || 'Belum Ditentukan'
+          waliKelas: editClassWali.trim() || 'Belum Ditentukan',
+          noHpWali: editClassHp.trim() || ''
         };
       }
       return c;
@@ -81,13 +85,15 @@ export default function PengaturanSekolah({
     const newClass = {
       id: newClassId.trim().toUpperCase(),
       nama: newClassName.trim() || `Kelas ${newClassId.trim().toUpperCase()}`,
-      waliKelas: newClassWali.trim() || 'Belum Ditentukan'
+      waliKelas: newClassWali.trim() || 'Belum Ditentukan',
+      noHpWali: newClassHp.trim() || ''
     };
 
     onSaveClasses([...classes, newClass]);
     setNewClassId('');
     setNewClassName('');
     setNewClassWali('');
+    setNewClassHp('');
   };
 
   const handleDeleteClass = (classId) => {
@@ -259,26 +265,29 @@ export default function PengaturanSekolah({
         </h2>
 
         {/* Add Class Form */}
-        <form onSubmit={handleAddClass} className="grid grid-cols-1 sm:grid-cols-4 gap-3 bg-slate-50 p-3 rounded-xl border border-slate-200">
+        <form onSubmit={handleAddClass} className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 bg-slate-50 p-3.5 rounded-xl border border-slate-200">
           <div>
+            <label className="block text-[10px] font-bold text-slate-500 mb-1">Kode Kelas</label>
             <input
               type="text"
-              placeholder="Kode Kelas (misal: 7C)"
+              placeholder="Misal: 7C"
               value={newClassId}
               onChange={(e) => setNewClassId(e.target.value)}
               className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs font-bold"
             />
           </div>
           <div>
+            <label className="block text-[10px] font-bold text-slate-500 mb-1">Nama Rombel</label>
             <input
               type="text"
-              placeholder="Nama Kelas (misal: Kelas 7C)"
+              placeholder="Misal: Kelas 7C"
               value={newClassName}
               onChange={(e) => setNewClassName(e.target.value)}
               className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs"
             />
           </div>
           <div>
+            <label className="block text-[10px] font-bold text-slate-500 mb-1">Nama Wali Kelas</label>
             <input
               type="text"
               placeholder="Nama Wali Kelas..."
@@ -287,12 +296,24 @@ export default function PengaturanSekolah({
               className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs"
             />
           </div>
-          <button
-            type="submit"
-            className="inline-flex items-center justify-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-2 rounded-lg text-xs transition"
-          >
-            <Plus className="w-4 h-4" /> Tambah Kelas
-          </button>
+          <div>
+            <label className="block text-[10px] font-bold text-slate-500 mb-1">No. WhatsApp Wali</label>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                placeholder="08xxxxxxxxxx"
+                value={newClassHp}
+                onChange={(e) => setNewClassHp(e.target.value)}
+                className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs font-mono"
+              />
+              <button
+                type="submit"
+                className="inline-flex items-center justify-center gap-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-2 rounded-lg text-xs transition flex-shrink-0"
+              >
+                <Plus className="w-4 h-4" /> Tambah
+              </button>
+            </div>
+          </div>
         </form>
 
         <div className="divide-y divide-slate-100">
@@ -301,7 +322,7 @@ export default function PengaturanSekolah({
             return (
               <div key={c.id} className="py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 {isEditing ? (
-                  <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <div className="flex-1 grid grid-cols-1 sm:grid-cols-3 gap-2">
                     <div>
                       <label className="block text-[10px] font-bold text-slate-500 mb-0.5">Nama Kelas</label>
                       <input
@@ -320,15 +341,33 @@ export default function PengaturanSekolah({
                         className="w-full bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
                       />
                     </div>
+                    <div>
+                      <label className="block text-[10px] font-bold text-slate-500 mb-0.5">No. WhatsApp Wali</label>
+                      <input
+                        type="text"
+                        placeholder="08xxxxxxxxxx"
+                        value={editClassHp}
+                        onChange={(e) => setEditClassHp(e.target.value)}
+                        className="w-full bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs font-mono text-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                      />
+                    </div>
                   </div>
                 ) : (
                   <div>
                     <div className="flex items-center gap-2">
                       <span className="font-bold text-slate-900 text-sm">{c.nama} ({c.id})</span>
                     </div>
-                    <p className="text-xs text-slate-600 flex items-center gap-1 mt-0.5">
-                      <span className="text-slate-400">Wali Kelas:</span>
-                      <strong className="text-slate-800">{c.waliKelas}</strong>
+                    <p className="text-xs text-slate-600 flex flex-wrap items-center gap-2 mt-0.5">
+                      <span>Wali Kelas: <strong className="text-slate-800">{c.waliKelas}</strong></span>
+                      {c.noHpWali ? (
+                        <span className="text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded text-[11px] font-mono">
+                          📱 WA: {c.noHpWali}
+                        </span>
+                      ) : (
+                        <span className="text-slate-400 bg-slate-100 px-2 py-0.5 rounded text-[11px] italic">
+                          WA belum diisi
+                        </span>
+                      )}
                     </p>
                   </div>
                 )}

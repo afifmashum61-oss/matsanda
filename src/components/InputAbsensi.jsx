@@ -9,7 +9,10 @@ import {
   AlertCircle, 
   Search,
   Check,
-  Zap
+  Zap,
+  MessageCircle,
+  X,
+  AlertTriangle
 } from 'lucide-react';
 import { JAM_PELAJARAN, getJamPelajaranByDate } from '../data/initialData';
 
@@ -32,6 +35,11 @@ export default function InputAbsensi({
   
   const [searchTerm, setSearchTerm] = useState('');
   const [saveSuccess, setSaveSuccess] = useState(false);
+
+  // Modal WhatsApp Wali Kelas untuk Siswa Alpa
+  const [showAlpaModal, setShowAlpaModal] = useState(false);
+  const [alpaModalStudents, setAlpaModalStudents] = useState([]);
+  const [waliPhoneInput, setWaliPhoneInput] = useState('');
 
   // Filter students by selected class and ensure strict alphabetical order (A-Z)
   const classStudents = students
@@ -123,7 +131,63 @@ export default function InputAbsensi({
 
     onSaveAttendance(newRecords, selectedClass, selectedDate);
     setSaveSuccess(true);
-    setTimeout(() => setSaveSuccess(false), 4000);
+    setTimeout(() => setSaveSuccess(false), 5000);
+
+    // Cek apakah ada siswa yang berstatus Alpa
+    const alpas = classStudents.filter(s => attendanceMap[s.id]?.status === 'Alpa');
+    if (alpas.length > 0) {
+      setAlpaModalStudents(alpas);
+      setWaliPhoneInput(currentClassObj?.noHpWali || '');
+      setShowAlpaModal(true);
+    }
+  };
+
+  const handleSendAlpaWhatsApp = () => {
+    let cleanPhone = waliPhoneInput.trim().replace(/[^0-9]/g, '');
+    if (!cleanPhone) {
+      alert('Silakan masukkan nomor WhatsApp Wali Kelas terlebih dahulu!');
+      return;
+    }
+    if (cleanPhone.startsWith('0')) {
+      cleanPhone = '62' + cleanPhone.slice(1);
+    }
+
+    const jamLabels = selectedJams.map(j => `Jam Ke-${j}`).join(', ');
+    const formattedDate = new Date(selectedDate).toLocaleDateString('id-ID', {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    });
+
+    const studentListText = alpaModalStudents.map((s, idx) => {
+      const cat = attendanceMap[s.id]?.catatan ? ` _(Ket: ${attendanceMap[s.id].catatan})_` : '';
+      return `${idx + 1}. *${s.nama}* (NIS: ${s.nis})${cat}`;
+    }).join('\n');
+
+    const message = 
+`*PEMBERITAHUAN KETIDAKHADIRAN SISWA (ALPA)*
+*MTs DARUSSALAM NGESONG JOMBANG*
+
+Assalamu'alaikum Wr. Wb.
+Yth. Wali Kelas *${currentClassObj?.nama || selectedClass}*
+Bpk/Ibu: *${currentClassObj?.waliKelas || '-'}*
+
+Menginformasikan bahwa pada absensi kelas:
+📅 *Hari/Tanggal:* ${formattedDate}
+⏰ *Jam Pelajaran:* ${jamLabels}
+
+Terdapat siswa yang tidak hadir dengan status *ALPA (Tanpa Keterangan)*:
+${studentListText}
+
+Mohon untuk dapat dikonfirmasi atau ditindaklanjuti ke pihak orang tua/wali murid.
+
+Terima kasih.
+Wassalamu'alaikum Wr. Wb.`;
+
+    const waUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
+    window.open(waUrl, '_blank');
+    setShowAlpaModal(false);
   };
 
   // Stats calculation
@@ -169,11 +233,28 @@ export default function InputAbsensi({
 
         {/* Success Alert */}
         {saveSuccess && (
-          <div className="bg-emerald-50 border border-emerald-300 text-emerald-800 p-3.5 rounded-xl text-xs font-semibold flex items-center gap-2 animate-fadeIn">
-            <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0" />
-            <span>
-              Berhasil menyimpan absensi Kelas {selectedClass} untuk <strong>{selectedJams.length} Jam Pelajaran ({selectedJamLabels})</strong> sekaligus pada tanggal {selectedDate}!
-            </span>
+          <div className="bg-emerald-50 border border-emerald-300 text-emerald-800 p-3.5 rounded-xl text-xs font-semibold flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-fadeIn">
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0" />
+              <span>
+                Berhasil menyimpan absensi Kelas {selectedClass} untuk <strong>{selectedJams.length} Jam Pelajaran ({selectedJamLabels})</strong> sekaligus pada tanggal {selectedDate}!
+              </span>
+            </div>
+            {alpaCount > 0 && (
+              <button
+                type="button"
+                onClick={() => {
+                  const alpas = classStudents.filter(s => attendanceMap[s.id]?.status === 'Alpa');
+                  setAlpaModalStudents(alpas);
+                  setWaliPhoneInput(currentClassObj?.noHpWali || '');
+                  setShowAlpaModal(true);
+                }}
+                className="inline-flex items-center justify-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-1.5 rounded-lg text-xs transition shadow-sm flex-shrink-0"
+              >
+                <MessageCircle className="w-4 h-4" />
+                Kirim WA ke Wali Kelas ({alpaCount} Alpa)
+              </button>
+            )}
           </div>
         )}
 
@@ -437,6 +518,104 @@ export default function InputAbsensi({
           </button>
         </div>
       </div>
+
+      {/* Modal Notifikasi WhatsApp Wali Kelas untuk Siswa Alpa */}
+      {showAlpaModal && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn no-print">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-5 border border-slate-100 animate-scaleUp">
+            
+            {/* Header Modal */}
+            <div className="flex items-start justify-between border-b border-slate-100 pb-4">
+              <div className="flex items-center gap-3">
+                <div className="p-3 bg-amber-50 text-amber-700 rounded-2xl border border-amber-200">
+                  <AlertTriangle className="w-6 h-6 text-amber-600" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-base text-slate-900">
+                    Notifikasi Siswa Alpa ke Wali Kelas
+                  </h3>
+                  <p className="text-xs text-slate-500">
+                    Terdapat {alpaModalStudents.length} siswa tanpa keterangan pada {selectedJamLabels}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowAlpaModal(false)}
+                className="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-100 transition"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* List Siswa Alpa */}
+            <div className="space-y-2">
+              <label className="block text-xs font-bold text-slate-700">Daftar Siswa Alpa Hari Ini:</label>
+              <div className="bg-rose-50/70 border border-rose-200/80 rounded-2xl p-3.5 max-h-40 overflow-y-auto space-y-2">
+                {alpaModalStudents.map((s, idx) => (
+                  <div key={s.id} className="flex items-center justify-between text-xs bg-white p-2.5 rounded-xl border border-rose-100 shadow-xs">
+                    <div>
+                      <span className="font-bold text-slate-900">{idx + 1}. {s.nama}</span>
+                      <span className="text-slate-500 ml-1.5 font-mono text-[11px]">(NIS: {s.nis})</span>
+                      {attendanceMap[s.id]?.catatan && (
+                        <p className="text-[11px] text-slate-500 italic mt-0.5">Ket: {attendanceMap[s.id].catatan}</p>
+                      )}
+                    </div>
+                    <span className="bg-rose-100 text-rose-800 font-bold px-2.5 py-0.5 rounded-full text-[10px]">
+                      Alpa
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Info Wali Kelas & Nomor HP */}
+            <div className="bg-slate-50 border border-slate-200 p-4 rounded-2xl space-y-2.5">
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-slate-500">Wali Kelas {currentClassObj?.nama || selectedClass}:</span>
+                <strong className="text-slate-900 font-bold">{currentClassObj?.waliKelas || '-'}</strong>
+              </div>
+              <div>
+                <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                  Nomor WhatsApp Wali Kelas:
+                </label>
+                <input
+                  type="text"
+                  placeholder="08xxxxxxxxxx"
+                  value={waliPhoneInput}
+                  onChange={(e) => setWaliPhoneInput(e.target.value)}
+                  className="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2 text-xs font-mono font-bold text-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                />
+                {!currentClassObj?.noHpWali && !waliPhoneInput && (
+                  <p className="text-[10px] text-amber-600 mt-1 italic">
+                    * Nomor WA wali kelas belum tersimpan. Masukkan nomor HP di atas untuk mengirim pesan langsung.
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex items-center justify-end gap-2.5 pt-2">
+              <button
+                type="button"
+                onClick={() => setShowAlpaModal(false)}
+                className="px-4 py-2.5 rounded-xl border border-slate-300 text-slate-700 text-xs font-semibold hover:bg-slate-50 transition"
+              >
+                Tutup / Lewati
+              </button>
+              <button
+                type="button"
+                onClick={handleSendAlpaWhatsApp}
+                className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-5 py-2.5 rounded-xl shadow-md transition"
+              >
+                <MessageCircle className="w-4 h-4" />
+                Kirim Notifikasi via WhatsApp
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
     </div>
   );
 }
