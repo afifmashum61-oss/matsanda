@@ -12,6 +12,7 @@ import {
   MessageCircle,
   GraduationCap
 } from 'lucide-react';
+import { getTodayDateString } from '../utils/storage';
 
 export default function Dashboard({ 
   students, 
@@ -21,7 +22,7 @@ export default function Dashboard({
   setActiveTab, 
   setSelectedClass 
 }) {
-  const todayStr = new Date().toISOString().split('T')[0];
+  const todayStr = getTodayDateString();
 
   // Filter today's attendance
   const todayRecords = attendance.filter(a => a.date === todayStr);

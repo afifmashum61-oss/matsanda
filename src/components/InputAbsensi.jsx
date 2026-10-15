@@ -15,6 +15,7 @@ import {
   AlertTriangle
 } from 'lucide-react';
 import { JAM_PELAJARAN, getJamPelajaranByDate } from '../data/initialData';
+import { getTodayDateString } from '../utils/storage';
 
 export default function InputAbsensi({ 
   classes, 
@@ -24,17 +25,18 @@ export default function InputAbsensi({
   selectedClass, 
   setSelectedClass 
 }) {
-  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+  const [selectedDate, setSelectedDate] = useState(getTodayDateString());
   
   // Dynamic Jam Pelajaran based on selected date (Monday vs Regular)
   const currentJamPelajaran = getJamPelajaranByDate(selectedDate);
-  const isMonday = new Date(selectedDate).getDay() === 1;
+  const isMonday = new Date(selectedDate + 'T00:00:00').getDay() === 1;
   
   // Multi-select Jam Pelajaran IDs, e.g. [1, 2] or [3, 4]
   const [selectedJams, setSelectedJams] = useState([1, 2]);
   
   const [searchTerm, setSearchTerm] = useState('');
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   // Modal WhatsApp Wali Kelas untuk Siswa Alpa
   const [showAlpaModal, setShowAlpaModal] = useState(false);
@@ -111,38 +113,51 @@ export default function InputAbsensi({
     setAttendanceMap(newMap);
   };
 
-  // Multi-Jam Pelajaran Save
-  const handleSave = (e) => {
-    e.preventDefault();
+  // Helper to build attendance records from classStudents
+  const buildNewRecords = () => {
     const newRecords = [];
-
-    // Save attendance for EVERY selected Jam Pelajaran at once!
     selectedJams.forEach(jamId => {
-      Object.keys(attendanceMap).forEach(studentId => {
+      classStudents.forEach(s => {
         newRecords.push({
-          studentId,
+          studentId: s.id,
           date: selectedDate,
           jamKe: jamId,
-          status: attendanceMap[studentId]?.status || 'Hadir',
-          catatan: attendanceMap[studentId]?.catatan || ''
+          status: attendanceMap[s.id]?.status || 'Hadir',
+          catatan: attendanceMap[s.id]?.catatan || ''
         });
       });
     });
+    return newRecords;
+  };
 
-    onSaveAttendance(newRecords, selectedClass, selectedDate);
-    setSaveSuccess(true);
-    setTimeout(() => setSaveSuccess(false), 5000);
+  // Multi-Jam Pelajaran Save
+  const handleSave = async (e) => {
+    if (e && e.preventDefault) e.preventDefault();
+    if (isSaving) return;
+    setIsSaving(true);
 
-    // Cek apakah ada siswa yang berstatus Alpa
-    const alpas = classStudents.filter(s => attendanceMap[s.id]?.status === 'Alpa');
-    if (alpas.length > 0) {
-      setAlpaModalStudents(alpas);
-      setWaliPhoneInput(currentClassObj?.noHpWali || '');
-      setShowAlpaModal(true);
+    try {
+      const newRecords = buildNewRecords();
+      await onSaveAttendance(newRecords, selectedClass, selectedDate);
+      setSaveSuccess(true);
+      setTimeout(() => setSaveSuccess(false), 5000);
+
+      // Cek apakah ada siswa yang berstatus Alpa
+      const alpas = classStudents.filter(s => attendanceMap[s.id]?.status === 'Alpa');
+      if (alpas.length > 0) {
+        setAlpaModalStudents(alpas);
+        setWaliPhoneInput(currentClassObj?.noHpWali || '');
+        setShowAlpaModal(true);
+      }
+    } catch (err) {
+      console.error("Gagal menyimpan absensi:", err);
+      alert("Gagal menyimpan absensi. Silakan periksa koneksi internet Anda.");
+    } finally {
+      setIsSaving(false);
     }
   };
 
-  const handleSendAlpaWhatsApp = () => {
+  const handleSendAlpaWhatsApp = async () => {
     let cleanPhone = waliPhoneInput.trim().replace(/[^0-9]/g, '');
     if (!cleanPhone) {
       alert('Silakan masukkan nomor WhatsApp Wali Kelas terlebih dahulu!');
@@ -152,8 +167,16 @@ export default function InputAbsensi({
       cleanPhone = '62' + cleanPhone.slice(1);
     }
 
+    // Pastikan data absensi 100% tersimpan ke cloud dan storage sebelum membuka WhatsApp
+    try {
+      const newRecords = buildNewRecords();
+      await onSaveAttendance(newRecords, selectedClass, selectedDate);
+    } catch (err) {
+      console.warn("Auto-save before WhatsApp:", err);
+    }
+
     const jamLabels = selectedJams.map(j => `Jam Ke-${j}`).join(', ');
-    const formattedDate = new Date(selectedDate).toLocaleDateString('id-ID', {
+    const formattedDate = new Date(selectedDate + 'T00:00:00').toLocaleDateString('id-ID', {
       weekday: 'long',
       day: 'numeric',
       month: 'long',
@@ -186,8 +209,8 @@ Terima kasih.
 Wassalamu'alaikum Wr. Wb.`;
 
     const waUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
-    window.open(waUrl, '_blank');
     setShowAlpaModal(false);
+    window.open(waUrl, '_blank');
   };
 
   // Stats calculation
@@ -222,11 +245,14 @@ Wassalamu'alaikum Wr. Wb.`;
 
             <button
               type="button"
+              disabled={isSaving}
               onClick={handleSave}
-              className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-5 py-2.5 rounded-xl text-xs shadow-md transition"
+              className={`flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 text-white font-bold px-5 py-2.5 rounded-xl text-xs shadow-md transition ${
+                isSaving ? 'bg-emerald-400 cursor-wait opacity-80' : 'bg-emerald-600 hover:bg-emerald-700'
+              }`}
             >
-              <Save className="w-4 h-4" />
-              Simpan {selectedJams.length} Jam Pelajaran
+              <Save className={`w-4 h-4 ${isSaving ? 'animate-spin' : ''}`} />
+              {isSaving ? 'Menyimpan...' : `Simpan ${selectedJams.length} Jam Pelajaran`}
             </button>
           </div>
         </div>
@@ -510,11 +536,14 @@ Wassalamu'alaikum Wr. Wb.`;
         <div className="p-4 bg-slate-50 border-t border-slate-200 flex justify-end">
           <button
             type="button"
+            disabled={isSaving}
             onClick={handleSave}
-            className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-2.5 rounded-xl text-sm shadow-md transition"
+            className={`inline-flex items-center gap-2 text-white font-bold px-6 py-2.5 rounded-xl text-sm shadow-md transition ${
+              isSaving ? 'bg-emerald-400 cursor-wait opacity-80' : 'bg-emerald-600 hover:bg-emerald-700'
+            }`}
           >
-            <Save className="w-4 h-4" />
-            Simpan Absensi Kelas {selectedClass} ({selectedJams.length} Jam Pelajaran)
+            <Save className={`w-4 h-4 ${isSaving ? 'animate-spin' : ''}`} />
+            {isSaving ? 'Menyimpan ke Cloud...' : `Simpan Absensi Kelas ${selectedClass} (${selectedJams.length} Jam Pelajaran)`}
           </button>
         </div>
       </div>
@@ -546,6 +575,12 @@ Wassalamu'alaikum Wr. Wb.`;
               >
                 <X className="w-5 h-5" />
               </button>
+            </div>
+
+            {/* Status Penyimpanan Cloud */}
+            <div className="flex items-center gap-2 bg-emerald-50 text-emerald-800 text-xs px-3.5 py-2 rounded-xl border border-emerald-200 font-medium">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+              <span>Data absensi telah tersimpan aman di cloud & memori lokal.</span>
             </div>
 
             {/* List Siswa Alpa */}

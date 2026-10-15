@@ -13,6 +13,15 @@ const KEYS = {
   ATTENDANCE: 'mts_attendance',
 };
 
+// Always returns YYYY-MM-DD in local time (WIB UTC+7) without timezone shift bugs
+export const getTodayDateString = () => {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
 export const getSchoolProfile = () => {
   const data = localStorage.getItem(KEYS.SCHOOL);
   if (!data) return INITIAL_SCHOOL_PROFILE;

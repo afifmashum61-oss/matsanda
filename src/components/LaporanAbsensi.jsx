@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import { JAM_PELAJARAN, getJamPelajaranByDate } from '../data/initialData';
+import { getTodayDateString } from '../utils/storage';
 
 export default function LaporanAbsensi({ students, attendance, classes, schoolProfile }) {
   const [reportType, setReportType] = useState('monthly'); // 'monthly' | 'daily'
@@ -22,7 +23,7 @@ export default function LaporanAbsensi({ students, attendance, classes, schoolPr
   const [selectedYear, setSelectedYear] = useState(now.getFullYear());
   
   // Date & Jam state for daily report
-  const [selectedDate, setSelectedDate] = useState(now.toISOString().split('T')[0]);
+  const [selectedDate, setSelectedDate] = useState(getTodayDateString());
   const [selectedJamFilter, setSelectedJamFilter] = useState('ALL'); // 'ALL' | 1..8
 
   const currentJamList = getJamPelajaranByDate(selectedDate);

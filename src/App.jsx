@@ -150,7 +150,7 @@ export default function App() {
     saveStudents(sorted);
   };
 
-  const handleSaveAttendance = (newRecords, classId, dateStr) => {
+  const handleSaveAttendance = async (newRecords, classId, dateStr) => {
     // 1. Identify all student IDs that belong to this class
     const classStudentIds = new Set([
       ...students.filter(s => s.kelas === classId).map(s => s.id),
@@ -175,7 +175,8 @@ export default function App() {
     localStorage.setItem('mts_attendance', JSON.stringify(updatedGlobal));
 
     // 4. Atomically sync ONLY this class's records for this date to Firestore (concurrent multi-device safe)
-    syncAttendanceToCloud(fullClassRecordsForDate, classId, dateStr);
+    await syncAttendanceToCloud(fullClassRecordsForDate, classId, dateStr);
+    return true;
   };
 
   const navItems = [
