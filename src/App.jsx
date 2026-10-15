@@ -215,41 +215,11 @@ export default function App() {
             </div>
           </div>
 
-          {/* Right: Cloud Sync Realtime Status Pill */}
-          <div className="flex items-center gap-2">
-            {isOnline && isCloudConnected ? (
-              <div 
-                className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-800/90 border border-emerald-500/40 text-emerald-100 text-xs font-medium shadow-sm transition-all"
-                title="Tersambung ke cloud Firebase. Semua data tersimpan & sinkron realtime ke semua device."
-              >
-                <span className="relative flex h-2.5 w-2.5">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-400"></span>
-                </span>
-                <span className="hidden sm:inline">Realtime Cloud Aktif</span>
-                <span className="sm:hidden text-[11px]">Online</span>
-              </div>
-            ) : isOnline && !isCloudConnected ? (
-              <div 
-                className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-900/60 border border-amber-600/50 text-amber-200 text-xs font-medium"
-                title="Sedang menyambungkan ke Firebase cloud..."
-              >
-                <span className="relative flex h-2 w-2">
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-400 animate-pulse"></span>
-                </span>
-                <span className="hidden sm:inline">Menghubungkan...</span>
-                <span className="sm:hidden text-[11px]">Sync...</span>
-              </div>
-            ) : (
-              <div 
-                className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-rose-900/60 border border-rose-600/50 text-rose-200 text-xs font-medium"
-                title="Perangkat offline. Data tersimpan di memori lokal dan akan otomatis sinkron saat internet aktif."
-              >
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-400"></span>
-                <span className="hidden sm:inline">Offline (Tersimpan Lokal)</span>
-                <span className="sm:hidden text-[11px]">Offline</span>
-              </div>
-            )}
+          {/* Right: School Logo */}
+          <div className="flex items-center gap-2.5">
+            <div className="bg-white/10 p-1.5 rounded-xl border border-white/20 backdrop-blur-xs flex items-center justify-center shadow-xs">
+              <img src="/logo.png" alt="Logo MTs Darussalam" className="w-7 h-7 object-contain drop-shadow-sm" />
+            </div>
           </div>
 
         </div>
