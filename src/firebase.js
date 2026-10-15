@@ -166,7 +166,8 @@ export const subscribeAttendance = (onUpdate) => {
               allRecords.push(...records);
             }
           });
-        } else if (Array.isArray(data.records)) {
+        }
+        if (Array.isArray(data.records)) {
           allRecords.push(...data.records);
         }
       });
