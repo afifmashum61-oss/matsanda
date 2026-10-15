@@ -210,7 +210,16 @@ Wassalamu'alaikum Wr. Wb.`;
 
     const waUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
     setShowAlpaModal(false);
-    window.open(waUrl, '_blank');
+
+    // Fallback safe for Android WebView & Median.co
+    try {
+      const win = window.open(waUrl, '_blank');
+      if (!win || win.closed || typeof win.closed === 'undefined') {
+        window.location.href = waUrl;
+      }
+    } catch (e) {
+      window.location.href = waUrl;
+    }
   };
 
   // Stats calculation
