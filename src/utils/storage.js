@@ -105,9 +105,9 @@ export const getAttendance = () => {
   return data ? JSON.parse(data) : INITIAL_ATTENDANCE;
 };
 
-export const saveAttendance = (records, targetDate) => {
+export const saveAttendance = (records, targetDate, classId) => {
   localStorage.setItem(KEYS.ATTENDANCE, JSON.stringify(records));
-  syncAttendanceToCloud(records, targetDate);
+  syncAttendanceToCloud(records, classId, targetDate);
 };
 
 export const resetDataToDefault = () => {

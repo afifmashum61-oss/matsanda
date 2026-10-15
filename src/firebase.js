@@ -50,63 +50,80 @@ export const syncStudentsToCloud = async (students) => {
   }
 };
 
-export const syncAttendanceToCloud = async (attendance, targetDate) => {
+export const syncAttendanceToCloud = async (records, arg2, arg3) => {
   try {
-    // 1. Sync full master list for fast global realtime app sync
-    await setDoc(doc(db, "school", "attendance"), { list: attendance });
+    if (!records || !Array.isArray(records) || records.length === 0) return;
 
-    // 2. Save structured daily attendance documents in 'daily_attendance' collection
-    if (targetDate) {
-      const dayRecords = attendance.filter(a => a.date === targetDate);
-      if (dayRecords.length > 0) {
-        const stats = {
-          hadir: dayRecords.filter(r => r.status === 'H').length,
-          sakit: dayRecords.filter(r => r.status === 'S').length,
-          izin: dayRecords.filter(r => r.status === 'I').length,
-          alpha: dayRecords.filter(r => r.status === 'A').length,
-        };
-        await setDoc(doc(db, "daily_attendance", targetDate), {
-          date: targetDate,
-          updatedAt: new Date().toISOString(),
-          stats,
-          totalStudents: dayRecords.length,
-          records: dayRecords
-        }, { merge: true });
+    let classId = null;
+    let dateStr = null;
+
+    if (arg2 && typeof arg2 === 'string') {
+      if (/^\d{4}-\d{2}-\d{2}$/.test(arg2)) {
+        dateStr = arg2;
+        classId = (arg3 && typeof arg3 === 'string' && !/^\d{4}-\d{2}-\d{2}$/.test(arg3)) ? arg3 : null;
+      } else {
+        classId = arg2;
+        dateStr = (arg3 && typeof arg3 === 'string') ? arg3 : null;
       }
-    } else {
-      // Group all attendance records by date and save each date neatly to Firestore
-      const recordsByDate = {};
-      attendance.forEach(rec => {
-        if (!rec.date) return;
-        if (!recordsByDate[rec.date]) recordsByDate[rec.date] = [];
-        recordsByDate[rec.date].push(rec);
+    }
+
+    // 1. Concurrent Multi-Device Safe: Save specific class records under classes[classId]
+    if (dateStr && classId) {
+      await setDoc(doc(db, "daily_attendance", dateStr), {
+        date: dateStr,
+        updatedAt: new Date().toISOString(),
+        classes: {
+          [classId]: records
+        }
+      }, { merge: true });
+      return;
+    }
+
+    // 2. If dateStr is provided without classId, partition records by class if possible
+    if (dateStr) {
+      const classesMap = {};
+      records.forEach(r => {
+        const c = r.kelas || 'all';
+        if (!classesMap[c]) classesMap[c] = [];
+        classesMap[c].push(r);
       });
+      await setDoc(doc(db, "daily_attendance", dateStr), {
+        date: dateStr,
+        updatedAt: new Date().toISOString(),
+        classes: classesMap
+      }, { merge: true });
+      return;
+    }
 
-      for (const [dStr, dayRecords] of Object.entries(recordsByDate)) {
-        const stats = {
-          hadir: dayRecords.filter(r => r.status === 'H').length,
-          sakit: dayRecords.filter(r => r.status === 'S').length,
-          izin: dayRecords.filter(r => r.status === 'I').length,
-          alpha: dayRecords.filter(r => r.status === 'A').length,
-        };
-        await setDoc(doc(db, "daily_attendance", dStr), {
-          date: dStr,
-          updatedAt: new Date().toISOString(),
-          stats,
-          totalStudents: dayRecords.length,
-          records: dayRecords
-        }, { merge: true });
-      }
+    // 3. Fallback: Full sync partitioned cleanly by date and class into daily_attendance
+    const recordsByDate = {};
+    records.forEach(rec => {
+      if (!rec.date) return;
+      if (!recordsByDate[rec.date]) recordsByDate[rec.date] = [];
+      recordsByDate[rec.date].push(rec);
+    });
+
+    for (const [dStr, dayRecords] of Object.entries(recordsByDate)) {
+      const classesMap = {};
+      dayRecords.forEach(r => {
+        const c = r.kelas || 'all';
+        if (!classesMap[c]) classesMap[c] = [];
+        classesMap[c].push(r);
+      });
+      await setDoc(doc(db, "daily_attendance", dStr), {
+        date: dStr,
+        updatedAt: new Date().toISOString(),
+        classes: classesMap
+      }, { merge: true });
     }
   } catch (err) {
     console.warn("Cloud sync warning (attendance):", err);
   }
 };
 
-// Real-time subscriptions for multi-device sync
+// Real-time subscriptions for instantaneous multi-device sync
 export const subscribeSchoolProfile = (onUpdate) => {
   return onSnapshot(doc(db, "school", "profile"), (docSnap) => {
-    if (docSnap.metadata.hasPendingWrites) return;
     if (docSnap.exists()) {
       onUpdate(docSnap.data());
     } else {
@@ -117,7 +134,6 @@ export const subscribeSchoolProfile = (onUpdate) => {
 
 export const subscribeClasses = (onUpdate) => {
   return onSnapshot(doc(db, "school", "classes"), (docSnap) => {
-    if (docSnap.metadata.hasPendingWrites) return;
     if (docSnap.exists() && Array.isArray(docSnap.data().list)) {
       onUpdate(docSnap.data().list);
     } else {
@@ -128,7 +144,6 @@ export const subscribeClasses = (onUpdate) => {
 
 export const subscribeStudents = (onUpdate) => {
   return onSnapshot(doc(db, "school", "students"), (docSnap) => {
-    if (docSnap.metadata.hasPendingWrites) return;
     if (docSnap.exists() && Array.isArray(docSnap.data().list)) {
       onUpdate(docSnap.data().list);
     } else {
@@ -138,12 +153,39 @@ export const subscribeStudents = (onUpdate) => {
 };
 
 export const subscribeAttendance = (onUpdate) => {
-  return onSnapshot(doc(db, "school", "attendance"), (docSnap) => {
-    if (docSnap.metadata.hasPendingWrites) return;
-    if (docSnap.exists() && Array.isArray(docSnap.data().list)) {
-      onUpdate(docSnap.data().list);
-    } else {
-      syncAttendanceToCloud(INITIAL_ATTENDANCE);
+  return onSnapshot(collection(db, "daily_attendance"), (querySnapshot) => {
+    try {
+      if (querySnapshot.empty) return;
+
+      const allRecords = [];
+      querySnapshot.forEach(docSnap => {
+        const data = docSnap.data();
+        if (data.classes && typeof data.classes === 'object') {
+          Object.values(data.classes).forEach(records => {
+            if (Array.isArray(records)) {
+              allRecords.push(...records);
+            }
+          });
+        } else if (Array.isArray(data.records)) {
+          allRecords.push(...data.records);
+        }
+      });
+
+      // Strict de-duplication by studentId + date + jamKe to ensure flawless consistency
+      const recordMap = new Map();
+      allRecords.forEach(r => {
+        if (r && r.studentId && r.date) {
+          const key = `${r.studentId}_${r.date}_${r.jamKe || 1}`;
+          recordMap.set(key, r);
+        }
+      });
+
+      const deduplicated = Array.from(recordMap.values());
+      onUpdate(deduplicated);
+    } catch (err) {
+      console.warn("Realtime processing error (attendance):", err);
     }
-  }, (err) => console.warn("Realtime error (attendance):", err));
+  }, (err) => {
+    console.warn("Realtime error (attendance):", err);
+  });
 };
