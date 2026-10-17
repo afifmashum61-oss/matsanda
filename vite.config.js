@@ -12,9 +12,9 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'logo.png', 'robots.txt'],
       manifest: {
-        name: 'MTs Darussalam Ngesong Jombang - Absensi Digital',
-        short_name: 'Absensi MTs',
-        description: 'Sistem Informasi Absensi Digital MTs Darussalam Ngesong Jombang',
+        name: 'E- MATSANDA - MTs Darussalam Ngesong Jombang',
+        short_name: 'E- MATSANDA',
+        description: 'Sistem Informasi Absensi Digital E- MATSANDA MTs Darussalam Ngesong Jombang',
         theme_color: '#065f46',
         background_color: '#f8fafc',
         display: 'standalone',
