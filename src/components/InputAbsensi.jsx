@@ -279,7 +279,7 @@ Wassalamu'alaikum Wr. Wb.`;
             <div className="flex items-center gap-2">
               <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0" />
               <span>
-                Berhasil menyimpan absensi Kelas {selectedClass} untuk <strong>{selectedJams.length} Jam Pelajaran ({selectedJamLabels})</strong> sekaligus pada tanggal {selectedDate}!
+                Berhasil menyimpan absensi Kelas {selectedClass} ke <strong>Cloud Firebase</strong> untuk <strong>{selectedJams.length} Jam Pelajaran ({selectedJamLabels})</strong> sekaligus pada tanggal {selectedDate}!
               </span>
             </div>
             {alpaCount > 0 && (

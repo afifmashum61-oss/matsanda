@@ -88,8 +88,43 @@ export default function RekapNilai({
   // Scores state: { [studentId]: { ph1: { ph, remidi, praktek, proyek, porto }, ph2: { ... }, ... } }
   const [scores, setScores] = useState({});
 
+  // Refs to prevent race conditions & stale state when switching tabs/dropdowns
+  const scoresRef = useRef(scores);
+  scoresRef.current = scores;
+
+  const kkmRef = useRef(kkm);
+  kkmRef.current = kkm;
+
+  const guruPengampuRef = useRef(guruPengampu);
+  guruPengampuRef.current = guruPengampu;
+
+  const kdCountRef = useRef(kdCount);
+  kdCountRef.current = kdCount;
+
+  const saveStatusRef = useRef(saveStatus);
+  saveStatusRef.current = saveStatus;
+
+  const selectedClassRef = useRef(selectedClass);
+  selectedClassRef.current = selectedClass;
+
+  const selectedMapelRef = useRef(selectedMapel);
+  selectedMapelRef.current = selectedMapel;
+
+  const selectedSemesterRef = useRef(selectedSemester);
+  selectedSemesterRef.current = selectedSemester;
+
+  const lastDocKeyRef = useRef(docKey);
+
   // Load existing grades whenever class, subject, semester, or allGrades changes
   useEffect(() => {
+    const isDocKeyChange = lastDocKeyRef.current !== docKey;
+    lastDocKeyRef.current = docKey;
+
+    // If docKey has not changed and user is actively typing, do not overwrite local state with cloud snapshot
+    if (!isDocKeyChange && (saveStatusRef.current === 'dirty' || saveStatusRef.current === 'saving')) {
+      return;
+    }
+
     const existing = allGrades[docKey] || getGrades()[docKey];
     if (existing) {
       setScores(existing.scores || {});
@@ -102,7 +137,9 @@ export default function RekapNilai({
       setKkm(currentMapelObj?.kkmDefault || 70);
       setGuruPengampu('');
     }
-    setSaveStatus('');
+    if (isDocKeyChange) {
+      setSaveStatus('');
+    }
   }, [docKey, allGrades, currentMapelObj]);
 
   // Helper to handle input change for a student's KD score
@@ -137,7 +174,15 @@ export default function RekapNilai({
   };
 
   // Perform save to LocalStorage and Firestore
-  const handleSave = (scoresToSave = scores, customKkm = kkm, customGuru = guruPengampu, customKdCount = kdCount) => {
+  const handleSave = async (
+    scoresToSave = scoresRef.current, 
+    customKkm = kkmRef.current, 
+    customGuru = guruPengampuRef.current, 
+    customKdCount = kdCountRef.current,
+    targetClass = selectedClassRef.current,
+    targetMapel = selectedMapelRef.current,
+    targetSemester = selectedSemesterRef.current
+  ) => {
     setSaveStatus('saving');
     const gradeData = {
       kkm: Number(customKkm),
@@ -146,19 +191,25 @@ export default function RekapNilai({
       scores: scoresToSave,
     };
 
-    if (onSaveGrade) {
-      onSaveGrade(selectedClass, selectedMapel, selectedSemester, gradeData);
-    } else {
-      saveGradeForClassSubject(selectedClass, selectedMapel, selectedSemester, gradeData);
-    }
-
-    setTimeout(() => {
+    try {
+      if (onSaveGrade) {
+        await onSaveGrade(targetClass, targetMapel, targetSemester, gradeData);
+      } else {
+        await saveGradeForClassSubject(targetClass, targetMapel, targetSemester, gradeData);
+      }
       setSaveStatus('saved');
-      setTimeout(() => setSaveStatus(''), 2500);
-    }, 400);
+      setTimeout(() => {
+        setSaveStatus(prev => prev === 'saved' ? '' : prev);
+      }, 2500);
+      return true;
+    } catch (err) {
+      console.error("Gagal simpan nilai ke Firebase Cloud:", err);
+      setSaveStatus('error');
+      return false;
+    }
   };
 
-  // Auto-save debounced when dirty
+  // Auto-save debounced when dirty (quick 700ms debounce)
   const isFirstRender = useRef(true);
   useEffect(() => {
     if (isFirstRender.current) {
@@ -168,10 +219,32 @@ export default function RekapNilai({
     if (saveStatus === 'dirty') {
       const timer = setTimeout(() => {
         handleSave();
-      }, 1500);
+      }, 700);
       return () => clearTimeout(timer);
     }
   }, [scores, kkm, guruPengampu, kdCount, saveStatus]);
+
+  // Safe dropdown handlers that flush dirty state before switching
+  const handleClassChange = async (newClass) => {
+    if (saveStatusRef.current === 'dirty') {
+      await handleSave();
+    }
+    setSelectedClass(newClass);
+  };
+
+  const handleMapelChange = async (newMapel) => {
+    if (saveStatusRef.current === 'dirty') {
+      await handleSave();
+    }
+    setSelectedMapel(newMapel);
+  };
+
+  const handleSemesterChange = async (newSemester) => {
+    if (saveStatusRef.current === 'dirty') {
+      await handleSave();
+    }
+    setSelectedSemester(newSemester);
+  };
 
   // Calculation helpers per student
   const calculateStudentResults = (studentId) => {
@@ -493,7 +566,7 @@ export default function RekapNilai({
             <label className="block text-[11px] font-bold text-slate-700 mb-1">Pilih Kelas</label>
             <select
               value={selectedClass}
-              onChange={(e) => setSelectedClass(e.target.value)}
+              onChange={(e) => handleClassChange(e.target.value)}
               className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
             >
               {classes.map(c => (
@@ -506,7 +579,7 @@ export default function RekapNilai({
             <label className="block text-[11px] font-bold text-slate-700 mb-1">Pilih Mata Pelajaran</label>
             <select
               value={selectedMapel}
-              onChange={(e) => setSelectedMapel(e.target.value)}
+              onChange={(e) => handleMapelChange(e.target.value)}
               className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-none truncate"
             >
               <optgroup label="Pendidikan Agama Islam (PAI)">
@@ -536,7 +609,7 @@ export default function RekapNilai({
             </div>
             <select
               value={selectedSemester}
-              onChange={(e) => setSelectedSemester(e.target.value)}
+              onChange={(e) => handleSemesterChange(e.target.value)}
               className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
             >
               <option value="Ganjil">Semester Ganjil</option>
@@ -863,6 +936,7 @@ export default function RekapNilai({
                             max="100"
                             value={kd.ph !== undefined ? kd.ph : ''}
                             onFocus={(e) => e.target.select()}
+                            onBlur={() => { if (saveStatusRef.current === 'dirty') handleSave(); }}
                             onKeyDown={(e) => handleInputKeyDown(e, idx, kdKey, 'ph')}
                             onChange={(e) => handleScoreChange(student.id, kdKey, 'ph', e.target.value)}
                             className="w-full h-8.5 text-center font-bold text-slate-900 bg-white border border-slate-200 focus:border-emerald-600 focus:bg-emerald-50/20 focus:outline-none rounded-md text-xs sm:text-sm"
@@ -880,6 +954,7 @@ export default function RekapNilai({
                             max="100"
                             value={kd.remidi !== undefined ? kd.remidi : ''}
                             onFocus={(e) => e.target.select()}
+                            onBlur={() => { if (saveStatusRef.current === 'dirty') handleSave(); }}
                             onKeyDown={(e) => handleInputKeyDown(e, idx, kdKey, 'remidi')}
                             onChange={(e) => handleScoreChange(student.id, kdKey, 'remidi', e.target.value)}
                             className={`w-full h-8.5 text-center font-bold rounded-md text-xs sm:text-sm border focus:outline-none ${
@@ -899,6 +974,7 @@ export default function RekapNilai({
                             max="100"
                             value={kd.praktek !== undefined ? kd.praktek : ''}
                             onFocus={(e) => e.target.select()}
+                            onBlur={() => { if (saveStatusRef.current === 'dirty') handleSave(); }}
                             onKeyDown={(e) => handleInputKeyDown(e, idx, kdKey, 'praktek')}
                             onChange={(e) => handleScoreChange(student.id, kdKey, 'praktek', e.target.value)}
                             className="w-full h-8.5 text-center font-bold text-slate-900 bg-white border border-slate-200 focus:border-sky-600 focus:bg-sky-50/20 focus:outline-none rounded-md text-xs sm:text-sm"
@@ -916,6 +992,7 @@ export default function RekapNilai({
                             max="100"
                             value={kd.proyek !== undefined ? kd.proyek : ''}
                             onFocus={(e) => e.target.select()}
+                            onBlur={() => { if (saveStatusRef.current === 'dirty') handleSave(); }}
                             onKeyDown={(e) => handleInputKeyDown(e, idx, kdKey, 'proyek')}
                             onChange={(e) => handleScoreChange(student.id, kdKey, 'proyek', e.target.value)}
                             className="w-full h-8.5 text-center font-bold text-slate-900 bg-white border border-slate-200 focus:border-indigo-600 focus:bg-indigo-50/20 focus:outline-none rounded-md text-xs sm:text-sm"
@@ -933,6 +1010,7 @@ export default function RekapNilai({
                             max="100"
                             value={kd.porto !== undefined ? kd.porto : ''}
                             onFocus={(e) => e.target.select()}
+                            onBlur={() => { if (saveStatusRef.current === 'dirty') handleSave(); }}
                             onKeyDown={(e) => handleInputKeyDown(e, idx, kdKey, 'porto')}
                             onChange={(e) => handleScoreChange(student.id, kdKey, 'porto', e.target.value)}
                             className="w-full h-8.5 text-center font-bold text-slate-900 bg-white border border-slate-200 focus:border-purple-600 focus:bg-purple-50/20 focus:outline-none rounded-md text-xs sm:text-sm"
@@ -1048,18 +1126,23 @@ export default function RekapNilai({
           {saveStatus === 'saving' && (
             <span className="inline-flex items-center gap-2 text-xs text-amber-700 bg-amber-50 px-3 py-1.5 rounded-xl border border-amber-200 font-bold animate-pulse">
               <RefreshCw className="w-4 h-4 animate-spin text-amber-600" />
-              Menyimpan data nilai ke cloud...
+              Menyimpan data nilai ke Cloud Firebase...
             </span>
           )}
           {saveStatus === 'saved' && (
             <span className="inline-flex items-center gap-2 text-xs text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-200 font-bold animate-fadeIn">
               <CheckCircle className="w-4 h-4 text-emerald-600" />
-              Nilai kelas {currentClassObj.nama} berhasil tersimpan di cloud!
+              Nilai kelas {currentClassObj.nama} berhasil tersimpan di Cloud Firebase!
             </span>
           )}
-          {saveStatus !== 'saving' && saveStatus !== 'saved' && (
+          {saveStatus === 'error' && (
+            <span className="inline-flex items-center gap-2 text-xs text-rose-700 bg-rose-50 px-3 py-1.5 rounded-xl border border-rose-200 font-bold">
+              Gagal menyimpan ke cloud. Periksa koneksi internet Anda.
+            </span>
+          )}
+          {saveStatus !== 'saving' && saveStatus !== 'saved' && saveStatus !== 'error' && (
             <span className="text-xs text-slate-500 font-medium">
-              Data otomatis disinkronkan, atau klik tombol simpan untuk memastikan.
+              Data otomatis disinkronkan ke Firebase di semua device, atau klik tombol simpan.
             </span>
           )}
         </div>
@@ -1068,10 +1151,15 @@ export default function RekapNilai({
         <button
           type="button"
           onClick={() => handleSave()}
-          className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-black px-8 py-3 rounded-xl text-sm shadow-md shadow-emerald-900/15 transition active:scale-95"
+          disabled={saveStatus === 'saving'}
+          className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-black px-8 py-3 rounded-xl text-sm shadow-md shadow-emerald-900/15 transition active:scale-95 cursor-pointer"
         >
-          <Save className="w-5 h-5" />
-          <span>Simpan Rekapitulasi Nilai</span>
+          {saveStatus === 'saving' ? (
+            <RefreshCw className="w-5 h-5 animate-spin" />
+          ) : (
+            <Save className="w-5 h-5" />
+          )}
+          <span>{saveStatus === 'saving' ? 'Menyimpan...' : 'Simpan Rekapitulasi Nilai'}</span>
         </button>
 
       </div>

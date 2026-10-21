@@ -39,9 +39,9 @@ export const getSchoolProfile = () => {
   }
 };
 
-export const saveSchoolProfile = (profile) => {
+export const saveSchoolProfile = async (profile) => {
   localStorage.setItem(KEYS.SCHOOL, JSON.stringify(profile));
-  syncSchoolProfileToCloud(profile);
+  await syncSchoolProfileToCloud(profile);
 };
 
 export const getClasses = () => {
@@ -68,9 +68,9 @@ export const getClasses = () => {
   }
 };
 
-export const saveClasses = (classes) => {
+export const saveClasses = async (classes) => {
   localStorage.setItem(KEYS.CLASSES, JSON.stringify(classes));
-  syncClassesToCloud(classes);
+  await syncClassesToCloud(classes);
 };
 
 export const sortStudentsAlphabetically = (studentsList) => {
@@ -105,10 +105,10 @@ export const getStudents = () => {
   }
 };
 
-export const saveStudents = (students) => {
+export const saveStudents = async (students) => {
   const sorted = sortStudentsAlphabetically(students);
   localStorage.setItem(KEYS.STUDENTS, JSON.stringify(sorted));
-  syncStudentsToCloud(sorted);
+  await syncStudentsToCloud(sorted);
 };
 
 export const getAttendance = () => {
@@ -116,9 +116,9 @@ export const getAttendance = () => {
   return data ? JSON.parse(data) : INITIAL_ATTENDANCE;
 };
 
-export const saveAttendance = (records, targetDate, classId) => {
+export const saveAttendance = async (records, targetDate, classId) => {
   localStorage.setItem(KEYS.ATTENDANCE, JSON.stringify(records));
-  syncAttendanceToCloud(records, classId, targetDate);
+  await syncAttendanceToCloud(records, classId, targetDate);
 };
 
 export const getGrades = () => {
@@ -131,7 +131,7 @@ export const getGrades = () => {
   }
 };
 
-export const saveGradeForClassSubject = (classId, mapelId, semester, gradeData) => {
+export const saveGradeForClassSubject = async (classId, mapelId, semester, gradeData) => {
   const currentGrades = getGrades();
   const docId = `${classId}_${mapelId}_${semester}`;
   const updatedDoc = {
@@ -146,7 +146,11 @@ export const saveGradeForClassSubject = (classId, mapelId, semester, gradeData) 
     [docId]: updatedDoc
   };
   localStorage.setItem(KEYS.GRADES, JSON.stringify(updatedGrades));
-  syncGradesToCloud(classId, mapelId, semester, updatedDoc);
+  try {
+    await syncGradesToCloud(classId, mapelId, semester, updatedDoc);
+  } catch (err) {
+    console.warn("Could not sync grade to cloud immediately:", err);
+  }
   return updatedGrades;
 };
 

@@ -1,6 +1,7 @@
-import { initializeApp } from "firebase/app";
+import { initializeApp, getApps, getApp } from "firebase/app";
 import { 
   initializeFirestore, 
+  getFirestore,
   persistentLocalCache, 
   persistentMultipleTabManager,
   doc, setDoc, getDoc, collection, getDocs, onSnapshot 
@@ -17,42 +18,54 @@ const firebaseConfig = {
   measurementId: "G-6C4PWQZY1W"
 };
 
-// Initialize Firebase with multi-tab IndexedDB offline persistence
-const app = initializeApp(firebaseConfig);
-export const db = initializeFirestore(app, {
-  localCache: persistentLocalCache({
-    tabManager: persistentMultipleTabManager()
-  })
-});
+// Initialize Firebase with multi-tab IndexedDB offline persistence & safe fallback
+const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+let firestoreDb;
+try {
+  firestoreDb = initializeFirestore(app, {
+    localCache: persistentLocalCache({
+      tabManager: persistentMultipleTabManager()
+    })
+  });
+} catch (e) {
+  firestoreDb = getFirestore(app);
+}
+export const db = firestoreDb;
 
 // Helper functions for cloud synchronization
 export const syncSchoolProfileToCloud = async (profile) => {
   try {
     await setDoc(doc(db, "school", "profile"), profile);
+    return true;
   } catch (err) {
     console.warn("Cloud sync warning (profile):", err);
+    return false;
   }
 };
 
 export const syncClassesToCloud = async (classes) => {
   try {
     await setDoc(doc(db, "school", "classes"), { list: classes });
+    return true;
   } catch (err) {
     console.warn("Cloud sync warning (classes):", err);
+    return false;
   }
 };
 
 export const syncStudentsToCloud = async (students) => {
   try {
     await setDoc(doc(db, "school", "students"), { list: students });
+    return true;
   } catch (err) {
     console.warn("Cloud sync warning (students):", err);
+    return false;
   }
 };
 
 export const syncAttendanceToCloud = async (records, arg2, arg3) => {
   try {
-    if (!records || !Array.isArray(records) || records.length === 0) return;
+    if (!records || !Array.isArray(records) || records.length === 0) return true;
 
     let classId = null;
     let dateStr = null;
@@ -76,7 +89,7 @@ export const syncAttendanceToCloud = async (records, arg2, arg3) => {
           [classId]: records
         }
       }, { merge: true });
-      return;
+      return true;
     }
 
     // 2. If dateStr is provided without classId, partition records by class if possible
@@ -92,7 +105,7 @@ export const syncAttendanceToCloud = async (records, arg2, arg3) => {
         updatedAt: new Date().toISOString(),
         classes: classesMap
       }, { merge: true });
-      return;
+      return true;
     }
 
     // 3. Fallback: Full sync partitioned cleanly by date and class into daily_attendance
@@ -116,8 +129,10 @@ export const syncAttendanceToCloud = async (records, arg2, arg3) => {
         classes: classesMap
       }, { merge: true });
     }
+    return true;
   } catch (err) {
     console.warn("Cloud sync warning (attendance):", err);
+    throw err;
   }
 };
 
@@ -194,7 +209,7 @@ export const subscribeAttendance = (onUpdate) => {
 // Sync grade ledger per class, subject, and semester to Firestore
 export const syncGradesToCloud = async (classId, mapelId, semester, gradeData) => {
   try {
-    if (!classId || !mapelId || !semester) return;
+    if (!classId || !mapelId || !semester) return false;
     const docId = `${classId}_${mapelId}_${semester}`;
     await setDoc(doc(db, "grades", docId), {
       ...gradeData,
@@ -203,8 +218,10 @@ export const syncGradesToCloud = async (classId, mapelId, semester, gradeData) =
       semester,
       updatedAt: new Date().toISOString()
     }, { merge: true });
+    return true;
   } catch (err) {
     console.warn("Cloud sync warning (grades):", err);
+    throw err;
   }
 };
 

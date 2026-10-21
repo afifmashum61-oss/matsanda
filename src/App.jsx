@@ -146,21 +146,21 @@ export default function App() {
     };
   }, []);
 
-  // Handlers for state update + LocalStorage persistence
-  const handleSaveSchoolProfile = (profile) => {
+  // Handlers for state update + LocalStorage persistence & Cloud Sync
+  const handleSaveSchoolProfile = async (profile) => {
     setSchoolProfileState(profile);
-    saveSchoolProfile(profile);
+    await saveSchoolProfile(profile);
   };
 
-  const handleSaveClasses = (newClasses) => {
+  const handleSaveClasses = async (newClasses) => {
     setClassesState(newClasses);
-    saveClasses(newClasses);
+    await saveClasses(newClasses);
   };
 
-  const handleSaveStudents = (newStudents) => {
+  const handleSaveStudents = async (newStudents) => {
     const sorted = sortStudentsAlphabetically(newStudents);
     setStudentsState(sorted);
-    saveStudents(sorted);
+    await saveStudents(sorted);
   };
 
   const handleSaveAttendance = async (newRecords, classId, dateStr) => {
@@ -192,9 +192,10 @@ export default function App() {
     return true;
   };
 
-  const handleSaveGrade = (classId, mapelId, semester, gradeData) => {
-    const updated = saveGradeForClassSubject(classId, mapelId, semester, gradeData);
+  const handleSaveGrade = async (classId, mapelId, semester, gradeData) => {
+    const updated = await saveGradeForClassSubject(classId, mapelId, semester, gradeData);
     setGradesState(updated);
+    return updated;
   };
 
   const navItems = [
@@ -236,6 +237,28 @@ export default function App() {
               <p className="text-[11px] text-emerald-300 font-medium">
                 T.A. {schoolProfile.tahunAjaran || '2026/2027'} • Semester {schoolProfile.semester || 'Ganjil'}
               </p>
+            </div>
+          </div>
+
+          {/* Cloud Connection Live Status Pill */}
+          <div className="flex items-center gap-2">
+            <div 
+              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold border transition-all ${
+                isCloudConnected && isOnline
+                  ? 'bg-emerald-800/90 text-emerald-100 border-emerald-600/70 shadow-xs'
+                  : 'bg-amber-900/70 text-amber-200 border-amber-700/80 animate-pulse'
+              }`}
+              title={isCloudConnected && isOnline ? "Terhubung ke Firebase Firestore (Data otomatis tersimpan di Cloud)" : "Menghubungkan ke Cloud..."}
+            >
+              <span className={`w-2 h-2 rounded-full ${
+                isCloudConnected && isOnline ? 'bg-emerald-400 shadow-sm animate-pulse' : 'bg-amber-400'
+              }`} />
+              <span className="hidden sm:inline">
+                {isCloudConnected && isOnline ? 'Firebase Cloud Aktif' : 'Menghubungkan Cloud...'}
+              </span>
+              <span className="sm:hidden">
+                {isCloudConnected && isOnline ? 'Cloud Aktif' : 'Menghubungkan...'}
+              </span>
             </div>
           </div>
 
