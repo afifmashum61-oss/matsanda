@@ -486,8 +486,8 @@ export default function RekapNilai({
           </div>
         </div>
 
-        {/* Essential Selectors: Kelas & Mata Pelajaran */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 border-t border-slate-100">
+        {/* Essential Selectors: Kelas, Mata Pelajaran, Semester & Tahun Ajaran */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-2 border-t border-slate-100">
           <div>
             <label className="block text-[11px] font-bold text-slate-700 mb-1">Pilih Kelas</label>
             <select
@@ -523,6 +523,23 @@ export default function RekapNilai({
                   <option key={m.id} value={m.id}>{m.nama}</option>
                 ))}
               </optgroup>
+            </select>
+          </div>
+
+          <div>
+            <div className="flex items-center justify-between mb-1">
+              <label className="block text-[11px] font-bold text-slate-700">Pilih Semester</label>
+              <span className="text-[10px] font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                T.A. {schoolProfile?.tahunAjaran || '2026/2027'}
+              </span>
+            </div>
+            <select
+              value={selectedSemester}
+              onChange={(e) => setSelectedSemester(e.target.value)}
+              className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+            >
+              <option value="Ganjil">Semester Ganjil</option>
+              <option value="Genap">Semester Genap</option>
             </select>
           </div>
         </div>
@@ -583,7 +600,7 @@ export default function RekapNilai({
                 : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
             }`}
           >
-            📝 PH 1 (Langsung di HP)
+            📝 PH 1
           </button>
 
           <button
@@ -595,7 +612,7 @@ export default function RekapNilai({
                 : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
             }`}
           >
-            📝 PH 2 (Langsung di HP)
+            📝 PH 2
           </button>
 
           <button
@@ -658,16 +675,8 @@ export default function RekapNilai({
           </div>
         </div>
 
-        {/* Mobile Swipe Hint */}
-        <div className="sm:hidden px-3 py-1.5 bg-emerald-50/70 border-b border-emerald-100 flex items-center justify-between text-[11px] text-emerald-800 font-medium">
-          <span className="flex items-center gap-1.5">
-            <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            Geser tabel ke samping untuk melihat nilai PH & kolom lainnya 👉
-          </span>
-        </div>
-
-        {/* Scrollable Table Container */}
-        <div className="overflow-x-auto relative scrollbar-thin overscroll-x-contain touch-pan-x [-webkit-overflow-scrolling:touch]">
+        {/* Scrollable Table Container - Smooth and responsive without gesture blocking */}
+        <div className="overflow-x-auto relative scrollbar-thin [-webkit-overflow-scrolling:touch]">
           <table className="min-w-full text-xs border-collapse text-center">
             
             {/* Table Header matching the template locked in Hijau Madrasah theme */}
@@ -823,7 +832,7 @@ export default function RekapNilai({
                     return (
                       <React.Fragment key={kdIdx}>
                         {/* PH */}
-                        <td className="border border-slate-300 p-1 min-w-[50px]">
+                        <td className="border border-slate-300 p-0.5 min-w-[48px]">
                           <input
                             id={`score_${student.id}_${kdKey}_ph`}
                             type="number"
@@ -834,13 +843,13 @@ export default function RekapNilai({
                             onFocus={(e) => e.target.select()}
                             onKeyDown={(e) => handleInputKeyDown(e, idx, kdKey, 'ph')}
                             onChange={(e) => handleScoreChange(student.id, kdKey, 'ph', e.target.value)}
-                            className="w-full h-9 sm:h-10 text-center font-bold text-slate-900 bg-white border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/30 focus:outline-none rounded-lg text-xs sm:text-sm shadow-2xs"
+                            className="w-full h-8.5 text-center font-bold text-slate-900 bg-white border border-slate-200 focus:border-emerald-600 focus:bg-emerald-50/20 focus:outline-none rounded-md text-xs sm:text-sm"
                             placeholder="-"
                           />
                         </td>
 
                         {/* Remidi */}
-                        <td className="border border-slate-300 p-1 min-w-[50px] bg-amber-50/20">
+                        <td className="border border-slate-300 p-0.5 min-w-[48px] bg-amber-50/20">
                           <input
                             id={`score_${student.id}_${kdKey}_remidi`}
                             type="number"
@@ -851,15 +860,15 @@ export default function RekapNilai({
                             onFocus={(e) => e.target.select()}
                             onKeyDown={(e) => handleInputKeyDown(e, idx, kdKey, 'remidi')}
                             onChange={(e) => handleScoreChange(student.id, kdKey, 'remidi', e.target.value)}
-                            className={`w-full h-9 sm:h-10 text-center font-bold rounded-lg text-xs sm:text-sm border focus:ring-2 focus:ring-amber-500/30 focus:outline-none shadow-2xs ${
-                              kd.remidi ? 'text-amber-800 bg-amber-100/90 border-amber-300' : 'text-slate-400 bg-white border-slate-200'
+                            className={`w-full h-8.5 text-center font-bold rounded-md text-xs sm:text-sm border focus:outline-none ${
+                              kd.remidi ? 'text-amber-800 bg-amber-100/90 border-amber-400 font-black' : 'text-slate-400 bg-white border-slate-200 focus:border-amber-500'
                             }`}
                             placeholder="-"
                           />
                         </td>
 
                         {/* Praktek */}
-                        <td className="border border-slate-300 p-1 min-w-[50px]">
+                        <td className="border border-slate-300 p-0.5 min-w-[48px]">
                           <input
                             id={`score_${student.id}_${kdKey}_praktek`}
                             type="number"
@@ -870,13 +879,13 @@ export default function RekapNilai({
                             onFocus={(e) => e.target.select()}
                             onKeyDown={(e) => handleInputKeyDown(e, idx, kdKey, 'praktek')}
                             onChange={(e) => handleScoreChange(student.id, kdKey, 'praktek', e.target.value)}
-                            className="w-full h-9 sm:h-10 text-center font-bold text-slate-900 bg-white border border-slate-200 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/30 focus:outline-none rounded-lg text-xs sm:text-sm shadow-2xs"
+                            className="w-full h-8.5 text-center font-bold text-slate-900 bg-white border border-slate-200 focus:border-sky-600 focus:bg-sky-50/20 focus:outline-none rounded-md text-xs sm:text-sm"
                             placeholder="-"
                           />
                         </td>
 
                         {/* Proyek */}
-                        <td className="border border-slate-300 p-1 min-w-[50px]">
+                        <td className="border border-slate-300 p-0.5 min-w-[48px]">
                           <input
                             id={`score_${student.id}_${kdKey}_proyek`}
                             type="number"
@@ -887,13 +896,13 @@ export default function RekapNilai({
                             onFocus={(e) => e.target.select()}
                             onKeyDown={(e) => handleInputKeyDown(e, idx, kdKey, 'proyek')}
                             onChange={(e) => handleScoreChange(student.id, kdKey, 'proyek', e.target.value)}
-                            className="w-full h-9 sm:h-10 text-center font-bold text-slate-900 bg-white border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/30 focus:outline-none rounded-lg text-xs sm:text-sm shadow-2xs"
+                            className="w-full h-8.5 text-center font-bold text-slate-900 bg-white border border-slate-200 focus:border-indigo-600 focus:bg-indigo-50/20 focus:outline-none rounded-md text-xs sm:text-sm"
                             placeholder="-"
                           />
                         </td>
 
                         {/* Porto F */}
-                        <td className="border border-slate-300 p-1 min-w-[50px]">
+                        <td className="border border-slate-300 p-0.5 min-w-[48px]">
                           <input
                             id={`score_${student.id}_${kdKey}_porto`}
                             type="number"
@@ -904,7 +913,7 @@ export default function RekapNilai({
                             onFocus={(e) => e.target.select()}
                             onKeyDown={(e) => handleInputKeyDown(e, idx, kdKey, 'porto')}
                             onChange={(e) => handleScoreChange(student.id, kdKey, 'porto', e.target.value)}
-                            className="w-full h-9 sm:h-10 text-center font-bold text-slate-900 bg-white border border-slate-200 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/30 focus:outline-none rounded-lg text-xs sm:text-sm shadow-2xs"
+                            className="w-full h-8.5 text-center font-bold text-slate-900 bg-white border border-slate-200 focus:border-purple-600 focus:bg-purple-50/20 focus:outline-none rounded-md text-xs sm:text-sm"
                             placeholder="-"
                           />
                         </td>

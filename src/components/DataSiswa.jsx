@@ -16,7 +16,7 @@ import {
 import * as XLSX from 'xlsx';
 import { sortStudentsAlphabetically } from '../utils/storage';
 
-export default function DataSiswa({ students, classes, onSaveStudents }) {
+export default function DataSiswa({ students, classes, onSaveStudents, schoolProfile }) {
   const [selectedFilterClass, setSelectedFilterClass] = useState('ALL');
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -198,7 +198,12 @@ export default function DataSiswa({ students, classes, onSaveStudents }) {
       <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-4">
           <div>
-            <h1 className="text-xl font-bold text-slate-900">Data Master Siswa</h1>
+            <div className="flex items-center gap-2 flex-wrap mb-1">
+              <h1 className="text-xl font-bold text-slate-900">Data Master Siswa</h1>
+              <span className="inline-flex items-center gap-1 bg-emerald-100 text-emerald-800 text-[11px] font-bold px-2.5 py-0.5 rounded-full border border-emerald-300">
+                T.A. {schoolProfile?.tahunAjaran || '2026/2027'} • Semester {schoolProfile?.semester || 'Ganjil'}
+              </span>
+            </div>
             <p className="text-xs text-slate-500">Kelola informasi data siswa MTs Darussalam Ngesong Jombang per kelas.</p>
           </div>
 

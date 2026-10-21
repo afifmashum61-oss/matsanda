@@ -23,9 +23,11 @@ export default function InputAbsensi({
   attendance, 
   onSaveAttendance, 
   selectedClass, 
-  setSelectedClass 
+  setSelectedClass,
+  schoolProfile
 }) {
   const [selectedDate, setSelectedDate] = useState(getTodayDateString());
+  const [selectedSemester, setSelectedSemester] = useState(schoolProfile?.semester || 'Ganjil');
   
   // Dynamic Jam Pelajaran based on selected date (Monday vs Regular)
   const currentJamPelajaran = getJamPelajaranByDate(selectedDate);
@@ -238,7 +240,12 @@ Wassalamu'alaikum Wr. Wb.`;
       <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-4">
           <div>
-            <h1 className="text-xl font-bold text-slate-900">Form Absensi Siswa Multi-Jam Pelajaran</h1>
+            <div className="flex items-center gap-2 flex-wrap mb-1">
+              <h1 className="text-xl font-bold text-slate-900">Form Absensi Siswa Multi-Jam Pelajaran</h1>
+              <span className="inline-flex items-center gap-1 bg-emerald-100 text-emerald-800 text-[11px] font-bold px-2.5 py-0.5 rounded-full border border-emerald-300">
+                T.A. {schoolProfile?.tahunAjaran || '2026/2027'} • Semester {selectedSemester}
+              </span>
+            </div>
             <p className="text-xs text-slate-500">Bisa memilih lebih dari 1 Jam Pelajaran sekaligus untuk pengisian cepat dan praktis.</p>
           </div>
 
@@ -293,8 +300,8 @@ Wassalamu'alaikum Wr. Wb.`;
           </div>
         )}
 
-        {/* Inputs row with separated Kelas & Wali Kelas */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 pt-1">
+        {/* Inputs row with separated Kelas, Wali Kelas, Semester, Tanggal, & Cari Siswa */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5 pt-1">
           <div>
             <label className="block text-xs font-bold text-slate-700 mb-1.5">Pilih Kelas</label>
             <select
@@ -318,12 +325,29 @@ Wassalamu'alaikum Wr. Wb.`;
           </div>
 
           <div>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="block text-xs font-bold text-slate-700">Semester</label>
+              <span className="text-[10px] font-bold text-emerald-800 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
+                T.A. {schoolProfile?.tahunAjaran || '2026/2027'}
+              </span>
+            </div>
+            <select
+              value={selectedSemester}
+              onChange={(e) => setSelectedSemester(e.target.value)}
+              className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 focus:ring-2 focus:ring-emerald-500 focus:outline-none h-[38px]"
+            >
+              <option value="Ganjil">Semester Ganjil</option>
+              <option value="Genap">Semester Genap</option>
+            </select>
+          </div>
+
+          <div>
             <label className="block text-xs font-bold text-slate-700 mb-1.5">Tanggal Absensi</label>
             <input
               type="date"
               value={selectedDate}
               onChange={(e) => setSelectedDate(e.target.value)}
-              className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-medium text-slate-800 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+              className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-medium text-slate-800 focus:ring-2 focus:ring-emerald-500 focus:outline-none h-[38px]"
             />
           </div>
 
@@ -336,7 +360,7 @@ Wassalamu'alaikum Wr. Wb.`;
                 placeholder="Cari nama/NIS..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full bg-slate-50 border border-slate-300 rounded-xl pl-9 pr-3 py-2 text-xs text-slate-800 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                className="w-full bg-slate-50 border border-slate-300 rounded-xl pl-9 pr-3 py-2 text-xs text-slate-800 focus:ring-2 focus:ring-emerald-500 focus:outline-none h-[38px]"
               />
             </div>
           </div>

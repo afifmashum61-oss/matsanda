@@ -16,6 +16,8 @@ import { getTodayDateString } from '../utils/storage';
 export default function LaporanAbsensi({ students, attendance, classes, schoolProfile }) {
   const [reportType, setReportType] = useState('monthly'); // 'monthly' | 'daily'
   const [selectedClass, setSelectedClass] = useState(classes[0]?.id || '7A');
+  const [selectedSemester, setSelectedSemester] = useState(schoolProfile?.semester || 'Ganjil');
+  const [selectedTahunAjaran, setSelectedTahunAjaran] = useState(schoolProfile?.tahunAjaran || '2026/2027');
   
   // Month & Year state for monthly report
   const now = new Date();
@@ -104,7 +106,7 @@ export default function LaporanAbsensi({ students, attendance, classes, schoolPr
     const worksheet = XLSX.utils.json_to_sheet(excelData);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, `Rekap Kelas ${selectedClass}`);
-    XLSX.writeFile(workbook, `Rekap_Absensi_MTs_Darussalam_Kelas_${selectedClass}_${monthNames[selectedMonth - 1]}_${selectedYear}.xlsx`);
+    XLSX.writeFile(workbook, `Rekap_Absensi_MTs_Darussalam_Kelas_${selectedClass}_Sem_${selectedSemester}_${monthNames[selectedMonth - 1]}_${selectedYear}.xlsx`);
   };
 
   const handlePrint = () => {
@@ -117,7 +119,12 @@ export default function LaporanAbsensi({ students, attendance, classes, schoolPr
       <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4 no-print">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-4">
           <div>
-            <h1 className="text-xl font-bold text-slate-900">Laporan & Rekapitulasi Absensi</h1>
+            <div className="flex items-center gap-2 flex-wrap mb-1">
+              <h1 className="text-xl font-bold text-slate-900">Laporan & Rekapitulasi Absensi</h1>
+              <span className="inline-flex items-center gap-1 bg-emerald-100 text-emerald-800 text-[11px] font-bold px-2.5 py-0.5 rounded-full border border-emerald-300">
+                T.A. {selectedTahunAjaran} • Semester {selectedSemester}
+              </span>
+            </div>
             <p className="text-xs text-slate-500">Cetak dokumen rekapitulasi kehadiran resmi (termasuk jam pelajaran ke 1-8) atau download file Excel.</p>
           </div>
 
@@ -141,7 +148,7 @@ export default function LaporanAbsensi({ students, attendance, classes, schoolPr
         </div>
 
         {/* Report Options */}
-        <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
           <div>
             <label className="block text-xs font-bold text-slate-700 mb-1.5">Jenis Laporan</label>
             <select
@@ -155,15 +162,40 @@ export default function LaporanAbsensi({ students, attendance, classes, schoolPr
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1.5">Kelas</label>
+            <label className="block text-xs font-bold text-slate-700 mb-1.5">Pilih Kelas</label>
             <select
               value={selectedClass}
               onChange={(e) => setSelectedClass(e.target.value)}
-              className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-medium text-slate-800 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+              className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
             >
               {classes.map(c => (
                 <option key={c.id} value={c.id}>{c.nama}</option>
               ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-slate-700 mb-1.5">Pilih Semester</label>
+            <select
+              value={selectedSemester}
+              onChange={(e) => setSelectedSemester(e.target.value)}
+              className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+            >
+              <option value="Ganjil">Semester Ganjil</option>
+              <option value="Genap">Semester Genap</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-slate-700 mb-1.5">Tahun Ajaran</label>
+            <select
+              value={selectedTahunAjaran}
+              onChange={(e) => setSelectedTahunAjaran(e.target.value)}
+              className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+            >
+              <option value="2026/2027">2026/2027</option>
+              <option value="2025/2026">2025/2026</option>
+              <option value="2027/2028">2027/2028</option>
             </select>
           </div>
 
@@ -255,8 +287,8 @@ export default function LaporanAbsensi({ students, attendance, classes, schoolPr
           </p>
           <p className="text-xs text-slate-600">
             {reportType === 'monthly' 
-              ? `Bulan: ${monthNames[selectedMonth - 1]} ${selectedYear} • Tahun Ajaran ${schoolProfile.tahunAjaran} (${schoolProfile.semester})`
-              : `Tanggal: ${new Date(selectedDate).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })} ${selectedJamFilter !== 'ALL' ? `• Jam Ke-${selectedJamFilter}` : '• Jam Pelajaran Ke 1 s/d 8'}`
+              ? `Bulan: ${monthNames[selectedMonth - 1]} ${selectedYear} • Tahun Ajaran ${selectedTahunAjaran} (Semester ${selectedSemester})`
+              : `Tanggal: ${new Date(selectedDate).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })} • T.A. ${selectedTahunAjaran} (Semester ${selectedSemester}) ${selectedJamFilter !== 'ALL' ? `• Jam Ke-${selectedJamFilter}` : '• Jam Pelajaran Ke 1 s/d 8'}`
             }
           </p>
         </div>
