@@ -8,12 +8,7 @@ import {
   Sparkles, 
   RefreshCw,
   Search,
-  MoreVertical,
-  X,
-  User,
-  Eye,
-  ChevronLeft,
-  ChevronRight
+  MoreVertical
 } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import { MATA_PELAJARAN_MTS } from '../data/initialData';
@@ -67,10 +62,9 @@ export default function RekapNilai({
   const [searchQuery, setSearchQuery] = useState('');
   const [saveStatus, setSaveStatus] = useState(''); // 'saved' | 'saving' | 'dirty' | ''
   
-  // Mobile UX States
+  // Mobile Column Filter State: 'all' | 'ph1' | 'ph2' | 'final'
+  const [viewMode, setViewMode] = useState('all');
   const [showMoreActions, setShowMoreActions] = useState(false);
-  const [viewMode, setViewMode] = useState('all'); // 'all' | 'ph1' | 'ph2' | 'final'
-  const [activeStudentModal, setActiveStudentModal] = useState(null);
 
   // Batch Fill Modal
   const [showBatchModal, setShowBatchModal] = useState(false);
@@ -124,6 +118,21 @@ export default function RekapNilai({
       return { ...prev, [studentId]: updatedStudent };
     });
     setSaveStatus('dirty');
+  };
+
+  // Fast Enter Key Navigation: moves directly to the same field of the next student
+  const handleInputKeyDown = (e, currentIdx, kdKey, field) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      if (currentIdx < filteredStudents.length - 1) {
+        const nextStudent = filteredStudents[currentIdx + 1];
+        const nextInput = document.getElementById(`score_${nextStudent.id}_${kdKey}_${field}`);
+        if (nextInput) {
+          nextInput.focus();
+          nextInput.select();
+        }
+      }
+    }
   };
 
   // Perform save to LocalStorage and Firestore
@@ -283,23 +292,6 @@ export default function RekapNilai({
     setSaveStatus('dirty');
     setShowBatchModal(false);
     handleSave(updated);
-  };
-
-  // Modal Student Navigation
-  const handleNextStudent = () => {
-    if (!activeStudentModal) return;
-    const curIdx = filteredStudents.findIndex(s => s.id === activeStudentModal.id);
-    if (curIdx < filteredStudents.length - 1) {
-      setActiveStudentModal(filteredStudents[curIdx + 1]);
-    }
-  };
-
-  const handlePrevStudent = () => {
-    if (!activeStudentModal) return;
-    const curIdx = filteredStudents.findIndex(s => s.id === activeStudentModal.id);
-    if (curIdx > 0) {
-      setActiveStudentModal(filteredStudents[curIdx - 1]);
-    }
   };
 
   // Export to Excel with Multi-Level Merged Headers matching the template
@@ -591,7 +583,7 @@ export default function RekapNilai({
                 : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
             }`}
           >
-            📝 PH 1 (Pas Layar HP)
+            📝 PH 1 (Langsung di HP)
           </button>
 
           <button
@@ -603,7 +595,7 @@ export default function RekapNilai({
                 : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
             }`}
           >
-            📝 PH 2 (Pas Layar HP)
+            📝 PH 2 (Langsung di HP)
           </button>
 
           <button
@@ -633,7 +625,7 @@ export default function RekapNilai({
 
       </div>
 
-      {/* 4. MAIN GRADE LEDGER TABLE (Locked with Hijau Madrasah Theme) */}
+      {/* 4. MAIN GRADE LEDGER TABLE (Direct In-Table Touch-Friendly Input) */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden print:border-none print:shadow-none print:p-0">
         
         {/* Printable Madrasah KOP (visible when printed) */}
@@ -825,14 +817,16 @@ export default function RekapNilai({
                         {/* PH */}
                         <td className="border border-slate-300 p-0.5">
                           <input
+                            id={`score_${student.id}_${kdKey}_ph`}
                             type="number"
                             inputMode="numeric"
                             min="0"
                             max="100"
                             value={kd.ph !== undefined ? kd.ph : ''}
                             onFocus={(e) => e.target.select()}
+                            onKeyDown={(e) => handleInputKeyDown(e, idx, kdKey, 'ph')}
                             onChange={(e) => handleScoreChange(student.id, kdKey, 'ph', e.target.value)}
-                            className="w-full text-center py-2 px-1 font-semibold text-slate-900 bg-transparent focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none rounded text-xs"
+                            className="w-full text-center py-2 px-1 font-bold text-slate-900 bg-transparent focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none rounded text-xs sm:text-sm"
                             placeholder="-"
                           />
                         </td>
@@ -840,14 +834,16 @@ export default function RekapNilai({
                         {/* Remidi */}
                         <td className="border border-slate-300 p-0.5 bg-amber-50/20">
                           <input
+                            id={`score_${student.id}_${kdKey}_remidi`}
                             type="number"
                             inputMode="numeric"
                             min="0"
                             max="100"
                             value={kd.remidi !== undefined ? kd.remidi : ''}
                             onFocus={(e) => e.target.select()}
+                            onKeyDown={(e) => handleInputKeyDown(e, idx, kdKey, 'remidi')}
                             onChange={(e) => handleScoreChange(student.id, kdKey, 'remidi', e.target.value)}
-                            className={`w-full text-center py-2 px-1 font-bold rounded text-xs focus:ring-2 focus:ring-amber-500 focus:outline-none ${
+                            className={`w-full text-center py-2 px-1 font-bold rounded text-xs sm:text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none ${
                               kd.remidi ? 'text-amber-800 bg-amber-100/90 border border-amber-300' : 'text-slate-400 bg-transparent'
                             }`}
                             placeholder="-"
@@ -857,14 +853,16 @@ export default function RekapNilai({
                         {/* Praktek */}
                         <td className="border border-slate-300 p-0.5">
                           <input
+                            id={`score_${student.id}_${kdKey}_praktek`}
                             type="number"
                             inputMode="numeric"
                             min="0"
                             max="100"
                             value={kd.praktek !== undefined ? kd.praktek : ''}
                             onFocus={(e) => e.target.select()}
+                            onKeyDown={(e) => handleInputKeyDown(e, idx, kdKey, 'praktek')}
                             onChange={(e) => handleScoreChange(student.id, kdKey, 'praktek', e.target.value)}
-                            className="w-full text-center py-2 px-1 font-semibold text-slate-900 bg-transparent focus:bg-white focus:ring-2 focus:ring-sky-500 focus:outline-none rounded text-xs"
+                            className="w-full text-center py-2 px-1 font-bold text-slate-900 bg-transparent focus:bg-white focus:ring-2 focus:ring-sky-500 focus:outline-none rounded text-xs sm:text-sm"
                             placeholder="-"
                           />
                         </td>
@@ -872,14 +870,16 @@ export default function RekapNilai({
                         {/* Proyek */}
                         <td className="border border-slate-300 p-0.5">
                           <input
+                            id={`score_${student.id}_${kdKey}_proyek`}
                             type="number"
                             inputMode="numeric"
                             min="0"
                             max="100"
                             value={kd.proyek !== undefined ? kd.proyek : ''}
                             onFocus={(e) => e.target.select()}
+                            onKeyDown={(e) => handleInputKeyDown(e, idx, kdKey, 'proyek')}
                             onChange={(e) => handleScoreChange(student.id, kdKey, 'proyek', e.target.value)}
-                            className="w-full text-center py-2 px-1 font-semibold text-slate-900 bg-transparent focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none rounded text-xs"
+                            className="w-full text-center py-2 px-1 font-bold text-slate-900 bg-transparent focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none rounded text-xs sm:text-sm"
                             placeholder="-"
                           />
                         </td>
@@ -887,14 +887,16 @@ export default function RekapNilai({
                         {/* Porto F */}
                         <td className="border border-slate-300 p-0.5">
                           <input
+                            id={`score_${student.id}_${kdKey}_porto`}
                             type="number"
                             inputMode="numeric"
                             min="0"
                             max="100"
                             value={kd.porto !== undefined ? kd.porto : ''}
                             onFocus={(e) => e.target.select()}
+                            onKeyDown={(e) => handleInputKeyDown(e, idx, kdKey, 'porto')}
                             onChange={(e) => handleScoreChange(student.id, kdKey, 'porto', e.target.value)}
-                            className="w-full text-center py-2 px-1 font-semibold text-slate-900 bg-transparent focus:bg-white focus:ring-2 focus:ring-purple-500 focus:outline-none rounded text-xs"
+                            className="w-full text-center py-2 px-1 font-bold text-slate-900 bg-transparent focus:bg-white focus:ring-2 focus:ring-purple-500 focus:outline-none rounded text-xs sm:text-sm"
                             placeholder="-"
                           />
                         </td>
@@ -915,16 +917,9 @@ export default function RekapNilai({
                         {student.nis || '-'}
                       </td>
 
-                      {/* Sticky Frozen Student Name Column (Tap to open full card) */}
-                      <td 
-                        className="border border-slate-300 px-2.5 py-1 text-left font-bold text-slate-900 whitespace-nowrap sticky left-0 z-10 bg-white shadow-xs cursor-pointer hover:text-emerald-700 group"
-                        onClick={() => setActiveStudentModal(student)}
-                        title="Klik untuk membuka kartu input cepat siswa ini"
-                      >
-                        <div className="flex items-center justify-between gap-1">
-                          <span className="truncate">{student.nama}</span>
-                          <Eye className="w-3.5 h-3.5 text-slate-400 group-hover:text-emerald-600 flex-shrink-0" />
-                        </div>
+                      {/* Sticky Frozen Student Name Column: Direct, simple, no cumbersome eye icon */}
+                      <td className="border border-slate-300 px-3 py-2 text-left font-bold text-slate-900 whitespace-nowrap sticky left-0 z-10 bg-white shadow-xs">
+                        {student.nama}
                       </td>
 
                       <td className="border border-slate-300 px-1 py-1 font-semibold text-slate-500 text-[11px]">
@@ -1042,196 +1037,7 @@ export default function RekapNilai({
 
       </div>
 
-      {/* 6. QUICK INDIVIDUAL STUDENT CARD MODAL */}
-      {activeStudentModal && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 no-print animate-fadeIn">
-          <div className="bg-white rounded-t-3xl sm:rounded-2xl max-w-lg w-full p-5 sm:p-6 shadow-2xl space-y-4 border border-slate-100 max-h-[90vh] overflow-y-auto">
-            
-            {/* Modal Header */}
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <div className="flex items-center gap-2.5">
-                <div className="p-2 bg-emerald-50 text-emerald-700 rounded-xl">
-                  <User className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-sm text-slate-900 leading-tight">
-                    {activeStudentModal.nama}
-                  </h3>
-                  <p className="text-[11px] text-slate-500 font-medium">
-                    NIS: {activeStudentModal.nis || '-'} • {currentClassObj.nama} • {currentMapelObj.nama}
-                  </p>
-                </div>
-              </div>
-              <button
-                onClick={() => setActiveStudentModal(null)}
-                className="p-1 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            {/* Inputs Per KD */}
-            <div className="space-y-4">
-              {Array.from({ length: kdCount }, (_, kdIdx) => {
-                const kdKey = `ph${kdIdx + 1}`;
-                const studentScore = scores[activeStudentModal.id] || {};
-                const kd = studentScore[kdKey] || {};
-
-                return (
-                  <div key={kdIdx} className="bg-slate-50 p-3.5 rounded-2xl border border-slate-200/80 space-y-2.5">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-black text-slate-800 uppercase tracking-wide">
-                        Penilaian Harian {kdIdx + 1}
-                      </span>
-                      <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-md">
-                        KD {kdIdx + 1}
-                      </span>
-                    </div>
-
-                    <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
-                      <div>
-                        <label className="block text-[10px] font-bold text-slate-600 mb-1">PH (Ulangan)</label>
-                        <input
-                          type="number"
-                          inputMode="numeric"
-                          min="0"
-                          max="100"
-                          value={kd.ph !== undefined ? kd.ph : ''}
-                          onFocus={(e) => e.target.select()}
-                          onChange={(e) => handleScoreChange(activeStudentModal.id, kdKey, 'ph', e.target.value)}
-                          className="w-full bg-white border border-slate-300 rounded-xl py-2 px-2 text-center text-sm font-bold text-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
-                          placeholder="-"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-[10px] font-bold text-amber-700 mb-1">Remidi</label>
-                        <input
-                          type="number"
-                          inputMode="numeric"
-                          min="0"
-                          max="100"
-                          value={kd.remidi !== undefined ? kd.remidi : ''}
-                          onFocus={(e) => e.target.select()}
-                          onChange={(e) => handleScoreChange(activeStudentModal.id, kdKey, 'remidi', e.target.value)}
-                          className="w-full bg-amber-50/60 border border-amber-300 rounded-xl py-2 px-2 text-center text-sm font-bold text-amber-900 focus:ring-2 focus:ring-amber-500 focus:outline-none"
-                          placeholder="-"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-[10px] font-bold text-slate-600 mb-1">Praktek</label>
-                        <input
-                          type="number"
-                          inputMode="numeric"
-                          min="0"
-                          max="100"
-                          value={kd.praktek !== undefined ? kd.praktek : ''}
-                          onFocus={(e) => e.target.select()}
-                          onChange={(e) => handleScoreChange(activeStudentModal.id, kdKey, 'praktek', e.target.value)}
-                          className="w-full bg-white border border-slate-300 rounded-xl py-2 px-2 text-center text-sm font-bold text-slate-900 focus:ring-2 focus:ring-sky-500 focus:outline-none"
-                          placeholder="-"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-[10px] font-bold text-slate-600 mb-1">Proyek</label>
-                        <input
-                          type="number"
-                          inputMode="numeric"
-                          min="0"
-                          max="100"
-                          value={kd.proyek !== undefined ? kd.proyek : ''}
-                          onFocus={(e) => e.target.select()}
-                          onChange={(e) => handleScoreChange(activeStudentModal.id, kdKey, 'proyek', e.target.value)}
-                          className="w-full bg-white border border-slate-300 rounded-xl py-2 px-2 text-center text-sm font-bold text-slate-900 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-                          placeholder="-"
-                        />
-                      </div>
-
-                      <div className="col-span-2 sm:col-span-1">
-                        <label className="block text-[10px] font-bold text-slate-600 mb-1">Porto F</label>
-                        <input
-                          type="number"
-                          inputMode="numeric"
-                          min="0"
-                          max="100"
-                          value={kd.porto !== undefined ? kd.porto : ''}
-                          onFocus={(e) => e.target.select()}
-                          onChange={(e) => handleScoreChange(activeStudentModal.id, kdKey, 'porto', e.target.value)}
-                          className="w-full bg-white border border-slate-300 rounded-xl py-2 px-2 text-center text-sm font-bold text-slate-900 focus:ring-2 focus:ring-purple-500 focus:outline-none"
-                          placeholder="-"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-
-              {/* Calculated Summary for this student */}
-              {(() => {
-                const res = calculateStudentResults(activeStudentModal.id);
-                return (
-                  <div className="p-3 bg-amber-50 rounded-2xl border border-amber-200 flex items-center justify-between text-xs font-bold text-slate-800">
-                    <div>
-                      <p className="text-[10px] text-amber-800 font-semibold">Hasil Akhir Siswa:</p>
-                      <p className="text-sm font-black text-slate-950">
-                        Nilai: {res.nilaiAkhir !== null ? res.nilaiAkhir : '-'} (Predikat: {res.predikat})
-                      </p>
-                    </div>
-                    <div>
-                      {res.isFilled ? (
-                        <span className={`px-2.5 py-1 rounded-full text-xs font-black ${
-                          res.isTuntas ? 'bg-emerald-600 text-white' : 'bg-rose-600 text-white'
-                        }`}>
-                          {res.isTuntas ? 'Tuntas' : 'Belum Tuntas'}
-                        </span>
-                      ) : (
-                        <span className="text-slate-400 font-medium">Belum Lengkap</span>
-                      )}
-                    </div>
-                  </div>
-                );
-              })()}
-            </div>
-
-            {/* Navigation buttons: Prev & Next Student */}
-            <div className="flex items-center justify-between pt-3 border-t border-slate-100">
-              <button
-                type="button"
-                onClick={handlePrevStudent}
-                className="inline-flex items-center gap-1 px-3 py-2 rounded-xl border border-slate-300 text-xs font-bold text-slate-700 hover:bg-slate-50 transition"
-              >
-                <ChevronLeft className="w-4 h-4" />
-                <span>Sebelumnya</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  handleSave();
-                  setActiveStudentModal(null);
-                }}
-                className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs transition"
-              >
-                Selesai & Simpan
-              </button>
-
-              <button
-                type="button"
-                onClick={handleNextStudent}
-                className="inline-flex items-center gap-1 px-3 py-2 rounded-xl border border-slate-300 text-xs font-bold text-slate-700 hover:bg-slate-50 transition"
-              >
-                <span>Berikutnya</span>
-                <ChevronRight className="w-4 h-4" />
-              </button>
-            </div>
-
-          </div>
-        </div>
-      )}
-
-      {/* 7. BATCH FILL MODAL */}
+      {/* 6. BATCH FILL MODAL (Isi Cepat) */}
       {showBatchModal && (
         <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 no-print animate-fadeIn">
           <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 border border-slate-100">
