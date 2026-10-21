@@ -180,11 +180,11 @@ export default function App() {
   };
 
   const navItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, desc: 'Ringkasan kehadiran & statistik' },
-    { id: 'input', label: 'Input Absensi', icon: UserCheck, desc: 'Form absensi harian per kelas' },
-    { id: 'siswa', label: 'Data Siswa', icon: Users, desc: 'Kelola data siswa & import Excel' },
-    { id: 'laporan', label: 'Rekap & Laporan', icon: FileText, desc: 'Rekap bulanan & cetak PDF' },
-    { id: 'pengaturan', label: 'Pengaturan Sekolah', icon: Settings, desc: 'Identitas sekolah & backup data' },
+    { id: 'dashboard', label: 'Dashboard', shortLabel: 'Beranda', icon: LayoutDashboard, desc: 'Ringkasan kehadiran & statistik' },
+    { id: 'input', label: 'Input Absensi', shortLabel: 'Absensi', icon: UserCheck, desc: 'Form absensi harian per kelas' },
+    { id: 'siswa', label: 'Data Siswa', shortLabel: 'Siswa', icon: Users, desc: 'Kelola data siswa & import Excel' },
+    { id: 'laporan', label: 'Rekap & Laporan', shortLabel: 'Laporan', icon: FileText, desc: 'Rekap bulanan & cetak PDF' },
+    { id: 'pengaturan', label: 'Pengaturan Sekolah', shortLabel: 'Pengaturan', icon: Settings, desc: 'Identitas sekolah & backup data' },
   ];
 
   const activeNavItem = navItems.find(item => item.id === activeTab);
@@ -195,16 +195,21 @@ export default function App() {
       <header className="bg-emerald-900 text-white border-b border-emerald-800 sticky top-0 z-40 shadow-md no-print">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           
-          {/* Left: Hamburger & Logo */}
+          {/* Left: Hamburger (Desktop) & Logo / Title */}
           <div className="flex items-center gap-3">
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="p-2.5 rounded-xl bg-emerald-800/80 hover:bg-emerald-700 text-emerald-100 hover:text-white transition flex items-center justify-center border border-emerald-700/50 shadow-sm focus:outline-none"
+              className="hidden md:flex p-2.5 rounded-xl bg-emerald-800/80 hover:bg-emerald-700 text-emerald-100 hover:text-white transition items-center justify-center border border-emerald-700/50 shadow-sm focus:outline-none"
               title="Buka Navigasi Utama"
             >
               {isMenuOpen ? <X className="w-5 h-5 text-emerald-200" /> : <Menu className="w-5 h-5 text-emerald-200" />}
             </button>
             
+            {/* Mobile Brand Logo */}
+            <div className="bg-white/10 p-1 rounded-lg border border-white/20 flex items-center justify-center md:hidden flex-shrink-0 shadow-xs">
+              <img src="/logo.png" alt="Logo" className="w-7 h-7 object-contain drop-shadow-xs" />
+            </div>
+
             <div>
               <h1 className="font-bold text-base md:text-lg leading-tight tracking-tight text-emerald-50">
                 {schoolProfile.nama}
@@ -215,8 +220,8 @@ export default function App() {
             </div>
           </div>
 
-          {/* Right: School Logo */}
-          <div className="flex items-center gap-2.5">
+          {/* Right: School Logo (Desktop & Tablet) */}
+          <div className="hidden md:flex items-center gap-2.5">
             <div className="bg-white/10 p-1.5 rounded-xl border border-white/20 backdrop-blur-xs flex items-center justify-center shadow-xs">
               <img src="/logo.png" alt="Logo MTs Darussalam" className="w-7 h-7 object-contain drop-shadow-sm" />
             </div>
@@ -301,7 +306,7 @@ export default function App() {
       )}
 
       {/* Main Content Area - Full Width */}
-      <div className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-24 md:pb-6">
         <main className="w-full">
           {activeTab === 'dashboard' && (
             <Dashboard
@@ -431,9 +436,54 @@ export default function App() {
       )}
 
       {/* Footer (Hidden during print) */}
-      <footer className="bg-white border-t border-slate-200 mt-auto py-4 text-center text-xs text-slate-500 no-print">
+      <footer className="bg-white border-t border-slate-200 mt-auto py-4 text-center text-xs text-slate-500 no-print mb-16 md:mb-0">
         <p>© {new Date().getFullYear()} MTs Darussalam Ngesong Jombang. All Rights Reserved.</p>
       </footer>
+
+      {/* Mobile Bottom Navigation Bar (Docked at bottom of screen on mobile) */}
+      <nav 
+        className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200/90 shadow-[0_-4px_25px_rgba(0,0,0,0.08)] no-print"
+        style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
+        aria-label="Navigasi Utama Ponsel"
+      >
+        <div className="grid grid-cols-5 items-center h-16 max-w-lg mx-auto px-1">
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = activeTab === item.id;
+            return (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => handleSelectTab(item.id)}
+                className={`flex flex-col items-center justify-center py-1 px-0.5 transition-all duration-200 relative group ${
+                  isActive ? 'text-emerald-700' : 'text-slate-400 hover:text-slate-600'
+                }`}
+              >
+                {/* Active Indicator Top Pill */}
+                {isActive && (
+                  <span className="absolute top-0 w-8 h-1 bg-emerald-600 rounded-full" />
+                )}
+
+                <div className={`p-1.5 rounded-xl transition-all duration-200 ${
+                  isActive 
+                    ? 'bg-emerald-50 text-emerald-700 scale-105 shadow-xs' 
+                    : 'group-hover:bg-slate-50'
+                }`}>
+                  <Icon className="w-5 h-5" />
+                </div>
+
+                <span className={`text-[10px] leading-tight tracking-tight mt-0.5 transition-all ${
+                  isActive 
+                    ? 'font-bold text-emerald-800' 
+                    : 'font-medium text-slate-500'
+                }`}>
+                  {item.shortLabel || item.label}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </nav>
     </div>
   );
 }
