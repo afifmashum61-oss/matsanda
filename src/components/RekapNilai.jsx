@@ -16,11 +16,152 @@ import {
   Check,
   ChevronDown,
   Layers,
-  Info
+  Info,
+  Palette
 } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import { MATA_PELAJARAN_MTS } from '../data/initialData';
 import { getGrades, saveGradeForClassSubject } from '../utils/storage';
+
+// Curated Professional Color Themes
+const COLOR_THEMES = {
+  emerald: {
+    id: 'emerald',
+    name: 'Hijau Madrasah',
+    colorDot: 'bg-emerald-600',
+    accentBorder: 'border-emerald-500',
+    topIdentity: 'bg-slate-800 text-white border-slate-700',
+    topKd: 'bg-gradient-to-r from-emerald-800 via-emerald-700 to-teal-800 text-white border-emerald-900',
+    topSummary: 'bg-gradient-to-r from-amber-600 to-amber-700 text-white border-amber-800',
+    phHeaders: [
+      'bg-emerald-700 text-white border-emerald-800',
+      'bg-teal-700 text-white border-teal-800',
+      'bg-cyan-700 text-white border-cyan-800',
+      'bg-emerald-800 text-white border-emerald-900',
+    ],
+    summaryHeaders: {
+      rataKd3: 'bg-emerald-600 text-white border-emerald-700',
+      rataKd4: 'bg-teal-600 text-white border-teal-700',
+      nilaiAkhir: 'bg-amber-500 text-amber-950 font-black border-amber-600',
+      predikat: 'bg-emerald-700 text-white border-emerald-800',
+      keterangan: 'bg-slate-700 text-white border-slate-800',
+    },
+    subColumns: {
+      ph: 'bg-emerald-100 text-emerald-950 border-emerald-300 font-bold',
+      remidi: 'bg-amber-100 text-amber-950 border-amber-300 font-bold',
+      praktek: 'bg-sky-100 text-sky-950 border-sky-300 font-bold',
+      proyek: 'bg-indigo-100 text-indigo-950 border-indigo-300 font-bold',
+      porto: 'bg-purple-100 text-purple-950 border-purple-300 font-bold',
+    },
+    cellHighlight: {
+      kd3: 'bg-emerald-50/70 text-emerald-950 font-bold',
+      kd4: 'bg-teal-50/70 text-teal-950 font-bold',
+      akhir: 'bg-amber-100 text-amber-950 font-black',
+    }
+  },
+  ocean: {
+    id: 'ocean',
+    name: 'Biru Samudra',
+    colorDot: 'bg-blue-600',
+    accentBorder: 'border-blue-500',
+    topIdentity: 'bg-slate-900 text-white border-slate-800',
+    topKd: 'bg-gradient-to-r from-blue-900 via-indigo-800 to-cyan-800 text-white border-blue-950',
+    topSummary: 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white border-cyan-700',
+    phHeaders: [
+      'bg-blue-800 text-white border-blue-900',
+      'bg-cyan-700 text-white border-cyan-800',
+      'bg-sky-700 text-white border-sky-800',
+      'bg-indigo-800 text-white border-indigo-900',
+    ],
+    summaryHeaders: {
+      rataKd3: 'bg-blue-700 text-white border-blue-800',
+      rataKd4: 'bg-cyan-600 text-white border-cyan-700',
+      nilaiAkhir: 'bg-sky-400 text-slate-950 font-black border-sky-500',
+      predikat: 'bg-indigo-700 text-white border-indigo-800',
+      keterangan: 'bg-slate-800 text-white border-slate-900',
+    },
+    subColumns: {
+      ph: 'bg-blue-100 text-blue-950 border-blue-300 font-bold',
+      remidi: 'bg-amber-100 text-amber-950 border-amber-300 font-bold',
+      praktek: 'bg-cyan-100 text-cyan-950 border-cyan-300 font-bold',
+      proyek: 'bg-teal-100 text-teal-950 border-teal-300 font-bold',
+      porto: 'bg-sky-100 text-sky-950 border-sky-300 font-bold',
+    },
+    cellHighlight: {
+      kd3: 'bg-blue-50/70 text-blue-950 font-bold',
+      kd4: 'bg-cyan-50/70 text-cyan-950 font-bold',
+      akhir: 'bg-sky-100 text-sky-950 font-black',
+    }
+  },
+  royal: {
+    id: 'royal',
+    name: 'Ungu Elegan',
+    colorDot: 'bg-purple-600',
+    accentBorder: 'border-purple-500',
+    topIdentity: 'bg-slate-900 text-white border-slate-800',
+    topKd: 'bg-gradient-to-r from-purple-900 via-indigo-900 to-violet-800 text-white border-purple-950',
+    topSummary: 'bg-gradient-to-r from-fuchsia-600 to-purple-600 text-white border-fuchsia-700',
+    phHeaders: [
+      'bg-purple-800 text-white border-purple-900',
+      'bg-indigo-800 text-white border-indigo-900',
+      'bg-violet-800 text-white border-violet-900',
+      'bg-fuchsia-800 text-white border-fuchsia-900',
+    ],
+    summaryHeaders: {
+      rataKd3: 'bg-purple-700 text-white border-purple-800',
+      rataKd4: 'bg-indigo-600 text-white border-indigo-700',
+      nilaiAkhir: 'bg-amber-400 text-amber-950 font-black border-amber-500',
+      predikat: 'bg-violet-700 text-white border-violet-800',
+      keterangan: 'bg-slate-800 text-white border-slate-900',
+    },
+    subColumns: {
+      ph: 'bg-purple-100 text-purple-950 border-purple-300 font-bold',
+      remidi: 'bg-amber-100 text-amber-950 border-amber-300 font-bold',
+      praktek: 'bg-violet-100 text-violet-950 border-violet-300 font-bold',
+      proyek: 'bg-indigo-100 text-indigo-950 border-indigo-300 font-bold',
+      porto: 'bg-fuchsia-100 text-fuchsia-950 border-fuchsia-300 font-bold',
+    },
+    cellHighlight: {
+      kd3: 'bg-purple-50/70 text-purple-950 font-bold',
+      kd4: 'bg-violet-50/70 text-violet-950 font-bold',
+      akhir: 'bg-amber-100 text-amber-950 font-black',
+    }
+  },
+  sunset: {
+    id: 'sunset',
+    name: 'Sunset Coral',
+    colorDot: 'bg-orange-500',
+    accentBorder: 'border-orange-500',
+    topIdentity: 'bg-stone-900 text-white border-stone-800',
+    topKd: 'bg-gradient-to-r from-orange-700 via-amber-700 to-rose-700 text-white border-orange-800',
+    topSummary: 'bg-gradient-to-r from-rose-600 to-red-600 text-white border-rose-700',
+    phHeaders: [
+      'bg-orange-600 text-white border-orange-700',
+      'bg-amber-600 text-white border-amber-700',
+      'bg-rose-600 text-white border-rose-700',
+      'bg-red-700 text-white border-red-800',
+    ],
+    summaryHeaders: {
+      rataKd3: 'bg-orange-600 text-white border-orange-700',
+      rataKd4: 'bg-amber-600 text-white border-amber-700',
+      nilaiAkhir: 'bg-amber-300 text-amber-950 font-black border-amber-400',
+      predikat: 'bg-rose-600 text-white border-rose-700',
+      keterangan: 'bg-stone-800 text-white border-stone-900',
+    },
+    subColumns: {
+      ph: 'bg-orange-100 text-orange-950 border-orange-300 font-bold',
+      remidi: 'bg-rose-100 text-rose-950 border-rose-300 font-bold',
+      praktek: 'bg-amber-100 text-amber-950 border-amber-300 font-bold',
+      proyek: 'bg-yellow-100 text-yellow-950 border-yellow-300 font-bold',
+      porto: 'bg-teal-100 text-teal-950 border-teal-300 font-bold',
+    },
+    cellHighlight: {
+      kd3: 'bg-orange-50/70 text-orange-950 font-bold',
+      kd4: 'bg-amber-50/70 text-amber-950 font-bold',
+      akhir: 'bg-amber-100 text-amber-950 font-black',
+    }
+  }
+};
 
 export default function RekapNilai({ 
   classes, 
@@ -32,7 +173,7 @@ export default function RekapNilai({
   const [selectedClass, setSelectedClass] = useState(classes[0]?.id || '7A');
   const [selectedMapel, setSelectedMapel] = useState(MATA_PELAJARAN_MTS[0]?.id || 'QH');
   const [selectedSemester, setSelectedSemester] = useState(schoolProfile?.semester || 'Ganjil');
-  const [kdCount, setKdCount] = useState(2); // Default 2: PH 1 & PH 2 exactly matching the template
+  const [kdCount, setKdCount] = useState(2); // Default 2: PH 1 & PH 2
   const [kkm, setKkm] = useState(75);
   const [guruPengampu, setGuruPengampu] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
@@ -40,6 +181,18 @@ export default function RekapNilai({
   const [showBatchModal, setShowBatchModal] = useState(false);
   const [batchTarget, setBatchTarget] = useState('ph1_ph');
   const [batchScore, setBatchScore] = useState(80);
+
+  // Theme selection: defaults to 'emerald' (Hijau Madrasah)
+  const [activeThemeKey, setActiveThemeKey] = useState(() => {
+    return localStorage.getItem('mts_grade_theme') || 'emerald';
+  });
+
+  const currentTheme = COLOR_THEMES[activeThemeKey] || COLOR_THEMES.emerald;
+
+  const handleSelectTheme = (themeKey) => {
+    setActiveThemeKey(themeKey);
+    localStorage.setItem('mts_grade_theme', themeKey);
+  };
 
   // Current grade sheet document key: `${classId}_${mapelId}_${semester}`
   const docKey = `${selectedClass}_${selectedMapel}_${selectedSemester}`;
@@ -255,13 +408,12 @@ export default function RekapNilai({
     handleSave(updated);
   };
 
-  // Export to Excel with Multi-Level Merged Headers matching the image
+  // Export to Excel with Multi-Level Merged Headers matching the template
   const handleExportExcel = () => {
     const wb = XLSX.utils.book_new();
 
     // Prepare header rows
     const sheetData = [
-      // Title metadata
       [`MADRASAH TSANAWIYAH (MTs) DARUSSALAM NGESONG JOMBANG`],
       [`REKAPITULASI NILAI HASIL BELAJAR SISWA - TAHUN AJARAN ${schoolProfile?.tahunAjaran || '2026/2027'}`],
       [`Kelas: ${currentClassObj.nama}`, `Mata Pelajaran: ${currentMapelObj.nama}`, `Semester: ${selectedSemester}`, `KKM: ${kkm}`, `Guru: ${guruPengampu || '-'}`],
@@ -327,26 +479,15 @@ export default function RekapNilai({
 
     const ws = XLSX.utils.aoa_to_sheet(sheetData);
 
-    // Header Merges:
-    // r=4 (Top), r=5 (Sub), r=6 (Fields)
     const merges = [
-      // Title merges
       { s: { r: 0, c: 0 }, e: { r: 0, c: 4 + kdTotalCols + 4 } },
       { s: { r: 1, c: 0 }, e: { r: 1, c: 4 + kdTotalCols + 4 } },
-
-      // Identity columns (Row 4 to Row 6)
       { s: { r: 4, c: 0 }, e: { r: 6, c: 0 } }, // No
       { s: { r: 4, c: 1 }, e: { r: 6, c: 1 } }, // NIS
       { s: { r: 4, c: 2 }, e: { r: 6, c: 2 } }, // Nama Siswa
       { s: { r: 4, c: 3 }, e: { r: 6, c: 3 } }, // L/P
-
-      // Row 4: Kompetensi Dasar Pengetahuan dan Ketrampilan
-      { s: { r: 4, c: 4 }, e: { r: 4, c: 4 + kdTotalCols - 1 } },
-
-      // Row 4: Nilai Akhir overall header
-      { s: { r: 4, c: 4 + kdTotalCols }, e: { r: 4, c: 4 + kdTotalCols + 4 } },
-
-      // Row 5 & 6: Summary columns
+      { s: { r: 4, c: 4 }, e: { r: 4, c: 4 + kdTotalCols - 1 } }, // Kompetensi Dasar
+      { s: { r: 4, c: 4 + kdTotalCols }, e: { r: 4, c: 4 + kdTotalCols + 4 } }, // Nilai Akhir
       { s: { r: 5, c: 4 + kdTotalCols }, e: { r: 6, c: 4 + kdTotalCols } }, // Rata KD-3
       { s: { r: 5, c: 4 + kdTotalCols + 1 }, e: { r: 6, c: 4 + kdTotalCols + 1 } }, // Rata KD-4
       { s: { r: 5, c: 4 + kdTotalCols + 2 }, e: { r: 6, c: 4 + kdTotalCols + 2 } }, // Nilai Akhir
@@ -354,7 +495,6 @@ export default function RekapNilai({
       { s: { r: 5, c: 4 + kdTotalCols + 4 }, e: { r: 6, c: 4 + kdTotalCols + 4 } }, // Keterangan
     ];
 
-    // Penilaian Harian subheaders in Row 5
     for (let i = 0; i < kdCount; i++) {
       merges.push({
         s: { r: 5, c: 4 + (i * 5) },
@@ -364,12 +504,11 @@ export default function RekapNilai({
 
     ws['!merges'] = merges;
 
-    // Set Column Widths
     const colWidths = [
-      { wch: 5 },  // No
-      { wch: 10 }, // NIS
-      { wch: 28 }, // Nama
-      { wch: 6 },  // L/P
+      { wch: 5 },
+      { wch: 10 },
+      { wch: 28 },
+      { wch: 6 },
     ];
     for (let i = 0; i < kdTotalCols; i++) {
       colWidths.push({ wch: 9 });
@@ -399,13 +538,13 @@ export default function RekapNilai({
       <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-4 no-print">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-slate-100 pb-4">
           <div className="flex items-center gap-3">
-            <div className="p-3 bg-amber-50 text-amber-700 rounded-2xl border border-amber-200 shadow-xs">
+            <div className="p-3 bg-emerald-50 text-emerald-700 rounded-2xl border border-emerald-200 shadow-xs">
               <Award className="w-6 h-6" />
             </div>
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="text-xl font-black text-slate-900 tracking-tight">Rekapitulasi Nilai Siswa</h1>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#fcd5b4] text-amber-900 border border-amber-300">
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-xs">
                   Format Resmi MTs
                 </span>
               </div>
@@ -457,7 +596,7 @@ export default function RekapNilai({
 
             <button
               onClick={() => handleSave()}
-              className="inline-flex items-center gap-1.5 bg-amber-500 hover:bg-amber-600 text-white font-bold px-3.5 py-2 rounded-xl text-xs shadow-md transition"
+              className="inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3.5 py-2 rounded-xl text-xs shadow-md transition"
             >
               <Save className="w-4 h-4" />
               <span>Simpan</span>
@@ -556,9 +695,11 @@ export default function RekapNilai({
 
         </div>
 
-        {/* Secondary Info Bar: Guru Pengampu & Search */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2 border-t border-slate-100">
-          <div className="w-full sm:w-80">
+        {/* Secondary Info Bar: Guru Pengampu, Search & Theme Selector */}
+        <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3 pt-3 border-t border-slate-100">
+          
+          {/* Guru Pengampu */}
+          <div className="w-full lg:w-72">
             <label className="block text-[11px] font-bold text-slate-700 mb-1">Guru Pengampu</label>
             <input
               type="text"
@@ -572,7 +713,8 @@ export default function RekapNilai({
             />
           </div>
 
-          <div className="w-full sm:w-72">
+          {/* Search Siswa */}
+          <div className="w-full lg:w-64">
             <label className="block text-[11px] font-bold text-slate-700 mb-1">Cari Siswa</label>
             <div className="relative">
               <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
@@ -585,13 +727,43 @@ export default function RekapNilai({
               />
             </div>
           </div>
+
+          {/* Color Theme Selector Pills */}
+          <div className="w-full lg:w-auto">
+            <label className="block text-[11px] font-bold text-slate-700 mb-1 flex items-center gap-1.5">
+              <Palette className="w-3.5 h-3.5 text-emerald-600" />
+              <span>Tema Warna Tabel</span>
+            </label>
+            <div className="flex items-center gap-1.5 flex-wrap">
+              {Object.values(COLOR_THEMES).map((theme) => {
+                const isSelected = activeThemeKey === theme.id;
+                return (
+                  <button
+                    key={theme.id}
+                    type="button"
+                    onClick={() => handleSelectTheme(theme.id)}
+                    className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-semibold transition border ${
+                      isSelected
+                        ? 'bg-slate-900 text-white border-slate-900 shadow-xs'
+                        : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100 hover:text-slate-800'
+                    }`}
+                  >
+                    <span className={`w-2.5 h-2.5 rounded-full ${theme.colorDot}`} />
+                    <span>{theme.name}</span>
+                    {isSelected && <Check className="w-3 h-3 text-emerald-400" />}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
         </div>
 
       </div>
 
       {/* Statistics Cards (Hidden during print) */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 no-print">
-        <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs">
+        <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs border-t-4 border-t-slate-700">
           <p className="text-[11px] font-semibold text-slate-500">Total Siswa Kelas</p>
           <div className="flex items-baseline gap-2 mt-1">
             <p className="text-xl font-black text-slate-900">{statistics.totalStudents}</p>
@@ -599,7 +771,7 @@ export default function RekapNilai({
           </div>
         </div>
 
-        <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs">
+        <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs border-t-4 border-t-emerald-600">
           <p className="text-[11px] font-semibold text-slate-500">Rata-rata Nilai Kelas</p>
           <div className="flex items-baseline gap-2 mt-1">
             <p className="text-xl font-black text-emerald-600">{statistics.average}</p>
@@ -607,7 +779,7 @@ export default function RekapNilai({
           </div>
         </div>
 
-        <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs">
+        <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs border-t-4 border-t-blue-600">
           <p className="text-[11px] font-semibold text-slate-500">Ketuntasan Belajar</p>
           <div className="flex items-baseline gap-2 mt-1">
             <p className="text-xl font-black text-blue-600">{statistics.tuntasPercent}%</p>
@@ -615,7 +787,7 @@ export default function RekapNilai({
           </div>
         </div>
 
-        <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs">
+        <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs border-t-4 border-t-amber-500">
           <p className="text-[11px] font-semibold text-slate-500">Nilai Tertinggi / Terendah</p>
           <div className="flex items-baseline gap-2 mt-1">
             <p className="text-lg font-black text-slate-900">{statistics.highest}</p>
@@ -659,14 +831,14 @@ export default function RekapNilai({
         </div>
 
         {/* Informative helper for user on desktop/mobile */}
-        <div className="px-5 py-2.5 bg-amber-50/50 border-b border-amber-100 flex items-center justify-between no-print text-[11px] text-amber-900">
+        <div className="px-5 py-2.5 bg-gradient-to-r from-emerald-50 via-teal-50/50 to-sky-50/50 border-b border-emerald-100 flex items-center justify-between no-print text-[11px] text-slate-800">
           <div className="flex items-center gap-2">
-            <Info className="w-4 h-4 text-amber-600 flex-shrink-0" />
+            <Info className="w-4 h-4 text-emerald-600 flex-shrink-0" />
             <span>
               Tabel otomatis menghitung <strong>Rata KD-3</strong> (Pengetahuan PH/Remidi), <strong>Rata KD-4</strong> (Ketrampilan Praktek/Proyek/Porto), dan <strong>Nilai Akhir</strong>. Nilai tersimpan realtime.
             </span>
           </div>
-          <span className="hidden sm:inline font-semibold text-amber-700">
+          <span className="hidden sm:inline font-bold text-emerald-800">
             {currentClassObj.nama} • {currentMapelObj.nama}
           </span>
         </div>
@@ -675,83 +847,85 @@ export default function RekapNilai({
         <div className="overflow-x-auto">
           <table className="w-full text-xs border-collapse text-center">
             
-            {/* Table Header matching the uploaded image exactly */}
+            {/* Table Header with Modern, High-Contrast Harmonious Theme */}
             <thead>
               {/* Row 1: Top Header */}
-              <tr className="bg-[#fcd5b4] text-slate-900 font-bold border border-slate-600">
-                <th rowSpan={3} className="border border-slate-600 px-2 py-2 min-w-[36px] bg-[#fcd5b4]">
+              <tr className="border-b border-slate-400">
+                <th rowSpan={3} className={`border border-slate-600 px-2 py-2 min-w-[36px] font-black ${currentTheme.topIdentity}`}>
                   No
                 </th>
-                <th rowSpan={3} className="border border-slate-600 px-2 py-2 min-w-[80px] bg-[#fcd5b4]">
+                <th rowSpan={3} className={`border border-slate-600 px-2 py-2 min-w-[80px] font-black ${currentTheme.topIdentity}`}>
                   NIS
                 </th>
-                <th rowSpan={3} className="border border-slate-600 px-3 py-2 min-w-[190px] text-left bg-[#fcd5b4]">
+                <th rowSpan={3} className={`border border-slate-600 px-3 py-2 min-w-[190px] text-left font-black ${currentTheme.topIdentity}`}>
                   Nama Siswa
                 </th>
-                <th rowSpan={3} className="border border-slate-600 px-1.5 py-2 min-w-[36px] bg-[#fcd5b4]">
+                <th rowSpan={3} className={`border border-slate-600 px-1.5 py-2 min-w-[36px] font-black ${currentTheme.topIdentity}`}>
                   L/P
                 </th>
                 <th 
                   colSpan={5 * kdCount} 
-                  className="border border-slate-600 py-2.5 text-sm uppercase tracking-wide bg-[#fcd5b4] text-slate-950 font-black"
+                  className={`border border-slate-700 py-2.5 text-sm uppercase tracking-wider font-black shadow-inner ${currentTheme.topKd}`}
                 >
                   Kompetensi Dasar Pengetahuan dan Ketrampilan
                 </th>
                 <th 
                   colSpan={5} 
-                  className="border border-slate-600 py-2.5 text-xs uppercase tracking-wide bg-[#fcd5b4] text-slate-950 font-black"
+                  className={`border border-slate-700 py-2.5 text-xs uppercase tracking-wider font-black shadow-inner ${currentTheme.topSummary}`}
                 >
                   Rekapitulasi Nilai Akhir
                 </th>
               </tr>
 
               {/* Row 2: Penilaian Harian Subheaders */}
-              <tr className="bg-[#fcd5b4] text-slate-900 font-bold border border-slate-600">
+              <tr>
                 {Array.from({ length: kdCount }, (_, i) => (
                   <th 
                     key={i} 
                     colSpan={5} 
-                    className="border border-slate-600 py-2 text-xs font-extrabold bg-[#fcd5b4]"
+                    className={`border border-slate-600 py-2 text-xs font-black uppercase tracking-wide ${
+                      currentTheme.phHeaders[i % currentTheme.phHeaders.length]
+                    }`}
                   >
                     Penilaian Harian {i + 1}
                   </th>
                 ))}
                 
                 {/* Summary columns spanning across remaining 2 rows */}
-                <th rowSpan={2} className="border border-slate-600 px-2 py-2 min-w-[55px] bg-[#fcd5b4] font-bold">
+                <th rowSpan={2} className={`border border-slate-600 px-2 py-2 min-w-[55px] font-bold ${currentTheme.summaryHeaders.rataKd3}`}>
                   Rata KD-3
                 </th>
-                <th rowSpan={2} className="border border-slate-600 px-2 py-2 min-w-[55px] bg-[#fcd5b4] font-bold">
+                <th rowSpan={2} className={`border border-slate-600 px-2 py-2 min-w-[55px] font-bold ${currentTheme.summaryHeaders.rataKd4}`}>
                   Rata KD-4
                 </th>
-                <th rowSpan={2} className="border border-slate-600 px-2 py-2 min-w-[58px] bg-[#fcd5b4] font-black text-slate-950">
+                <th rowSpan={2} className={`border border-slate-600 px-2 py-2 min-w-[58px] font-black text-slate-950 ${currentTheme.summaryHeaders.nilaiAkhir}`}>
                   Nilai Akhir
                 </th>
-                <th rowSpan={2} className="border border-slate-600 px-2 py-2 min-w-[48px] bg-[#fcd5b4] font-bold">
+                <th rowSpan={2} className={`border border-slate-600 px-2 py-2 min-w-[48px] font-bold ${currentTheme.summaryHeaders.predikat}`}>
                   Predikat
                 </th>
-                <th rowSpan={2} className="border border-slate-600 px-2 py-2 min-w-[75px] bg-[#fcd5b4] font-bold">
+                <th rowSpan={2} className={`border border-slate-600 px-2 py-2 min-w-[75px] font-bold ${currentTheme.summaryHeaders.keterangan}`}>
                   Keterangan
                 </th>
               </tr>
 
               {/* Row 3: Sub-columns (PH, Remidi, Praktek, Proyek, Porto F) */}
-              <tr className="bg-[#fcd5b4] text-slate-900 font-bold border border-slate-600">
+              <tr>
                 {Array.from({ length: kdCount }, (_, i) => (
                   <React.Fragment key={i}>
-                    <th className="border border-slate-600 px-2 py-1.5 min-w-[50px] bg-[#fcd5b4] text-[11px] font-bold">
+                    <th className={`border border-slate-400 px-2 py-1.5 min-w-[50px] text-[11px] ${currentTheme.subColumns.ph}`}>
                       PH
                     </th>
-                    <th className="border border-slate-600 px-2 py-1.5 min-w-[50px] bg-[#fcd5b4] text-[11px] font-bold">
+                    <th className={`border border-slate-400 px-2 py-1.5 min-w-[50px] text-[11px] ${currentTheme.subColumns.remidi}`}>
                       Remidi
                     </th>
-                    <th className="border border-slate-600 px-2 py-1.5 min-w-[50px] bg-[#fcd5b4] text-[11px] font-bold">
+                    <th className={`border border-slate-400 px-2 py-1.5 min-w-[50px] text-[11px] ${currentTheme.subColumns.praktek}`}>
                       Praktek
                     </th>
-                    <th className="border border-slate-600 px-2 py-1.5 min-w-[50px] bg-[#fcd5b4] text-[11px] font-bold">
+                    <th className={`border border-slate-400 px-2 py-1.5 min-w-[50px] text-[11px] ${currentTheme.subColumns.proyek}`}>
                       Proyek
                     </th>
-                    <th className="border border-slate-600 px-2 py-1.5 min-w-[50px] bg-[#fcd5b4] text-[11px] font-bold">
+                    <th className={`border border-slate-400 px-2 py-1.5 min-w-[50px] text-[11px] ${currentTheme.subColumns.porto}`}>
                       Porto F
                     </th>
                   </React.Fragment>
@@ -775,7 +949,7 @@ export default function RekapNilai({
                   return (
                     <tr 
                       key={student.id} 
-                      className={`hover:bg-amber-50/40 transition-colors ${idx % 2 === 1 ? 'bg-slate-50/60' : 'bg-white'}`}
+                      className={`hover:bg-emerald-50/40 transition-colors ${idx % 2 === 1 ? 'bg-slate-50/70' : 'bg-white'}`}
                     >
                       {/* Identity Cells */}
                       <td className="border border-slate-300 px-2 py-1 text-slate-600 font-medium">
@@ -813,7 +987,7 @@ export default function RekapNilai({
                             </td>
 
                             {/* Remidi */}
-                            <td className="border border-slate-300 p-0.5 bg-amber-50/30">
+                            <td className="border border-slate-300 p-0.5 bg-amber-50/20">
                               <input
                                 type="number"
                                 inputMode="numeric"
@@ -822,7 +996,7 @@ export default function RekapNilai({
                                 value={kd.remidi !== undefined ? kd.remidi : ''}
                                 onChange={(e) => handleScoreChange(student.id, kdKey, 'remidi', e.target.value)}
                                 className={`w-full text-center py-1.5 px-0.5 font-bold rounded text-xs focus:ring-2 focus:ring-amber-500 focus:outline-none ${
-                                  kd.remidi ? 'text-amber-700 bg-amber-100/60' : 'text-slate-400 bg-transparent'
+                                  kd.remidi ? 'text-amber-800 bg-amber-100/80 border border-amber-300' : 'text-slate-400 bg-transparent'
                                 }`}
                                 placeholder="-"
                               />
@@ -837,7 +1011,7 @@ export default function RekapNilai({
                                 max="100"
                                 value={kd.praktek !== undefined ? kd.praktek : ''}
                                 onChange={(e) => handleScoreChange(student.id, kdKey, 'praktek', e.target.value)}
-                                className="w-full text-center py-1.5 px-0.5 font-semibold text-slate-900 bg-transparent focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none rounded text-xs"
+                                className="w-full text-center py-1.5 px-0.5 font-semibold text-slate-900 bg-transparent focus:bg-white focus:ring-2 focus:ring-sky-500 focus:outline-none rounded text-xs"
                                 placeholder="-"
                               />
                             </td>
@@ -851,7 +1025,7 @@ export default function RekapNilai({
                                 max="100"
                                 value={kd.proyek !== undefined ? kd.proyek : ''}
                                 onChange={(e) => handleScoreChange(student.id, kdKey, 'proyek', e.target.value)}
-                                className="w-full text-center py-1.5 px-0.5 font-semibold text-slate-900 bg-transparent focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none rounded text-xs"
+                                className="w-full text-center py-1.5 px-0.5 font-semibold text-slate-900 bg-transparent focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none rounded text-xs"
                                 placeholder="-"
                               />
                             </td>
@@ -865,7 +1039,7 @@ export default function RekapNilai({
                                 max="100"
                                 value={kd.porto !== undefined ? kd.porto : ''}
                                 onChange={(e) => handleScoreChange(student.id, kdKey, 'porto', e.target.value)}
-                                className="w-full text-center py-1.5 px-0.5 font-semibold text-slate-900 bg-transparent focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none rounded text-xs"
+                                className="w-full text-center py-1.5 px-0.5 font-semibold text-slate-900 bg-transparent focus:bg-white focus:ring-2 focus:ring-purple-500 focus:outline-none rounded text-xs"
                                 placeholder="-"
                               />
                             </td>
@@ -873,23 +1047,23 @@ export default function RekapNilai({
                         );
                       })}
 
-                      {/* Summary Calculated Results */}
-                      <td className="border border-slate-300 px-2 py-1 font-bold text-slate-800 bg-slate-50/50">
+                      {/* Summary Calculated Results with Highlight Tinting */}
+                      <td className={`border border-slate-300 px-2 py-1 font-bold ${currentTheme.cellHighlight.kd3}`}>
                         {res.rataKD3 !== null ? res.rataKD3 : '-'}
                       </td>
-                      <td className="border border-slate-300 px-2 py-1 font-bold text-slate-800 bg-slate-50/50">
+                      <td className={`border border-slate-300 px-2 py-1 font-bold ${currentTheme.cellHighlight.kd4}`}>
                         {res.rataKD4 !== null ? res.rataKD4 : '-'}
                       </td>
-                      <td className="border border-slate-300 px-2 py-1 font-black text-slate-950 bg-amber-50/50 text-sm">
+                      <td className={`border border-slate-300 px-2 py-1 font-black text-slate-950 text-sm ${currentTheme.cellHighlight.akhir}`}>
                         {res.nilaiAkhir !== null ? res.nilaiAkhir : '-'}
                       </td>
                       <td className="border border-slate-300 px-1.5 py-1 font-extrabold">
                         {res.predikat !== '-' ? (
-                          <span className={`inline-block px-1.5 py-0.5 rounded text-[11px] ${
-                            res.predikat === 'A' ? 'bg-emerald-100 text-emerald-800' :
-                            res.predikat === 'B' ? 'bg-blue-100 text-blue-800' :
-                            res.predikat === 'C' ? 'bg-amber-100 text-amber-800' :
-                            'bg-rose-100 text-rose-800'
+                          <span className={`inline-block px-2 py-0.5 rounded text-xs font-black shadow-2xs ${
+                            res.predikat === 'A' ? 'bg-emerald-600 text-white' :
+                            res.predikat === 'B' ? 'bg-blue-600 text-white' :
+                            res.predikat === 'C' ? 'bg-amber-500 text-slate-950' :
+                            'bg-rose-600 text-white'
                           }`}>
                             {res.predikat}
                           </span>
@@ -897,8 +1071,10 @@ export default function RekapNilai({
                       </td>
                       <td className="border border-slate-300 px-1.5 py-1 font-bold text-[11px]">
                         {res.isFilled ? (
-                          <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] ${
-                            res.isTuntas ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'
+                          <span className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
+                            res.isTuntas 
+                              ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' 
+                              : 'bg-rose-100 text-rose-800 border border-rose-300'
                           }`}>
                             {res.isTuntas ? 'Tuntas' : 'Belum'}
                           </span>
@@ -1007,7 +1183,7 @@ export default function RekapNilai({
               <button
                 type="button"
                 onClick={applyBatchFill}
-                className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold shadow-md transition"
+                className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-md transition"
               >
                 Terapkan Nilai
               </button>
