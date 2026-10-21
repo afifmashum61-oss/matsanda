@@ -4,161 +4,50 @@ import {
   Printer, 
   Save, 
   CheckCircle, 
-  AlertCircle, 
   Award, 
-  SlidersHorizontal,
   Sparkles, 
   RefreshCw,
   Search,
-  Check,
-  ChevronDown,
-  ChevronUp,
-  ChevronLeft,
-  ChevronRight,
   MoreVertical,
   X,
   User,
-  Layers,
-  Palette,
-  Eye
+  Eye,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import { MATA_PELAJARAN_MTS } from '../data/initialData';
 import { getGrades, saveGradeForClassSubject } from '../utils/storage';
 
-// Curated Professional Color Themes
-const COLOR_THEMES = {
-  emerald: {
-    id: 'emerald',
-    name: 'Hijau Madrasah',
-    colorDot: 'bg-emerald-600',
-    topIdentity: 'bg-slate-800 text-white border-slate-700',
-    topKd: 'bg-gradient-to-r from-emerald-800 via-emerald-700 to-teal-800 text-white border-emerald-900',
-    topSummary: 'bg-gradient-to-r from-amber-600 to-amber-700 text-white border-amber-800',
-    phHeaders: [
-      'bg-emerald-700 text-white border-emerald-800',
-      'bg-teal-700 text-white border-teal-800',
-      'bg-cyan-700 text-white border-cyan-800',
-      'bg-emerald-800 text-white border-emerald-900',
-    ],
-    summaryHeaders: {
-      rataKd3: 'bg-emerald-600 text-white border-emerald-700',
-      rataKd4: 'bg-teal-600 text-white border-teal-700',
-      nilaiAkhir: 'bg-amber-500 text-amber-950 font-black border-amber-600',
-      predikat: 'bg-emerald-700 text-white border-emerald-800',
-      keterangan: 'bg-slate-700 text-white border-slate-800',
-    },
-    subColumns: {
-      ph: 'bg-emerald-100 text-emerald-950 border-emerald-300 font-bold',
-      remidi: 'bg-amber-100 text-amber-950 border-amber-300 font-bold',
-      praktek: 'bg-sky-100 text-sky-950 border-sky-300 font-bold',
-      proyek: 'bg-indigo-100 text-indigo-950 border-indigo-300 font-bold',
-      porto: 'bg-purple-100 text-purple-950 border-purple-300 font-bold',
-    },
-    cellHighlight: {
-      kd3: 'bg-emerald-50/70 text-emerald-950 font-bold',
-      kd4: 'bg-teal-50/70 text-teal-950 font-bold',
-      akhir: 'bg-amber-100 text-amber-950 font-black',
-    }
+// Fixed Theme: Hijau Madrasah (Official Matsanda Theme)
+const THEME_HIJAU_MADRASAH = {
+  topIdentity: 'bg-slate-800 text-white border-slate-700',
+  topKd: 'bg-gradient-to-r from-emerald-800 via-emerald-700 to-teal-800 text-white border-emerald-900',
+  topSummary: 'bg-gradient-to-r from-amber-600 to-amber-700 text-white border-amber-800',
+  phHeaders: [
+    'bg-emerald-700 text-white border-emerald-800',
+    'bg-teal-700 text-white border-teal-800',
+    'bg-cyan-700 text-white border-cyan-800',
+    'bg-emerald-800 text-white border-emerald-900',
+  ],
+  summaryHeaders: {
+    rataKd3: 'bg-emerald-600 text-white border-emerald-700',
+    rataKd4: 'bg-teal-600 text-white border-teal-700',
+    nilaiAkhir: 'bg-amber-500 text-amber-950 font-black border-amber-600',
+    predikat: 'bg-emerald-700 text-white border-emerald-800',
+    keterangan: 'bg-slate-700 text-white border-slate-800',
   },
-  ocean: {
-    id: 'ocean',
-    name: 'Biru Samudra',
-    colorDot: 'bg-blue-600',
-    topIdentity: 'bg-slate-900 text-white border-slate-800',
-    topKd: 'bg-gradient-to-r from-blue-900 via-indigo-800 to-cyan-800 text-white border-blue-950',
-    topSummary: 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white border-cyan-700',
-    phHeaders: [
-      'bg-blue-800 text-white border-blue-900',
-      'bg-cyan-700 text-white border-cyan-800',
-      'bg-sky-700 text-white border-sky-800',
-      'bg-indigo-800 text-white border-indigo-900',
-    ],
-    summaryHeaders: {
-      rataKd3: 'bg-blue-700 text-white border-blue-800',
-      rataKd4: 'bg-cyan-600 text-white border-cyan-700',
-      nilaiAkhir: 'bg-sky-400 text-slate-950 font-black border-sky-500',
-      predikat: 'bg-indigo-700 text-white border-indigo-800',
-      keterangan: 'bg-slate-800 text-white border-slate-900',
-    },
-    subColumns: {
-      ph: 'bg-blue-100 text-blue-950 border-blue-300 font-bold',
-      remidi: 'bg-amber-100 text-amber-950 border-amber-300 font-bold',
-      praktek: 'bg-cyan-100 text-cyan-950 border-cyan-300 font-bold',
-      proyek: 'bg-teal-100 text-teal-950 border-teal-300 font-bold',
-      porto: 'bg-sky-100 text-sky-950 border-sky-300 font-bold',
-    },
-    cellHighlight: {
-      kd3: 'bg-blue-50/70 text-blue-950 font-bold',
-      kd4: 'bg-cyan-50/70 text-cyan-950 font-bold',
-      akhir: 'bg-sky-100 text-sky-950 font-black',
-    }
+  subColumns: {
+    ph: 'bg-emerald-100 text-emerald-950 border-emerald-300 font-bold',
+    remidi: 'bg-amber-100 text-amber-950 border-amber-300 font-bold',
+    praktek: 'bg-sky-100 text-sky-950 border-sky-300 font-bold',
+    proyek: 'bg-indigo-100 text-indigo-950 border-indigo-300 font-bold',
+    porto: 'bg-purple-100 text-purple-950 border-purple-300 font-bold',
   },
-  royal: {
-    id: 'royal',
-    name: 'Ungu Elegan',
-    colorDot: 'bg-purple-600',
-    topIdentity: 'bg-slate-900 text-white border-slate-800',
-    topKd: 'bg-gradient-to-r from-purple-900 via-indigo-900 to-violet-800 text-white border-purple-950',
-    topSummary: 'bg-gradient-to-r from-fuchsia-600 to-purple-600 text-white border-fuchsia-700',
-    phHeaders: [
-      'bg-purple-800 text-white border-purple-900',
-      'bg-indigo-800 text-white border-indigo-900',
-      'bg-violet-800 text-white border-violet-900',
-      'bg-fuchsia-800 text-white border-fuchsia-900',
-    ],
-    summaryHeaders: {
-      rataKd3: 'bg-purple-700 text-white border-purple-800',
-      rataKd4: 'bg-indigo-600 text-white border-indigo-700',
-      nilaiAkhir: 'bg-amber-400 text-amber-950 font-black border-amber-500',
-      predikat: 'bg-violet-700 text-white border-violet-800',
-      keterangan: 'bg-slate-800 text-white border-slate-900',
-    },
-    subColumns: {
-      ph: 'bg-purple-100 text-purple-950 border-purple-300 font-bold',
-      remidi: 'bg-amber-100 text-amber-950 border-amber-300 font-bold',
-      praktek: 'bg-violet-100 text-violet-950 border-violet-300 font-bold',
-      proyek: 'bg-indigo-100 text-indigo-950 border-indigo-300 font-bold',
-      porto: 'bg-fuchsia-100 text-fuchsia-950 border-fuchsia-300 font-bold',
-    },
-    cellHighlight: {
-      kd3: 'bg-purple-50/70 text-purple-950 font-bold',
-      kd4: 'bg-violet-50/70 text-violet-950 font-bold',
-      akhir: 'bg-amber-100 text-amber-950 font-black',
-    }
-  },
-  sunset: {
-    id: 'sunset',
-    name: 'Sunset Coral',
-    colorDot: 'bg-orange-500',
-    topIdentity: 'bg-stone-900 text-white border-stone-800',
-    topKd: 'bg-gradient-to-r from-orange-700 via-amber-700 to-rose-700 text-white border-orange-800',
-    topSummary: 'bg-gradient-to-r from-rose-600 to-red-600 text-white border-rose-700',
-    phHeaders: [
-      'bg-orange-600 text-white border-orange-700',
-      'bg-amber-600 text-white border-amber-700',
-      'bg-rose-600 text-white border-rose-700',
-      'bg-red-700 text-white border-red-800',
-    ],
-    summaryHeaders: {
-      rataKd3: 'bg-orange-600 text-white border-orange-700',
-      rataKd4: 'bg-amber-600 text-white border-amber-700',
-      nilaiAkhir: 'bg-amber-300 text-amber-950 font-black border-amber-400',
-      predikat: 'bg-rose-600 text-white border-rose-700',
-      keterangan: 'bg-stone-800 text-white border-stone-900',
-    },
-    subColumns: {
-      ph: 'bg-orange-100 text-orange-950 border-orange-300 font-bold',
-      remidi: 'bg-rose-100 text-rose-950 border-rose-300 font-bold',
-      praktek: 'bg-amber-100 text-amber-950 border-amber-300 font-bold',
-      proyek: 'bg-yellow-100 text-yellow-950 border-yellow-300 font-bold',
-      porto: 'bg-teal-100 text-teal-950 border-teal-300 font-bold',
-    },
-    cellHighlight: {
-      kd3: 'bg-orange-50/70 text-orange-950 font-bold',
-      kd4: 'bg-amber-50/70 text-amber-950 font-bold',
-      akhir: 'bg-amber-100 text-amber-950 font-black',
-    }
+  cellHighlight: {
+    kd3: 'bg-emerald-50/70 text-emerald-950 font-bold',
+    kd4: 'bg-teal-50/70 text-teal-950 font-bold',
+    akhir: 'bg-amber-100 text-amber-950 font-black',
   }
 };
 
@@ -172,33 +61,21 @@ export default function RekapNilai({
   const [selectedClass, setSelectedClass] = useState(classes[0]?.id || '7A');
   const [selectedMapel, setSelectedMapel] = useState(MATA_PELAJARAN_MTS[0]?.id || 'QH');
   const [selectedSemester, setSelectedSemester] = useState(schoolProfile?.semester || 'Ganjil');
-  const [kdCount, setKdCount] = useState(2); // Default 2: PH 1 & PH 2
+  const [kdCount, setKdCount] = useState(2); // Default 2 PH (sesuai format lampiran)
   const [kkm, setKkm] = useState(75);
   const [guruPengampu, setGuruPengampu] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [saveStatus, setSaveStatus] = useState(''); // 'saved' | 'saving' | 'dirty' | ''
   
-  // Mobile & Simplicity UX States
-  const [showSettings, setShowSettings] = useState(false);
+  // Mobile UX States
   const [showMoreActions, setShowMoreActions] = useState(false);
-  const [viewMode, setViewMode] = useState('all'); // 'all' | 'ph1' | 'ph2' | 'ph3' | 'final'
+  const [viewMode, setViewMode] = useState('all'); // 'all' | 'ph1' | 'ph2' | 'final'
   const [activeStudentModal, setActiveStudentModal] = useState(null);
 
   // Batch Fill Modal
   const [showBatchModal, setShowBatchModal] = useState(false);
   const [batchTarget, setBatchTarget] = useState('ph1_ph');
   const [batchScore, setBatchScore] = useState(80);
-
-  // Theme selection
-  const [activeThemeKey, setActiveThemeKey] = useState(() => {
-    return localStorage.getItem('mts_grade_theme') || 'emerald';
-  });
-  const currentTheme = COLOR_THEMES[activeThemeKey] || COLOR_THEMES.emerald;
-
-  const handleSelectTheme = (themeKey) => {
-    setActiveThemeKey(themeKey);
-    localStorage.setItem('mts_grade_theme', themeKey);
-  };
 
   // Current grade sheet document key: `${classId}_${mapelId}_${semester}`
   const docKey = `${selectedClass}_${selectedMapel}_${selectedSemester}`;
@@ -546,14 +423,12 @@ export default function RekapNilai({
   return (
     <div className="space-y-4">
       
-      {/* 1. SIMPLE & COMPACT TOP BAR (Optimized for Mobile Screens) */}
-      <div className="bg-white p-3.5 sm:p-4 rounded-2xl border border-slate-200 shadow-xs space-y-3 no-print">
+      {/* 1. SIMPLE & CLEAN TOP BAR */}
+      <div className="bg-white p-3 sm:p-4 rounded-2xl border border-slate-200 shadow-xs space-y-3 no-print">
         
-        {/* Row 1: Title, Quick Status & Action Buttons */}
+        {/* Title & Extra Actions Menu */}
         <div className="flex items-center justify-between gap-2">
-          
-          {/* Left: Compact Title & Badge */}
-          <div className="flex items-center gap-2 min-w-0">
+          <div className="flex items-center gap-2.5 min-w-0">
             <div className="p-2 bg-emerald-50 text-emerald-700 rounded-xl border border-emerald-200 flex-shrink-0">
               <Award className="w-5 h-5" />
             </div>
@@ -567,92 +442,66 @@ export default function RekapNilai({
             </div>
           </div>
 
-          {/* Right: Cloud Status & Quick Buttons */}
-          <div className="flex items-center gap-1.5 flex-shrink-0">
-            {saveStatus === 'saving' && (
-              <span className="hidden sm:inline-flex items-center gap-1 text-[11px] text-amber-600 bg-amber-50 px-2 py-1 rounded-lg border border-amber-200 font-semibold">
-                <RefreshCw className="w-3 h-3 animate-spin" />
-                Simpan...
-              </span>
-            )}
-            {saveStatus === 'saved' && (
-              <span className="hidden sm:inline-flex items-center gap-1 text-[11px] text-emerald-600 bg-emerald-50 px-2 py-1 rounded-lg border border-emerald-200 font-semibold">
-                <CheckCircle className="w-3 h-3" />
-                Tersimpan
-              </span>
-            )}
-
-            {/* Quick Save Button */}
+          {/* Quick Extra Menu (Export Excel, Cetak PDF, Isi Cepat) */}
+          <div className="relative">
             <button
-              onClick={() => handleSave()}
-              className="inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-1.5 rounded-xl text-xs shadow-xs transition active:scale-95"
+              type="button"
+              onClick={() => setShowMoreActions(!showMoreActions)}
+              className="p-2 text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-xl border border-slate-200 transition flex items-center gap-1 text-xs font-semibold"
+              title="Menu Tambahan"
             >
-              <Save className="w-4 h-4" />
-              <span>Simpan</span>
+              <MoreVertical className="w-4 h-4" />
+              <span className="hidden sm:inline">Menu Lainnya</span>
             </button>
 
-            {/* More Actions Dropdown Menu (Export, Cetak, Isi Cepat) */}
-            <div className="relative">
-              <button
-                type="button"
-                onClick={() => setShowMoreActions(!showMoreActions)}
-                className="p-1.5 text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-xl border border-slate-200 transition"
-                title="Aksi Tambahan"
-              >
-                <MoreVertical className="w-4 h-4" />
-              </button>
-
-              {showMoreActions && (
-                <>
-                  <div className="fixed inset-0 z-30" onClick={() => setShowMoreActions(false)} />
-                  <div className="absolute right-0 top-full mt-1.5 w-48 bg-white rounded-2xl shadow-xl border border-slate-200 py-1.5 z-40 text-xs animate-fadeIn">
-                    <button
-                      onClick={() => {
-                        setShowBatchModal(true);
-                        setShowMoreActions(false);
-                      }}
-                      className="w-full flex items-center gap-2.5 px-3.5 py-2 text-slate-700 hover:bg-amber-50 hover:text-amber-800 text-left font-medium"
-                    >
-                      <Sparkles className="w-4 h-4 text-amber-600" />
-                      <span>Isi Nilai Cepat</span>
-                    </button>
-                    <button
-                      onClick={() => {
-                        handleExportExcel();
-                        setShowMoreActions(false);
-                      }}
-                      className="w-full flex items-center gap-2.5 px-3.5 py-2 text-slate-700 hover:bg-emerald-50 hover:text-emerald-800 text-left font-medium"
-                    >
-                      <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
-                      <span>Export Excel (.xlsx)</span>
-                    </button>
-                    <button
-                      onClick={() => {
-                        window.print();
-                        setShowMoreActions(false);
-                      }}
-                      className="w-full flex items-center gap-2.5 px-3.5 py-2 text-slate-700 hover:bg-blue-50 hover:text-blue-800 text-left font-medium border-t border-slate-100"
-                    >
-                      <Printer className="w-4 h-4 text-blue-600" />
-                      <span>Cetak / PDF Resmi</span>
-                    </button>
-                  </div>
-                </>
-              )}
-            </div>
-
+            {showMoreActions && (
+              <>
+                <div className="fixed inset-0 z-30" onClick={() => setShowMoreActions(false)} />
+                <div className="absolute right-0 top-full mt-1.5 w-48 bg-white rounded-2xl shadow-xl border border-slate-200 py-1.5 z-40 text-xs animate-fadeIn">
+                  <button
+                    onClick={() => {
+                      setShowBatchModal(true);
+                      setShowMoreActions(false);
+                    }}
+                    className="w-full flex items-center gap-2.5 px-3.5 py-2 text-slate-700 hover:bg-amber-50 hover:text-amber-800 text-left font-medium"
+                  >
+                    <Sparkles className="w-4 h-4 text-amber-600" />
+                    <span>Isi Nilai Cepat</span>
+                  </button>
+                  <button
+                    onClick={() => {
+                      handleExportExcel();
+                      setShowMoreActions(false);
+                    }}
+                    className="w-full flex items-center gap-2.5 px-3.5 py-2 text-slate-700 hover:bg-emerald-50 hover:text-emerald-800 text-left font-medium"
+                  >
+                    <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
+                    <span>Export Excel (.xlsx)</span>
+                  </button>
+                  <button
+                    onClick={() => {
+                      window.print();
+                      setShowMoreActions(false);
+                    }}
+                    className="w-full flex items-center gap-2.5 px-3.5 py-2 text-slate-700 hover:bg-blue-50 hover:text-blue-800 text-left font-medium border-t border-slate-100"
+                  >
+                    <Printer className="w-4 h-4 text-blue-600" />
+                    <span>Cetak / PDF Resmi</span>
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         </div>
 
-        {/* Row 2: Two Essential Dropdowns (Kelas & Mapel) + Settings Toggle */}
-        <div className="grid grid-cols-12 gap-2 pt-1">
-          
-          {/* Kelas Selector */}
-          <div className="col-span-4 sm:col-span-3">
+        {/* Essential Selectors: Kelas & Mata Pelajaran */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 border-t border-slate-100">
+          <div>
+            <label className="block text-[11px] font-bold text-slate-700 mb-1">Pilih Kelas</label>
             <select
               value={selectedClass}
               onChange={(e) => setSelectedClass(e.target.value)}
-              className="w-full bg-slate-50 border border-slate-300 rounded-xl px-2.5 py-2 text-xs font-bold text-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+              className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
             >
               {classes.map(c => (
                 <option key={c.id} value={c.id}>{c.nama}</option>
@@ -660,12 +509,12 @@ export default function RekapNilai({
             </select>
           </div>
 
-          {/* Mata Pelajaran Selector */}
-          <div className="col-span-8 sm:col-span-6">
+          <div>
+            <label className="block text-[11px] font-bold text-slate-700 mb-1">Pilih Mata Pelajaran</label>
             <select
               value={selectedMapel}
               onChange={(e) => setSelectedMapel(e.target.value)}
-              className="w-full bg-slate-50 border border-slate-300 rounded-xl px-2.5 py-2 text-xs font-bold text-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-none truncate"
+              className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-none truncate"
             >
               <optgroup label="Pendidikan Agama Islam (PAI)">
                 {MATA_PELAJARAN_MTS.filter(m => m.kelompok === 'PAI').map(m => (
@@ -684,125 +533,11 @@ export default function RekapNilai({
               </optgroup>
             </select>
           </div>
-
-          {/* Settings & Filter Toggle Button */}
-          <div className="col-span-12 sm:col-span-3 flex items-center justify-end">
-            <button
-              type="button"
-              onClick={() => setShowSettings(!showSettings)}
-              className={`w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition border ${
-                showSettings 
-                  ? 'bg-slate-900 text-white border-slate-900' 
-                  : 'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200'
-              }`}
-            >
-              <SlidersHorizontal className="w-3.5 h-3.5" />
-              <span>{showSettings ? 'Tutup Pengaturan' : 'Pengaturan & KKM'}</span>
-              {showSettings ? <ChevronUp className="w-3.5 h-3.5 ml-0.5" /> : <ChevronDown className="w-3.5 h-3.5 ml-0.5" />}
-            </button>
-          </div>
-
         </div>
-
-        {/* Collapsible Secondary Settings (KKM, Semester, Guru, Jumlah KD, Tema Warna) */}
-        {showSettings && (
-          <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200 space-y-3 pt-3 animate-fadeIn">
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-              
-              <div>
-                <label className="block text-[10px] font-bold text-slate-600 mb-1">KKM Mapel</label>
-                <input
-                  type="number"
-                  min="0"
-                  max="100"
-                  value={kkm}
-                  onChange={(e) => {
-                    setKkm(Number(e.target.value));
-                    setSaveStatus('dirty');
-                  }}
-                  className="w-full bg-white border border-slate-300 rounded-lg px-2 py-1.5 text-xs font-bold text-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
-                />
-              </div>
-
-              <div>
-                <label className="block text-[10px] font-bold text-slate-600 mb-1">Semester</label>
-                <select
-                  value={selectedSemester}
-                  onChange={(e) => setSelectedSemester(e.target.value)}
-                  className="w-full bg-white border border-slate-300 rounded-lg px-2 py-1.5 text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
-                >
-                  <option value="Ganjil">Semester Ganjil</option>
-                  <option value="Genap">Semester Genap</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-[10px] font-bold text-slate-600 mb-1">Jumlah KD / PH</label>
-                <select
-                  value={kdCount}
-                  onChange={(e) => {
-                    setKdCount(Number(e.target.value));
-                    setSaveStatus('dirty');
-                  }}
-                  className="w-full bg-white border border-slate-300 rounded-lg px-2 py-1.5 text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
-                >
-                  <option value={2}>2 PH (Standar)</option>
-                  <option value={3}>3 Penilaian Harian</option>
-                  <option value={4}>4 Penilaian Harian</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-[10px] font-bold text-slate-600 mb-1">Guru Pengampu</label>
-                <input
-                  type="text"
-                  placeholder="Nama Guru Mapel..."
-                  value={guruPengampu}
-                  onChange={(e) => {
-                    setGuruPengampu(e.target.value);
-                    setSaveStatus('dirty');
-                  }}
-                  className="w-full bg-white border border-slate-300 rounded-lg px-2 py-1.5 text-xs font-medium text-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
-                />
-              </div>
-
-            </div>
-
-            {/* Tema Warna Switcher */}
-            <div className="pt-2 border-t border-slate-200 flex items-center justify-between gap-2 flex-wrap">
-              <span className="text-[11px] font-bold text-slate-700 flex items-center gap-1.5">
-                <Palette className="w-3.5 h-3.5 text-emerald-600" />
-                Pilihan Tema Warna:
-              </span>
-              <div className="flex items-center gap-1.5 flex-wrap">
-                {Object.values(COLOR_THEMES).map((theme) => {
-                  const isSelected = activeThemeKey === theme.id;
-                  return (
-                    <button
-                      key={theme.id}
-                      type="button"
-                      onClick={() => handleSelectTheme(theme.id)}
-                      className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-lg text-[11px] font-bold transition border ${
-                        isSelected
-                          ? 'bg-slate-900 text-white border-slate-900 shadow-2xs'
-                          : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100'
-                      }`}
-                    >
-                      <span className={`w-2 h-2 rounded-full ${theme.colorDot}`} />
-                      <span>{theme.name}</span>
-                      {isSelected && <Check className="w-3 h-3 text-emerald-400" />}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-          </div>
-        )}
 
       </div>
 
-      {/* 2. COMPACT SUMMARY STRIP (1-Line Stat Chips instead of 4 big boxes) */}
+      {/* 2. COMPACT SUMMARY STATS (1-Line Chips) */}
       <div className="flex items-center gap-2 overflow-x-auto pb-1 no-print text-xs">
         <div className="inline-flex items-center gap-1.5 bg-white px-3 py-1.5 rounded-xl border border-slate-200 shadow-2xs font-semibold text-slate-700 flex-shrink-0">
           <span className="text-slate-400">Total:</span>
@@ -830,7 +565,7 @@ export default function RekapNilai({
         </div>
       </div>
 
-      {/* 3. MOBILE COLUMN FILTER TABS & SEARCH (Solves horizontal swiping frustration) */}
+      {/* 3. MOBILE COLUMN FILTER TABS & SEARCH */}
       <div className="bg-white p-2.5 sm:p-3 rounded-2xl border border-slate-200 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 no-print">
         
         {/* Column Tabs */}
@@ -898,7 +633,7 @@ export default function RekapNilai({
 
       </div>
 
-      {/* 4. MAIN GRADE LEDGER TABLE (Optimized with Sticky Name Column & Mobile Width) */}
+      {/* 4. MAIN GRADE LEDGER TABLE (Locked with Hijau Madrasah Theme) */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden print:border-none print:shadow-none print:p-0">
         
         {/* Printable Madrasah KOP (visible when printed) */}
@@ -935,24 +670,24 @@ export default function RekapNilai({
         <div className="overflow-x-auto relative">
           <table className="w-full text-xs border-collapse text-center">
             
-            {/* Table Header matching the template and active view mode */}
+            {/* Table Header matching the template locked in Hijau Madrasah theme */}
             <thead>
               {/* Row 1: Top Header */}
               <tr className="border-b border-slate-400">
-                <th rowSpan={3} className={`border border-slate-600 px-2 py-2 min-w-[34px] font-black ${currentTheme.topIdentity}`}>
+                <th rowSpan={3} className={`border border-slate-600 px-2 py-2 min-w-[34px] font-black ${THEME_HIJAU_MADRASAH.topIdentity}`}>
                   No
                 </th>
-                <th rowSpan={3} className={`border border-slate-600 px-2 py-2 min-w-[70px] font-black ${currentTheme.topIdentity}`}>
+                <th rowSpan={3} className={`border border-slate-600 px-2 py-2 min-w-[70px] font-black ${THEME_HIJAU_MADRASAH.topIdentity}`}>
                   NIS
                 </th>
                 {/* Frozen Sticky Nama Column on Mobile & Desktop */}
                 <th 
                   rowSpan={3} 
-                  className={`border border-slate-600 px-3 py-2 min-w-[170px] max-w-[220px] text-left font-black sticky left-0 z-20 shadow-sm ${currentTheme.topIdentity}`}
+                  className={`border border-slate-600 px-3 py-2 min-w-[170px] max-w-[220px] text-left font-black sticky left-0 z-20 shadow-sm ${THEME_HIJAU_MADRASAH.topIdentity}`}
                 >
                   Nama Siswa
                 </th>
-                <th rowSpan={3} className={`border border-slate-600 px-1.5 py-2 min-w-[32px] font-black ${currentTheme.topIdentity}`}>
+                <th rowSpan={3} className={`border border-slate-600 px-1.5 py-2 min-w-[32px] font-black ${THEME_HIJAU_MADRASAH.topIdentity}`}>
                   L/P
                 </th>
 
@@ -960,7 +695,7 @@ export default function RekapNilai({
                 {(viewMode === 'all' || viewMode === 'ph1' || viewMode === 'ph2') && (
                   <th 
                     colSpan={viewMode === 'all' ? (5 * kdCount) : 5} 
-                    className={`border border-slate-700 py-2 text-xs sm:text-sm uppercase tracking-wider font-black shadow-inner ${currentTheme.topKd}`}
+                    className={`border border-slate-700 py-2 text-xs sm:text-sm uppercase tracking-wider font-black shadow-inner ${THEME_HIJAU_MADRASAH.topKd}`}
                   >
                     Kompetensi Dasar Pengetahuan dan Ketrampilan
                   </th>
@@ -970,7 +705,7 @@ export default function RekapNilai({
                 {(viewMode === 'all' || viewMode === 'final') && (
                   <th 
                     colSpan={5} 
-                    className={`border border-slate-700 py-2 text-xs uppercase tracking-wider font-black shadow-inner ${currentTheme.topSummary}`}
+                    className={`border border-slate-700 py-2 text-xs uppercase tracking-wider font-black shadow-inner ${THEME_HIJAU_MADRASAH.topSummary}`}
                   >
                     Rekapitulasi Nilai Akhir
                   </th>
@@ -985,7 +720,7 @@ export default function RekapNilai({
                       key={i} 
                       colSpan={5} 
                       className={`border border-slate-600 py-1.5 text-xs font-black uppercase tracking-wide ${
-                        currentTheme.phHeaders[i % currentTheme.phHeaders.length]
+                        THEME_HIJAU_MADRASAH.phHeaders[i % THEME_HIJAU_MADRASAH.phHeaders.length]
                       }`}
                     >
                       Penilaian Harian {i + 1}
@@ -995,7 +730,7 @@ export default function RekapNilai({
                   <th 
                     colSpan={5} 
                     className={`border border-slate-600 py-1.5 text-xs font-black uppercase tracking-wide ${
-                      viewMode === 'ph1' ? currentTheme.phHeaders[0] : currentTheme.phHeaders[1]
+                      viewMode === 'ph1' ? THEME_HIJAU_MADRASAH.phHeaders[0] : THEME_HIJAU_MADRASAH.phHeaders[1]
                     }`}
                   >
                     {viewMode === 'ph1' ? 'Penilaian Harian 1' : 'Penilaian Harian 2'}
@@ -1005,19 +740,19 @@ export default function RekapNilai({
                 {/* Summary columns spanning across remaining 2 rows */}
                 {(viewMode === 'all' || viewMode === 'final') && (
                   <>
-                    <th rowSpan={2} className={`border border-slate-600 px-2 py-1.5 min-w-[50px] font-bold ${currentTheme.summaryHeaders.rataKd3}`}>
+                    <th rowSpan={2} className={`border border-slate-600 px-2 py-1.5 min-w-[50px] font-bold ${THEME_HIJAU_MADRASAH.summaryHeaders.rataKd3}`}>
                       Rata KD-3
                     </th>
-                    <th rowSpan={2} className={`border border-slate-600 px-2 py-1.5 min-w-[50px] font-bold ${currentTheme.summaryHeaders.rataKd4}`}>
+                    <th rowSpan={2} className={`border border-slate-600 px-2 py-1.5 min-w-[50px] font-bold ${THEME_HIJAU_MADRASAH.summaryHeaders.rataKd4}`}>
                       Rata KD-4
                     </th>
-                    <th rowSpan={2} className={`border border-slate-600 px-2 py-1.5 min-w-[55px] font-black text-slate-950 ${currentTheme.summaryHeaders.nilaiAkhir}`}>
+                    <th rowSpan={2} className={`border border-slate-600 px-2 py-1.5 min-w-[55px] font-black text-slate-950 ${THEME_HIJAU_MADRASAH.summaryHeaders.nilaiAkhir}`}>
                       Nilai Akhir
                     </th>
-                    <th rowSpan={2} className={`border border-slate-600 px-1.5 py-1.5 min-w-[44px] font-bold ${currentTheme.summaryHeaders.predikat}`}>
+                    <th rowSpan={2} className={`border border-slate-600 px-1.5 py-1.5 min-w-[44px] font-bold ${THEME_HIJAU_MADRASAH.summaryHeaders.predikat}`}>
                       Predikat
                     </th>
-                    <th rowSpan={2} className={`border border-slate-600 px-2 py-1.5 min-w-[65px] font-bold ${currentTheme.summaryHeaders.keterangan}`}>
+                    <th rowSpan={2} className={`border border-slate-600 px-2 py-1.5 min-w-[65px] font-bold ${THEME_HIJAU_MADRASAH.summaryHeaders.keterangan}`}>
                       Keterangan
                     </th>
                   </>
@@ -1029,38 +764,38 @@ export default function RekapNilai({
                 {viewMode === 'all' ? (
                   Array.from({ length: kdCount }, (_, i) => (
                     <React.Fragment key={i}>
-                      <th className={`border border-slate-400 px-1.5 py-1 min-w-[46px] text-[11px] ${currentTheme.subColumns.ph}`}>
+                      <th className={`border border-slate-400 px-1.5 py-1 min-w-[46px] text-[11px] ${THEME_HIJAU_MADRASAH.subColumns.ph}`}>
                         PH
                       </th>
-                      <th className={`border border-slate-400 px-1.5 py-1 min-w-[46px] text-[11px] ${currentTheme.subColumns.remidi}`}>
+                      <th className={`border border-slate-400 px-1.5 py-1 min-w-[46px] text-[11px] ${THEME_HIJAU_MADRASAH.subColumns.remidi}`}>
                         Remidi
                       </th>
-                      <th className={`border border-slate-400 px-1.5 py-1 min-w-[46px] text-[11px] ${currentTheme.subColumns.praktek}`}>
+                      <th className={`border border-slate-400 px-1.5 py-1 min-w-[46px] text-[11px] ${THEME_HIJAU_MADRASAH.subColumns.praktek}`}>
                         Praktek
                       </th>
-                      <th className={`border border-slate-400 px-1.5 py-1 min-w-[46px] text-[11px] ${currentTheme.subColumns.proyek}`}>
+                      <th className={`border border-slate-400 px-1.5 py-1 min-w-[46px] text-[11px] ${THEME_HIJAU_MADRASAH.subColumns.proyek}`}>
                         Proyek
                       </th>
-                      <th className={`border border-slate-400 px-1.5 py-1 min-w-[46px] text-[11px] ${currentTheme.subColumns.porto}`}>
+                      <th className={`border border-slate-400 px-1.5 py-1 min-w-[46px] text-[11px] ${THEME_HIJAU_MADRASAH.subColumns.porto}`}>
                         Porto F
                       </th>
                     </React.Fragment>
                   ))
                 ) : (viewMode === 'ph1' || viewMode === 'ph2') ? (
                   <>
-                    <th className={`border border-slate-400 px-2 py-1.5 min-w-[50px] text-xs ${currentTheme.subColumns.ph}`}>
+                    <th className={`border border-slate-400 px-2 py-1.5 min-w-[50px] text-xs ${THEME_HIJAU_MADRASAH.subColumns.ph}`}>
                       PH
                     </th>
-                    <th className={`border border-slate-400 px-2 py-1.5 min-w-[50px] text-xs ${currentTheme.subColumns.remidi}`}>
+                    <th className={`border border-slate-400 px-2 py-1.5 min-w-[50px] text-xs ${THEME_HIJAU_MADRASAH.subColumns.remidi}`}>
                       Remidi
                     </th>
-                    <th className={`border border-slate-400 px-2 py-1.5 min-w-[50px] text-xs ${currentTheme.subColumns.praktek}`}>
+                    <th className={`border border-slate-400 px-2 py-1.5 min-w-[50px] text-xs ${THEME_HIJAU_MADRASAH.subColumns.praktek}`}>
                       Praktek
                     </th>
-                    <th className={`border border-slate-400 px-2 py-1.5 min-w-[50px] text-xs ${currentTheme.subColumns.proyek}`}>
+                    <th className={`border border-slate-400 px-2 py-1.5 min-w-[50px] text-xs ${THEME_HIJAU_MADRASAH.subColumns.proyek}`}>
                       Proyek
                     </th>
-                    <th className={`border border-slate-400 px-2 py-1.5 min-w-[50px] text-xs ${currentTheme.subColumns.porto}`}>
+                    <th className={`border border-slate-400 px-2 py-1.5 min-w-[50px] text-xs ${THEME_HIJAU_MADRASAH.subColumns.porto}`}>
                       Porto F
                     </th>
                   </>
@@ -1081,7 +816,6 @@ export default function RekapNilai({
                   const studentScore = scores[student.id] || {};
                   const res = calculateStudentResults(student.id);
 
-                  // Function to render a single KD block
                   const renderKdCells = (kdIdx) => {
                     const kdKey = `ph${kdIdx + 1}`;
                     const kd = studentScore[kdKey] || {};
@@ -1208,13 +942,13 @@ export default function RekapNilai({
                       {/* Summary Columns */}
                       {(viewMode === 'all' || viewMode === 'final') && (
                         <>
-                          <td className={`border border-slate-300 px-2 py-1 font-bold ${currentTheme.cellHighlight.kd3}`}>
+                          <td className={`border border-slate-300 px-2 py-1 font-bold ${THEME_HIJAU_MADRASAH.cellHighlight.kd3}`}>
                             {res.rataKD3 !== null ? res.rataKD3 : '-'}
                           </td>
-                          <td className={`border border-slate-300 px-2 py-1 font-bold ${currentTheme.cellHighlight.kd4}`}>
+                          <td className={`border border-slate-300 px-2 py-1 font-bold ${THEME_HIJAU_MADRASAH.cellHighlight.kd4}`}>
                             {res.rataKD4 !== null ? res.rataKD4 : '-'}
                           </td>
-                          <td className={`border border-slate-300 px-2 py-1 font-black text-slate-950 text-sm ${currentTheme.cellHighlight.akhir}`}>
+                          <td className={`border border-slate-300 px-2 py-1 font-black text-slate-950 text-sm ${THEME_HIJAU_MADRASAH.cellHighlight.akhir}`}>
                             {res.nilaiAkhir !== null ? res.nilaiAkhir : '-'}
                           </td>
                           <td className="border border-slate-300 px-1.5 py-1 font-extrabold">
@@ -1231,7 +965,7 @@ export default function RekapNilai({
                           </td>
                           <td className="border border-slate-300 px-1.5 py-1 font-bold text-[11px]">
                             {res.isFilled ? (
-                              <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                              <span className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
                                 res.isTuntas 
                                   ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' 
                                   : 'bg-rose-100 text-rose-800 border border-rose-300'
@@ -1272,7 +1006,43 @@ export default function RekapNilai({
 
       </div>
 
-      {/* 5. QUICK INDIVIDUAL STUDENT CARD MODAL (Makes mobile input super easy!) */}
+      {/* 5. MENU SIMPAN DI BAGIAN BAWAH (Sesuai Permintaan) */}
+      <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3 no-print">
+        
+        {/* Status Keterangan Simpan */}
+        <div className="flex items-center gap-2">
+          {saveStatus === 'saving' && (
+            <span className="inline-flex items-center gap-2 text-xs text-amber-700 bg-amber-50 px-3 py-1.5 rounded-xl border border-amber-200 font-bold animate-pulse">
+              <RefreshCw className="w-4 h-4 animate-spin text-amber-600" />
+              Menyimpan data nilai ke cloud...
+            </span>
+          )}
+          {saveStatus === 'saved' && (
+            <span className="inline-flex items-center gap-2 text-xs text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-200 font-bold animate-fadeIn">
+              <CheckCircle className="w-4 h-4 text-emerald-600" />
+              Nilai kelas {currentClassObj.nama} berhasil tersimpan di cloud!
+            </span>
+          )}
+          {saveStatus !== 'saving' && saveStatus !== 'saved' && (
+            <span className="text-xs text-slate-500 font-medium">
+              Data otomatis disinkronkan, atau klik tombol simpan untuk memastikan.
+            </span>
+          )}
+        </div>
+
+        {/* Tombol Simpan Utama di Bawah */}
+        <button
+          type="button"
+          onClick={() => handleSave()}
+          className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-black px-8 py-3 rounded-xl text-sm shadow-md shadow-emerald-900/15 transition active:scale-95"
+        >
+          <Save className="w-5 h-5" />
+          <span>Simpan Rekapitulasi Nilai</span>
+        </button>
+
+      </div>
+
+      {/* 6. QUICK INDIVIDUAL STUDENT CARD MODAL */}
       {activeStudentModal && (
         <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 no-print animate-fadeIn">
           <div className="bg-white rounded-t-3xl sm:rounded-2xl max-w-lg w-full p-5 sm:p-6 shadow-2xl space-y-4 border border-slate-100 max-h-[90vh] overflow-y-auto">
@@ -1438,10 +1208,13 @@ export default function RekapNilai({
 
               <button
                 type="button"
-                onClick={() => setActiveStudentModal(null)}
+                onClick={() => {
+                  handleSave();
+                  setActiveStudentModal(null);
+                }}
                 className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs transition"
               >
-                Selesai
+                Selesai & Simpan
               </button>
 
               <button
@@ -1458,7 +1231,7 @@ export default function RekapNilai({
         </div>
       )}
 
-      {/* 6. BATCH FILL MODAL */}
+      {/* 7. BATCH FILL MODAL */}
       {showBatchModal && (
         <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 no-print animate-fadeIn">
           <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 border border-slate-100">
