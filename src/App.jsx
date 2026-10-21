@@ -214,48 +214,28 @@ export default function App() {
       <header className="bg-emerald-900 text-white border-b border-emerald-800 sticky top-0 z-40 shadow-md no-print">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           
-          {/* Left: Hamburger (Desktop) & Logo / Title */}
+          {/* Brand: 1 Logo + Title + 1 Academic Year info */}
           <div className="flex items-center gap-3">
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="hidden md:flex p-2.5 rounded-xl bg-emerald-800/80 hover:bg-emerald-700 text-emerald-100 hover:text-white transition items-center justify-center border border-emerald-700/50 shadow-sm focus:outline-none"
+              className="hidden md:flex p-2 rounded-xl bg-emerald-800/80 hover:bg-emerald-700 text-emerald-100 hover:text-white transition items-center justify-center border border-emerald-700/50 shadow-sm focus:outline-none"
               title="Buka Navigasi Utama"
             >
               {isMenuOpen ? <X className="w-5 h-5 text-emerald-200" /> : <Menu className="w-5 h-5 text-emerald-200" />}
             </button>
             
-            {/* Mobile Brand Logo */}
-            <div className="bg-white/10 p-1 rounded-lg border border-white/20 flex items-center justify-center md:hidden flex-shrink-0 shadow-xs">
-              <img src="/logo.png" alt="Logo" className="w-7 h-7 object-contain drop-shadow-xs" />
+            {/* The Single Official Logo */}
+            <div className="bg-white/10 p-1.5 rounded-xl border border-white/20 flex items-center justify-center flex-shrink-0 shadow-xs">
+              <img src="/logo.png" alt="Logo MTs Darussalam" className="w-8 h-8 object-contain drop-shadow-xs" />
             </div>
 
             <div>
-              <div className="flex items-center gap-2">
-                <h1 className="font-bold text-base md:text-lg leading-tight tracking-tight text-emerald-50">
-                  {schoolProfile.nama}
-                </h1>
-                <span className="hidden sm:inline-block bg-emerald-800/90 text-emerald-200 text-[10px] font-bold px-2 py-0.5 rounded-full border border-emerald-700/60">
-                  T.A. {schoolProfile.tahunAjaran || '2026/2027'} • Sem. {schoolProfile.semester || 'Ganjil'}
-                </span>
-              </div>
-              <p className="text-[11px] text-emerald-300 font-medium sm:hidden">
-                T.A. {schoolProfile.tahunAjaran || '2026/2027'} • Sem. {schoolProfile.semester || 'Ganjil'}
+              <h1 className="font-bold text-base md:text-lg leading-tight tracking-tight text-emerald-50">
+                {schoolProfile.nama}
+              </h1>
+              <p className="text-[11px] text-emerald-300 font-medium">
+                T.A. {schoolProfile.tahunAjaran || '2026/2027'} • Semester {schoolProfile.semester || 'Ganjil'}
               </p>
-              <p className="text-[11px] text-emerald-300 font-medium hidden sm:block">
-                Sistem Informasi Absensi Digital • Ngesong - Jombang
-              </p>
-            </div>
-          </div>
-
-          {/* Right: School Logo & Academic Badge (Desktop & Tablet) */}
-          <div className="flex items-center gap-2.5">
-            <div className="hidden lg:flex items-center gap-2 bg-emerald-800/60 px-3 py-1 rounded-xl border border-emerald-700/60 text-xs text-emerald-100 font-semibold shadow-xs">
-              <span>Semester {schoolProfile.semester || 'Ganjil'}</span>
-              <span className="text-emerald-400">•</span>
-              <span>T.A. {schoolProfile.tahunAjaran || '2026/2027'}</span>
-            </div>
-            <div className="bg-white/10 p-1.5 rounded-xl border border-white/20 backdrop-blur-xs flex items-center justify-center shadow-xs">
-              <img src="/logo.png" alt="Logo MTs Darussalam" className="w-7 h-7 object-contain drop-shadow-sm" />
             </div>
           </div>
 
