@@ -58,25 +58,25 @@ export const JAM_PELAJARAN = JAM_PELAJARAN_REGULAR;
 
 export const MATA_PELAJARAN_MTS = [
   // Kelompok A (Pendidikan Agama Islam)
-  { id: "QH", nama: "Al-Qur'an Hadis", kelompok: "PAI", kkmDefault: 75 },
-  { id: "AA", nama: "Akidah Akhlak", kelompok: "PAI", kkmDefault: 75 },
-  { id: "FIQ", nama: "Fikih", kelompok: "PAI", kkmDefault: 75 },
-  { id: "SKI", nama: "Sejarah Kebudayaan Islam (SKI)", kelompok: "PAI", kkmDefault: 75 },
+  { id: "QH", nama: "Al-Qur'an Hadis", kelompok: "PAI", kkmDefault: 70 },
+  { id: "AA", nama: "Akidah Akhlak", kelompok: "PAI", kkmDefault: 70 },
+  { id: "FIQ", nama: "Fikih", kelompok: "PAI", kkmDefault: 70 },
+  { id: "SKI", nama: "Sejarah Kebudayaan Islam (SKI)", kelompok: "PAI", kkmDefault: 70 },
   // Kelompok A (Umum)
-  { id: "PKN", nama: "Pendidikan Pancasila & Kewarganegaraan (PPKn)", kelompok: "Umum", kkmDefault: 75 },
-  { id: "BIN", nama: "Bahasa Indonesia", kelompok: "Umum", kkmDefault: 75 },
-  { id: "BAR", nama: "Bahasa Arab", kelompok: "Umum", kkmDefault: 75 },
-  { id: "MAT", nama: "Matematika", kelompok: "Umum", kkmDefault: 75 },
-  { id: "IPA", nama: "Ilmu Pengetahuan Alam (IPA)", kelompok: "Umum", kkmDefault: 75 },
-  { id: "IPS", nama: "Ilmu Pengetahuan Sosial (IPS)", kelompok: "Umum", kkmDefault: 75 },
-  { id: "BIG", nama: "Bahasa Inggris", kelompok: "Umum", kkmDefault: 75 },
+  { id: "PKN", nama: "Pendidikan Pancasila & Kewarganegaraan (PPKn)", kelompok: "Umum", kkmDefault: 70 },
+  { id: "BIN", nama: "Bahasa Indonesia", kelompok: "Umum", kkmDefault: 70 },
+  { id: "BAR", nama: "Bahasa Arab", kelompok: "Umum", kkmDefault: 70 },
+  { id: "MAT", nama: "Matematika", kelompok: "Umum", kkmDefault: 70 },
+  { id: "IPA", nama: "Ilmu Pengetahuan Alam (IPA)", kelompok: "Umum", kkmDefault: 70 },
+  { id: "IPS", nama: "Ilmu Pengetahuan Sosial (IPS)", kelompok: "Umum", kkmDefault: 70 },
+  { id: "BIG", nama: "Bahasa Inggris", kelompok: "Umum", kkmDefault: 70 },
   // Kelompok B (Umum & Seni/Olahraga)
-  { id: "SBK", nama: "Seni Budaya", kelompok: "Umum", kkmDefault: 75 },
-  { id: "PJK", nama: "Pendidikan Jasmani, Olahraga & Kesehatan (PJOK)", kelompok: "Umum", kkmDefault: 75 },
-  { id: "INF", nama: "Informatika / Prakarya", kelompok: "Umum", kkmDefault: 75 },
+  { id: "SBK", nama: "Seni Budaya", kelompok: "Umum", kkmDefault: 70 },
+  { id: "PJK", nama: "Pendidikan Jasmani, Olahraga & Kesehatan (PJOK)", kelompok: "Umum", kkmDefault: 70 },
+  { id: "INF", nama: "Informatika / Prakarya", kelompok: "Umum", kkmDefault: 70 },
   // Muatan Lokal
-  { id: "BJW", nama: "Bahasa Jawa (Mulok)", kelompok: "Mulok", kkmDefault: 75 },
-  { id: "ASW", nama: "Ke-NU-an / Aswaja (Mulok)", kelompok: "Mulok", kkmDefault: 75 },
+  { id: "BJW", nama: "Bahasa Jawa (Mulok)", kelompok: "Mulok", kkmDefault: 70 },
+  { id: "ASW", nama: "Ke-NU-an / Aswaja (Mulok)", kelompok: "Mulok", kkmDefault: 70 },
 ];
 
 export const INITIAL_CLASSES = [

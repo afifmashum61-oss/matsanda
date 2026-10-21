@@ -57,7 +57,7 @@ export default function RekapNilai({
   const [selectedMapel, setSelectedMapel] = useState(MATA_PELAJARAN_MTS[0]?.id || 'QH');
   const [selectedSemester, setSelectedSemester] = useState(schoolProfile?.semester || 'Ganjil');
   const [kdCount, setKdCount] = useState(2); // Default 2 PH (sesuai format lampiran)
-  const [kkm, setKkm] = useState(75);
+  const [kkm, setKkm] = useState(70); // Minimal 70 sesuai standar madrasah
   const [guruPengampu, setGuruPengampu] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [saveStatus, setSaveStatus] = useState(''); // 'saved' | 'saving' | 'dirty' | ''
@@ -93,12 +93,13 @@ export default function RekapNilai({
     const existing = allGrades[docKey] || getGrades()[docKey];
     if (existing) {
       setScores(existing.scores || {});
-      setKkm(existing.kkm !== undefined ? existing.kkm : (currentMapelObj?.kkmDefault || 75));
+      const loadedKkm = existing.kkm !== undefined ? Number(existing.kkm) : (currentMapelObj?.kkmDefault || 70);
+      setKkm(loadedKkm === 75 || loadedKkm < 70 ? 70 : loadedKkm);
       setGuruPengampu(existing.guruPengampu || '');
       if (existing.kdCount) setKdCount(existing.kdCount);
     } else {
       setScores({});
-      setKkm(currentMapelObj?.kkmDefault || 75);
+      setKkm(currentMapelObj?.kkmDefault || 70);
       setGuruPengampu('');
     }
     setSaveStatus('');
@@ -486,8 +487,8 @@ export default function RekapNilai({
           </div>
         </div>
 
-        {/* Essential Selectors: Kelas, Mata Pelajaran, Semester & Tahun Ajaran */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-2 border-t border-slate-100">
+        {/* Essential Selectors: Kelas, Mata Pelajaran, Semester & Nilai KKM */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 pt-2 border-t border-slate-100">
           <div>
             <label className="block text-[11px] font-bold text-slate-700 mb-1">Pilih Kelas</label>
             <select
@@ -541,6 +542,27 @@ export default function RekapNilai({
               <option value="Ganjil">Semester Ganjil</option>
               <option value="Genap">Semester Genap</option>
             </select>
+          </div>
+
+          <div>
+            <div className="flex items-center justify-between mb-1">
+              <label className="block text-[11px] font-bold text-slate-700">Nilai KKM</label>
+              <span className="text-[10px] font-bold text-emerald-800 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
+                Minimal 70
+              </span>
+            </div>
+            <input
+              type="number"
+              min="70"
+              max="100"
+              value={kkm}
+              onChange={(e) => {
+                const val = e.target.value === '' ? '' : Math.max(70, Math.min(100, Number(e.target.value)));
+                setKkm(val === '' ? 70 : val);
+                setSaveStatus('dirty');
+              }}
+              className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+            />
           </div>
         </div>
 
