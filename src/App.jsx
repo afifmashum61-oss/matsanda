@@ -240,28 +240,6 @@ export default function App() {
             </div>
           </div>
 
-          {/* Cloud Connection Live Status Pill */}
-          <div className="flex items-center gap-2">
-            <div 
-              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold border transition-all ${
-                isCloudConnected && isOnline
-                  ? 'bg-emerald-800/90 text-emerald-100 border-emerald-600/70 shadow-xs'
-                  : 'bg-amber-900/70 text-amber-200 border-amber-700/80 animate-pulse'
-              }`}
-              title={isCloudConnected && isOnline ? "Terhubung ke Firebase Firestore (Data otomatis tersimpan di Cloud)" : "Menghubungkan ke Cloud..."}
-            >
-              <span className={`w-2 h-2 rounded-full ${
-                isCloudConnected && isOnline ? 'bg-emerald-400 shadow-sm animate-pulse' : 'bg-amber-400'
-              }`} />
-              <span className="hidden sm:inline">
-                {isCloudConnected && isOnline ? 'Firebase Cloud Aktif' : 'Menghubungkan Cloud...'}
-              </span>
-              <span className="sm:hidden">
-                {isCloudConnected && isOnline ? 'Cloud Aktif' : 'Menghubungkan...'}
-              </span>
-            </div>
-          </div>
-
         </div>
       </header>
 
