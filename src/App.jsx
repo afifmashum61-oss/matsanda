@@ -13,7 +13,8 @@ import {
   ShieldCheck,
   AlertCircle,
   Eye,
-  EyeOff
+  EyeOff,
+  Award
 } from 'lucide-react';
 
 import Dashboard from './components/Dashboard';
@@ -21,12 +22,14 @@ import InputAbsensi from './components/InputAbsensi';
 import DataSiswa from './components/DataSiswa';
 import LaporanAbsensi from './components/LaporanAbsensi';
 import PengaturanSekolah from './components/PengaturanSekolah';
+import RekapNilai from './components/RekapNilai';
 
 import { 
   getSchoolProfile, saveSchoolProfile,
   getClasses, saveClasses,
   getStudents, saveStudents, sortStudentsAlphabetically,
-  getAttendance, saveAttendance
+  getAttendance, saveAttendance,
+  getGrades, saveGradeForClassSubject
 } from './utils/storage';
 
 import {
@@ -34,7 +37,9 @@ import {
   subscribeClasses,
   subscribeStudents,
   subscribeAttendance,
-  syncAttendanceToCloud
+  syncAttendanceToCloud,
+  subscribeGrades,
+  syncGradesToCloud
 } from './firebase';
 
 export default function App() {
@@ -60,6 +65,7 @@ export default function App() {
   const [classes, setClassesState] = useState(getClasses);
   const [students, setStudentsState] = useState(() => sortStudentsAlphabetically(getStudents()));
   const [attendance, setAttendanceState] = useState(getAttendance);
+  const [grades, setGradesState] = useState(getGrades);
 
   const [selectedClass, setSelectedClass] = useState(classes[0]?.id || '7A');
 
@@ -125,11 +131,18 @@ export default function App() {
       setIsCloudConnected(true);
     });
 
+    const unsubGrades = subscribeGrades((gradesMap) => {
+      setGradesState(gradesMap);
+      localStorage.setItem('mts_grades', JSON.stringify(gradesMap));
+      setIsCloudConnected(true);
+    });
+
     return () => {
       unsubProfile();
       unsubClasses();
       unsubStudents();
       unsubAttendance();
+      unsubGrades();
     };
   }, []);
 
@@ -179,9 +192,15 @@ export default function App() {
     return true;
   };
 
+  const handleSaveGrade = (classId, mapelId, semester, gradeData) => {
+    const updated = saveGradeForClassSubject(classId, mapelId, semester, gradeData);
+    setGradesState(updated);
+  };
+
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', shortLabel: 'Beranda', icon: LayoutDashboard, desc: 'Ringkasan kehadiran & statistik' },
     { id: 'input', label: 'Input Absensi', shortLabel: 'Absensi', icon: UserCheck, desc: 'Form absensi harian per kelas' },
+    { id: 'nilai', label: 'Rekapitulasi Nilai', shortLabel: 'Nilai', icon: Award, desc: 'Ledger nilai PH, remidi & ketrampilan' },
     { id: 'siswa', label: 'Data Siswa', shortLabel: 'Siswa', icon: Users, desc: 'Kelola data siswa & import Excel' },
     { id: 'laporan', label: 'Rekap & Laporan', shortLabel: 'Laporan', icon: FileText, desc: 'Rekap bulanan & cetak PDF' },
     { id: 'pengaturan', label: 'Pengaturan Sekolah', shortLabel: 'Pengaturan', icon: Settings, desc: 'Identitas sekolah & backup data' },
@@ -330,6 +349,16 @@ export default function App() {
             />
           )}
 
+          {activeTab === 'nilai' && (
+            <RekapNilai
+              classes={classes}
+              students={students}
+              schoolProfile={schoolProfile}
+              allGrades={grades}
+              onSaveGrade={handleSaveGrade}
+            />
+          )}
+
           {activeTab === 'siswa' && (
             <DataSiswa
               students={students}
@@ -446,7 +475,7 @@ export default function App() {
         style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
         aria-label="Navigasi Utama Ponsel"
       >
-        <div className="grid grid-cols-5 items-center h-16 max-w-lg mx-auto px-1">
+        <div className="grid grid-cols-6 items-center h-16 max-w-xl mx-auto px-0.5">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;
@@ -461,10 +490,10 @@ export default function App() {
               >
                 {/* Active Indicator Top Pill */}
                 {isActive && (
-                  <span className="absolute top-0 w-8 h-1 bg-emerald-600 rounded-full" />
+                  <span className="absolute top-0 w-6 h-1 bg-emerald-600 rounded-full" />
                 )}
 
-                <div className={`p-1.5 rounded-xl transition-all duration-200 ${
+                <div className={`p-1 rounded-xl transition-all duration-200 ${
                   isActive 
                     ? 'bg-emerald-50 text-emerald-700 scale-105 shadow-xs' 
                     : 'group-hover:bg-slate-50'
@@ -472,7 +501,7 @@ export default function App() {
                   <Icon className="w-5 h-5" />
                 </div>
 
-                <span className={`text-[10px] leading-tight tracking-tight mt-0.5 transition-all ${
+                <span className={`text-[9px] leading-tight tracking-tight mt-0.5 transition-all truncate max-w-full px-0.5 ${
                   isActive 
                     ? 'font-bold text-emerald-800' 
                     : 'font-medium text-slate-500'

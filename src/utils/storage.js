@@ -3,7 +3,8 @@ import {
   syncSchoolProfileToCloud, 
   syncClassesToCloud, 
   syncStudentsToCloud, 
-  syncAttendanceToCloud 
+  syncAttendanceToCloud,
+  syncGradesToCloud
 } from '../firebase';
 
 const KEYS = {
@@ -11,6 +12,7 @@ const KEYS = {
   CLASSES: 'mts_classes',
   STUDENTS: 'mts_students',
   ATTENDANCE: 'mts_attendance',
+  GRADES: 'mts_grades',
 };
 
 // Always returns YYYY-MM-DD in local time (WIB UTC+7) without timezone shift bugs
@@ -119,6 +121,35 @@ export const saveAttendance = (records, targetDate, classId) => {
   syncAttendanceToCloud(records, classId, targetDate);
 };
 
+export const getGrades = () => {
+  const data = localStorage.getItem(KEYS.GRADES);
+  if (!data) return {};
+  try {
+    return JSON.parse(data);
+  } catch (err) {
+    return {};
+  }
+};
+
+export const saveGradeForClassSubject = (classId, mapelId, semester, gradeData) => {
+  const currentGrades = getGrades();
+  const docId = `${classId}_${mapelId}_${semester}`;
+  const updatedDoc = {
+    ...gradeData,
+    classId,
+    mapelId,
+    semester,
+    updatedAt: new Date().toISOString()
+  };
+  const updatedGrades = {
+    ...currentGrades,
+    [docId]: updatedDoc
+  };
+  localStorage.setItem(KEYS.GRADES, JSON.stringify(updatedGrades));
+  syncGradesToCloud(classId, mapelId, semester, updatedDoc);
+  return updatedGrades;
+};
+
 export const resetDataToDefault = () => {
   const sortedStudents = sortStudentsAlphabetically(INITIAL_STUDENTS);
   localStorage.setItem(KEYS.SCHOOL, JSON.stringify(INITIAL_SCHOOL_PROFILE));
@@ -138,6 +169,7 @@ export const exportFullBackup = () => {
     classes: getClasses(),
     students: getStudents(),
     attendance: getAttendance(),
+    grades: getGrades(),
     exportedAt: new Date().toISOString()
   };
   const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backup, null, 2));
@@ -148,3 +180,4 @@ export const exportFullBackup = () => {
   downloadAnchor.click();
   downloadAnchor.remove();
 };
+

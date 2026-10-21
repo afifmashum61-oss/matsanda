@@ -190,3 +190,38 @@ export const subscribeAttendance = (onUpdate) => {
     console.warn("Realtime error (attendance):", err);
   });
 };
+
+// Sync grade ledger per class, subject, and semester to Firestore
+export const syncGradesToCloud = async (classId, mapelId, semester, gradeData) => {
+  try {
+    if (!classId || !mapelId || !semester) return;
+    const docId = `${classId}_${mapelId}_${semester}`;
+    await setDoc(doc(db, "grades", docId), {
+      ...gradeData,
+      classId,
+      mapelId,
+      semester,
+      updatedAt: new Date().toISOString()
+    }, { merge: true });
+  } catch (err) {
+    console.warn("Cloud sync warning (grades):", err);
+  }
+};
+
+// Real-time listener for grades across all classes and subjects
+export const subscribeGrades = (onUpdate) => {
+  return onSnapshot(collection(db, "grades"), (querySnapshot) => {
+    try {
+      const gradesMap = {};
+      querySnapshot.forEach(docSnap => {
+        gradesMap[docSnap.id] = docSnap.data();
+      });
+      onUpdate(gradesMap);
+    } catch (err) {
+      console.warn("Realtime processing error (grades):", err);
+    }
+  }, (err) => {
+    console.warn("Realtime error (grades):", err);
+  });
+};
+
