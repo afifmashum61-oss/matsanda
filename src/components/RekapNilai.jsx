@@ -658,9 +658,17 @@ export default function RekapNilai({
           </div>
         </div>
 
+        {/* Mobile Swipe Hint */}
+        <div className="sm:hidden px-3 py-1.5 bg-emerald-50/70 border-b border-emerald-100 flex items-center justify-between text-[11px] text-emerald-800 font-medium">
+          <span className="flex items-center gap-1.5">
+            <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            Geser tabel ke samping untuk melihat nilai PH & kolom lainnya 👉
+          </span>
+        </div>
+
         {/* Scrollable Table Container */}
-        <div className="overflow-x-auto relative">
-          <table className="w-full text-xs border-collapse text-center">
+        <div className="overflow-x-auto relative scrollbar-thin overscroll-x-contain touch-pan-x [-webkit-overflow-scrolling:touch]">
+          <table className="min-w-full text-xs border-collapse text-center">
             
             {/* Table Header matching the template locked in Hijau Madrasah theme */}
             <thead>
@@ -669,17 +677,17 @@ export default function RekapNilai({
                 <th rowSpan={3} className={`border border-slate-600 px-2 py-2 min-w-[34px] font-black ${THEME_HIJAU_MADRASAH.topIdentity}`}>
                   No
                 </th>
-                <th rowSpan={3} className={`border border-slate-600 px-2 py-2 min-w-[70px] font-black ${THEME_HIJAU_MADRASAH.topIdentity}`}>
+                <th rowSpan={3} className={`hidden sm:table-cell print:table-cell border border-slate-600 px-2 py-2 min-w-[70px] font-black ${THEME_HIJAU_MADRASAH.topIdentity}`}>
                   NIS
                 </th>
-                {/* Frozen Sticky Nama Column on Mobile & Desktop */}
+                {/* Nama Column (Bebas digeser di HP, tidak menutupi kolom PH) */}
                 <th 
                   rowSpan={3} 
-                  className={`border border-slate-600 px-3 py-2 min-w-[170px] max-w-[220px] text-left font-black sticky left-0 z-20 shadow-sm ${THEME_HIJAU_MADRASAH.topIdentity}`}
+                  className={`border border-slate-600 px-2.5 py-2 min-w-[120px] sm:min-w-[180px] text-left font-black ${THEME_HIJAU_MADRASAH.topIdentity}`}
                 >
                   Nama Siswa
                 </th>
-                <th rowSpan={3} className={`border border-slate-600 px-1.5 py-2 min-w-[32px] font-black ${THEME_HIJAU_MADRASAH.topIdentity}`}>
+                <th rowSpan={3} className={`hidden sm:table-cell print:table-cell border border-slate-600 px-1.5 py-2 min-w-[32px] font-black ${THEME_HIJAU_MADRASAH.topIdentity}`}>
                   L/P
                 </th>
 
@@ -756,38 +764,38 @@ export default function RekapNilai({
                 {viewMode === 'all' ? (
                   Array.from({ length: kdCount }, (_, i) => (
                     <React.Fragment key={i}>
-                      <th className={`border border-slate-400 px-1.5 py-1 min-w-[46px] text-[11px] ${THEME_HIJAU_MADRASAH.subColumns.ph}`}>
+                      <th className={`border border-slate-400 px-1 py-1 min-w-[50px] text-[11px] ${THEME_HIJAU_MADRASAH.subColumns.ph}`}>
                         PH
                       </th>
-                      <th className={`border border-slate-400 px-1.5 py-1 min-w-[46px] text-[11px] ${THEME_HIJAU_MADRASAH.subColumns.remidi}`}>
+                      <th className={`border border-slate-400 px-1 py-1 min-w-[50px] text-[11px] ${THEME_HIJAU_MADRASAH.subColumns.remidi}`}>
                         Remidi
                       </th>
-                      <th className={`border border-slate-400 px-1.5 py-1 min-w-[46px] text-[11px] ${THEME_HIJAU_MADRASAH.subColumns.praktek}`}>
+                      <th className={`border border-slate-400 px-1 py-1 min-w-[50px] text-[11px] ${THEME_HIJAU_MADRASAH.subColumns.praktek}`}>
                         Praktek
                       </th>
-                      <th className={`border border-slate-400 px-1.5 py-1 min-w-[46px] text-[11px] ${THEME_HIJAU_MADRASAH.subColumns.proyek}`}>
+                      <th className={`border border-slate-400 px-1 py-1 min-w-[50px] text-[11px] ${THEME_HIJAU_MADRASAH.subColumns.proyek}`}>
                         Proyek
                       </th>
-                      <th className={`border border-slate-400 px-1.5 py-1 min-w-[46px] text-[11px] ${THEME_HIJAU_MADRASAH.subColumns.porto}`}>
+                      <th className={`border border-slate-400 px-1 py-1 min-w-[50px] text-[11px] ${THEME_HIJAU_MADRASAH.subColumns.porto}`}>
                         Porto F
                       </th>
                     </React.Fragment>
                   ))
                 ) : (viewMode === 'ph1' || viewMode === 'ph2') ? (
                   <>
-                    <th className={`border border-slate-400 px-2 py-1.5 min-w-[50px] text-xs ${THEME_HIJAU_MADRASAH.subColumns.ph}`}>
+                    <th className={`border border-slate-400 px-1.5 py-1.5 min-w-[50px] text-xs ${THEME_HIJAU_MADRASAH.subColumns.ph}`}>
                       PH
                     </th>
-                    <th className={`border border-slate-400 px-2 py-1.5 min-w-[50px] text-xs ${THEME_HIJAU_MADRASAH.subColumns.remidi}`}>
+                    <th className={`border border-slate-400 px-1.5 py-1.5 min-w-[50px] text-xs ${THEME_HIJAU_MADRASAH.subColumns.remidi}`}>
                       Remidi
                     </th>
-                    <th className={`border border-slate-400 px-2 py-1.5 min-w-[50px] text-xs ${THEME_HIJAU_MADRASAH.subColumns.praktek}`}>
+                    <th className={`border border-slate-400 px-1.5 py-1.5 min-w-[50px] text-xs ${THEME_HIJAU_MADRASAH.subColumns.praktek}`}>
                       Praktek
                     </th>
-                    <th className={`border border-slate-400 px-2 py-1.5 min-w-[50px] text-xs ${THEME_HIJAU_MADRASAH.subColumns.proyek}`}>
+                    <th className={`border border-slate-400 px-1.5 py-1.5 min-w-[50px] text-xs ${THEME_HIJAU_MADRASAH.subColumns.proyek}`}>
                       Proyek
                     </th>
-                    <th className={`border border-slate-400 px-2 py-1.5 min-w-[50px] text-xs ${THEME_HIJAU_MADRASAH.subColumns.porto}`}>
+                    <th className={`border border-slate-400 px-1.5 py-1.5 min-w-[50px] text-xs ${THEME_HIJAU_MADRASAH.subColumns.porto}`}>
                       Porto F
                     </th>
                   </>
@@ -815,7 +823,7 @@ export default function RekapNilai({
                     return (
                       <React.Fragment key={kdIdx}>
                         {/* PH */}
-                        <td className="border border-slate-300 p-0.5">
+                        <td className="border border-slate-300 p-1 min-w-[50px]">
                           <input
                             id={`score_${student.id}_${kdKey}_ph`}
                             type="number"
@@ -826,13 +834,13 @@ export default function RekapNilai({
                             onFocus={(e) => e.target.select()}
                             onKeyDown={(e) => handleInputKeyDown(e, idx, kdKey, 'ph')}
                             onChange={(e) => handleScoreChange(student.id, kdKey, 'ph', e.target.value)}
-                            className="w-full text-center py-2 px-1 font-bold text-slate-900 bg-transparent focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none rounded text-xs sm:text-sm"
+                            className="w-full h-9 sm:h-10 text-center font-bold text-slate-900 bg-white border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/30 focus:outline-none rounded-lg text-xs sm:text-sm shadow-2xs"
                             placeholder="-"
                           />
                         </td>
 
                         {/* Remidi */}
-                        <td className="border border-slate-300 p-0.5 bg-amber-50/20">
+                        <td className="border border-slate-300 p-1 min-w-[50px] bg-amber-50/20">
                           <input
                             id={`score_${student.id}_${kdKey}_remidi`}
                             type="number"
@@ -843,15 +851,15 @@ export default function RekapNilai({
                             onFocus={(e) => e.target.select()}
                             onKeyDown={(e) => handleInputKeyDown(e, idx, kdKey, 'remidi')}
                             onChange={(e) => handleScoreChange(student.id, kdKey, 'remidi', e.target.value)}
-                            className={`w-full text-center py-2 px-1 font-bold rounded text-xs sm:text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none ${
-                              kd.remidi ? 'text-amber-800 bg-amber-100/90 border border-amber-300' : 'text-slate-400 bg-transparent'
+                            className={`w-full h-9 sm:h-10 text-center font-bold rounded-lg text-xs sm:text-sm border focus:ring-2 focus:ring-amber-500/30 focus:outline-none shadow-2xs ${
+                              kd.remidi ? 'text-amber-800 bg-amber-100/90 border-amber-300' : 'text-slate-400 bg-white border-slate-200'
                             }`}
                             placeholder="-"
                           />
                         </td>
 
                         {/* Praktek */}
-                        <td className="border border-slate-300 p-0.5">
+                        <td className="border border-slate-300 p-1 min-w-[50px]">
                           <input
                             id={`score_${student.id}_${kdKey}_praktek`}
                             type="number"
@@ -862,13 +870,13 @@ export default function RekapNilai({
                             onFocus={(e) => e.target.select()}
                             onKeyDown={(e) => handleInputKeyDown(e, idx, kdKey, 'praktek')}
                             onChange={(e) => handleScoreChange(student.id, kdKey, 'praktek', e.target.value)}
-                            className="w-full text-center py-2 px-1 font-bold text-slate-900 bg-transparent focus:bg-white focus:ring-2 focus:ring-sky-500 focus:outline-none rounded text-xs sm:text-sm"
+                            className="w-full h-9 sm:h-10 text-center font-bold text-slate-900 bg-white border border-slate-200 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/30 focus:outline-none rounded-lg text-xs sm:text-sm shadow-2xs"
                             placeholder="-"
                           />
                         </td>
 
                         {/* Proyek */}
-                        <td className="border border-slate-300 p-0.5">
+                        <td className="border border-slate-300 p-1 min-w-[50px]">
                           <input
                             id={`score_${student.id}_${kdKey}_proyek`}
                             type="number"
@@ -879,13 +887,13 @@ export default function RekapNilai({
                             onFocus={(e) => e.target.select()}
                             onKeyDown={(e) => handleInputKeyDown(e, idx, kdKey, 'proyek')}
                             onChange={(e) => handleScoreChange(student.id, kdKey, 'proyek', e.target.value)}
-                            className="w-full text-center py-2 px-1 font-bold text-slate-900 bg-transparent focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none rounded text-xs sm:text-sm"
+                            className="w-full h-9 sm:h-10 text-center font-bold text-slate-900 bg-white border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/30 focus:outline-none rounded-lg text-xs sm:text-sm shadow-2xs"
                             placeholder="-"
                           />
                         </td>
 
                         {/* Porto F */}
-                        <td className="border border-slate-300 p-0.5">
+                        <td className="border border-slate-300 p-1 min-w-[50px]">
                           <input
                             id={`score_${student.id}_${kdKey}_porto`}
                             type="number"
@@ -896,7 +904,7 @@ export default function RekapNilai({
                             onFocus={(e) => e.target.select()}
                             onKeyDown={(e) => handleInputKeyDown(e, idx, kdKey, 'porto')}
                             onChange={(e) => handleScoreChange(student.id, kdKey, 'porto', e.target.value)}
-                            className="w-full text-center py-2 px-1 font-bold text-slate-900 bg-transparent focus:bg-white focus:ring-2 focus:ring-purple-500 focus:outline-none rounded text-xs sm:text-sm"
+                            className="w-full h-9 sm:h-10 text-center font-bold text-slate-900 bg-white border border-slate-200 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/30 focus:outline-none rounded-lg text-xs sm:text-sm shadow-2xs"
                             placeholder="-"
                           />
                         </td>
@@ -907,22 +915,22 @@ export default function RekapNilai({
                   return (
                     <tr 
                       key={student.id} 
-                      className={`hover:bg-emerald-50/40 transition-colors ${idx % 2 === 1 ? 'bg-slate-50/70' : 'bg-white'}`}
+                      className={`hover:bg-emerald-50/40 focus-within:bg-emerald-50/70 transition-colors ${idx % 2 === 1 ? 'bg-slate-50/70' : 'bg-white'}`}
                     >
                       {/* Identity Cells */}
-                      <td className="border border-slate-300 px-2 py-1 text-slate-500 font-medium text-[11px]">
+                      <td className="border border-slate-300 px-2 py-1 text-slate-500 font-medium text-[11px] min-w-[34px]">
                         {idx + 1}
                       </td>
-                      <td className="border border-slate-300 px-1 py-1 text-slate-500 font-mono text-[10px]">
+                      <td className="hidden sm:table-cell print:table-cell border border-slate-300 px-1 py-1 text-slate-500 font-mono text-[10px]">
                         {student.nis || '-'}
                       </td>
 
-                      {/* Sticky Frozen Student Name Column: Direct, simple, no cumbersome eye icon */}
-                      <td className="border border-slate-300 px-3 py-2 text-left font-bold text-slate-900 whitespace-nowrap sticky left-0 z-10 bg-white shadow-xs">
+                      {/* Student Name Column: Bebas geser di HP, tidak menutupi kolom PH */}
+                      <td className="border border-slate-300 px-2.5 py-2 text-left font-bold text-slate-900 min-w-[120px] sm:min-w-[180px] max-w-[160px] sm:max-w-none truncate sm:whitespace-normal">
                         {student.nama}
                       </td>
 
-                      <td className="border border-slate-300 px-1 py-1 font-semibold text-slate-500 text-[11px]">
+                      <td className="hidden sm:table-cell print:table-cell border border-slate-300 px-1 py-1 font-semibold text-slate-500 text-[11px]">
                         {student.gender || '-'}
                       </td>
 
