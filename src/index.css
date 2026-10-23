@@ -8,6 +8,19 @@
   }
 }
 
+/* Prevent mobile browser auto-zoom / pop-up jump on focus */
+@media screen and (max-width: 768px) {
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+}
+
+/* Prevent double-tap zoom lag on touch devices */
+html, body, button, input, select, textarea {
+  touch-action: manipulation;
+  -webkit-text-size-adjust: 100%;
+}
+
 /* Custom Print Styles */
 @media print {
   .no-print {
