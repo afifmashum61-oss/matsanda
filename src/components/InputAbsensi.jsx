@@ -806,18 +806,7 @@ Wassalamu'alaikum Wr. Wb.`;
         )}
 
         {/* Bottom Save Bar */}
-        <div className="p-4 bg-slate-50 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3">
-          {hasDraft ? (
-            <div className="text-xs text-slate-500 text-center sm:text-left">
-              <span className="text-amber-700 font-semibold flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
-                Draf tersimpan otomatis di perangkat ini. Klik tombol untuk menyimpan ke Cloud.
-              </span>
-            </div>
-          ) : (
-            <div />
-          )}
-
+        <div className="p-4 bg-slate-50 border-t border-slate-200 flex justify-end">
           <button
             type="button"
             disabled={isSaving}
