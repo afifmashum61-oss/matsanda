@@ -1140,11 +1140,6 @@ export default function RekapNilai({
               Gagal menyimpan ke cloud. Periksa koneksi internet Anda.
             </span>
           )}
-          {saveStatus !== 'saving' && saveStatus !== 'saved' && saveStatus !== 'error' && (
-            <span className="text-xs text-slate-500 font-medium">
-              Data otomatis disinkronkan ke Firebase di semua device, atau klik tombol simpan.
-            </span>
-          )}
         </div>
 
         {/* Tombol Simpan Utama di Bawah */}
