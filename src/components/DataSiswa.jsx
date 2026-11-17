@@ -270,32 +270,6 @@ export default function DataSiswa({
               <span className="inline-flex items-center gap-1 bg-emerald-100 text-emerald-800 text-[11px] font-bold px-2.5 py-0.5 rounded-full border border-emerald-300">
                 T.A. {schoolProfile?.tahunAjaran || '2026/2027'} • Semester {schoolProfile?.semester || 'Ganjil'}
               </span>
-              {isAdminUnlocked ? (
-                <div className="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-800 text-[11px] font-bold px-2.5 py-0.5 rounded-full border border-emerald-300 shadow-sm">
-                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                  <span>Mode Admin Aktif</span>
-                  {onLockAdmin && (
-                    <button
-                      type="button"
-                      onClick={onLockAdmin}
-                      className="ml-1 text-slate-400 hover:text-rose-600 underline text-[10px]"
-                      title="Kunci kembali mode Admin"
-                    >
-                      Kunci
-                    </button>
-                  )}
-                </div>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => onRequestAdminUnlock && onRequestAdminUnlock(null, 'Akses Admin Data Siswa', 'Masukkan PIN Admin untuk mengaktifkan akses edit dan tambah data siswa', 'Buka Akses Admin')}
-                  className="inline-flex items-center gap-1 bg-amber-50 hover:bg-amber-100 text-amber-800 text-[11px] font-bold px-2.5 py-0.5 rounded-full border border-amber-300 transition shadow-sm cursor-pointer"
-                  title="Klik untuk membuka hak akses edit dan tambah siswa"
-                >
-                  <Lock className="w-3 h-3 text-amber-600" />
-                  <span>Khusus Admin (Terkunci)</span>
-                </button>
-              )}
             </div>
             <p className="text-xs text-slate-500">Kelola informasi data siswa MTs Darussalam Ngesong Jombang per kelas.</p>
           </div>
@@ -331,7 +305,6 @@ export default function DataSiswa({
             >
               <Upload className="w-4 h-4 text-teal-600" />
               Import Excel
-              {!isAdminUnlocked && <Lock className="w-3 h-3 opacity-60 ml-0.5" />}
             </button>
 
             <button
@@ -341,7 +314,6 @@ export default function DataSiswa({
             >
               <UserPlus className="w-4 h-4" />
               Tambah Siswa Baru
-              {!isAdminUnlocked && <Lock className="w-3 h-3 opacity-70 ml-0.5" />}
             </button>
           </div>
         </div>
@@ -399,14 +371,7 @@ export default function DataSiswa({
                   <th className="py-3.5 px-4 text-center">L/P</th>
                   <th className="py-3.5 px-4 text-center">Kelas</th>
                   <th className="py-3.5 px-4">No HP Ortu</th>
-                  <th className="py-3.5 px-4 text-center w-28">
-                    <div className="inline-flex items-center justify-center gap-1">
-                      <span>Aksi</span>
-                      {!isAdminUnlocked && (
-                        <Lock className="w-3 h-3 text-slate-400" title="Khusus Admin" />
-                      )}
-                    </div>
-                  </th>
+                  <th className="py-3.5 px-4 text-center w-28">Aksi</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
