@@ -75,12 +75,37 @@ export default function App() {
   const [pinInput, setPinInput] = useState('');
   const [pinError, setPinError] = useState('');
   const [showPinText, setShowPinText] = useState(false);
+  const [pendingAdminAction, setPendingAdminAction] = useState(null);
+  const [adminModalConfig, setAdminModalConfig] = useState({
+    title: 'Akses Admin Terkunci',
+    desc: 'Masukkan PIN Admin untuk melanjutkan',
+    buttonText: 'Buka Pengaturan'
+  });
+
+  const handleRequestAdminUnlock = (actionCallback, title, desc, buttonText) => {
+    if (isAdminUnlocked) {
+      if (typeof actionCallback === 'function') actionCallback();
+      return;
+    }
+    setPinInput('');
+    setPinError('');
+    setPendingAdminAction(() => (typeof actionCallback === 'function' ? actionCallback : null));
+    setAdminModalConfig({
+      title: title || 'Akses Khusus Admin',
+      desc: desc || 'Masukkan PIN Admin untuk melanjutkan',
+      buttonText: buttonText || 'Konfirmasi Akses'
+    });
+    setShowAdminPinModal(true);
+  };
 
   const handleSelectTab = (tabId) => {
     if (tabId === 'pengaturan' && !isAdminUnlocked) {
-      setPinInput('');
-      setPinError('');
-      setShowAdminPinModal(true);
+      handleRequestAdminUnlock(
+        () => setActiveTab('pengaturan'),
+        'Akses Pengaturan Terkunci',
+        'Masukkan PIN Admin untuk membuka pengaturan sekolah',
+        'Buka Pengaturan'
+      );
     } else {
       setActiveTab(tabId);
     }
@@ -92,8 +117,12 @@ export default function App() {
     if (pinInput.trim() === correctPin) {
       setIsAdminUnlocked(true);
       setShowAdminPinModal(false);
-      setActiveTab('pengaturan');
       setPinError('');
+      if (typeof pendingAdminAction === 'function') {
+        const action = pendingAdminAction;
+        setPendingAdminAction(null);
+        action();
+      }
     } else {
       setPinError('PIN Admin / Password salah! Silakan periksa kembali.');
     }
@@ -101,7 +130,9 @@ export default function App() {
 
   const handleLockAdmin = () => {
     setIsAdminUnlocked(false);
-    setActiveTab('dashboard');
+    if (activeTab === 'pengaturan') {
+      setActiveTab('dashboard');
+    }
   };
 
   // Real-time Firestore Listeners across all devices
@@ -158,6 +189,10 @@ export default function App() {
   };
 
   const handleSaveStudents = async (newStudents) => {
+    if (!isAdminUnlocked) {
+      alert("Akses ditolak: Hanya Admin yang memiliki wewenang untuk menambah, mengedit, atau menghapus data siswa!");
+      return;
+    }
     const sorted = sortStudentsAlphabetically(newStudents);
     setStudentsState(sorted);
     await saveStudents(sorted);
@@ -360,6 +395,9 @@ export default function App() {
               classes={classes}
               onSaveStudents={handleSaveStudents}
               schoolProfile={schoolProfile}
+              isAdminUnlocked={isAdminUnlocked}
+              onRequestAdminUnlock={handleRequestAdminUnlock}
+              onLockAdmin={handleLockAdmin}
             />
           )}
 
@@ -394,12 +432,15 @@ export default function App() {
                   <Lock className="w-6 h-6" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-base text-slate-900">Akses Pengaturan Terkunci</h3>
-                  <p className="text-xs text-slate-500">Masukkan PIN Admin untuk membuka pengaturan</p>
+                  <h3 className="font-bold text-base text-slate-900">{adminModalConfig.title}</h3>
+                  <p className="text-xs text-slate-500">{adminModalConfig.desc}</p>
                 </div>
               </div>
               <button
-                onClick={() => setShowAdminPinModal(false)}
+                onClick={() => {
+                  setShowAdminPinModal(false);
+                  setPendingAdminAction(null);
+                }}
                 className="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-100 transition"
               >
                 <X className="w-5 h-5" />
@@ -442,7 +483,10 @@ export default function App() {
               <div className="flex items-center justify-end gap-2 pt-2">
                 <button
                   type="button"
-                  onClick={() => setShowAdminPinModal(false)}
+                  onClick={() => {
+                    setShowAdminPinModal(false);
+                    setPendingAdminAction(null);
+                  }}
                   className="px-4 py-2 rounded-xl border border-slate-300 text-slate-700 text-xs font-semibold hover:bg-slate-50 transition"
                 >
                   Batal
@@ -452,7 +496,7 @@ export default function App() {
                   className="inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-md transition"
                 >
                   <ShieldCheck className="w-4 h-4" />
-                  Buka Pengaturan
+                  {adminModalConfig.buttonText}
                 </button>
               </div>
             </form>

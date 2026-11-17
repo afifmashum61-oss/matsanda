@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { 
   UserPlus, 
   Search, 
@@ -11,12 +11,23 @@ import {
   Check, 
   Filter,
   Users,
-  CheckCircle2
+  CheckCircle2,
+  Lock,
+  ShieldCheck
 } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import { sortStudentsAlphabetically } from '../utils/storage';
 
-export default function DataSiswa({ students, classes, onSaveStudents, schoolProfile }) {
+export default function DataSiswa({ 
+  students, 
+  classes, 
+  onSaveStudents, 
+  schoolProfile,
+  isAdminUnlocked,
+  onRequestAdminUnlock,
+  onLockAdmin
+}) {
+  const fileInputRef = useRef(null);
   const [selectedFilterClass, setSelectedFilterClass] = useState('ALL');
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -44,7 +55,7 @@ export default function DataSiswa({ students, classes, onSaveStudents, schoolPro
     })
   );
 
-  const handleOpenAddModal = () => {
+  const openAddModalInternal = () => {
     setEditingStudent(null);
     setFormData({
       nis: '',
@@ -57,7 +68,20 @@ export default function DataSiswa({ students, classes, onSaveStudents, schoolPro
     setIsModalOpen(true);
   };
 
-  const handleOpenEditModal = (student) => {
+  const handleOpenAddModal = () => {
+    if (!isAdminUnlocked && typeof onRequestAdminUnlock === 'function') {
+      onRequestAdminUnlock(
+        openAddModalInternal,
+        'Akses Tambah Siswa Baru',
+        'Masukkan PIN Admin untuk menambahkan siswa baru ke sistem',
+        'Buka & Tambah Siswa'
+      );
+      return;
+    }
+    openAddModalInternal();
+  };
+
+  const openEditModalInternal = (student) => {
     setEditingStudent(student);
     setFormData({
       nis: student.nis || '',
@@ -70,7 +94,20 @@ export default function DataSiswa({ students, classes, onSaveStudents, schoolPro
     setIsModalOpen(true);
   };
 
-  const handleDelete = (studentId) => {
+  const handleOpenEditModal = (student) => {
+    if (!isAdminUnlocked && typeof onRequestAdminUnlock === 'function') {
+      onRequestAdminUnlock(
+        () => openEditModalInternal(student),
+        'Akses Edit Data Siswa',
+        `Masukkan PIN Admin untuk mengedit data siswa "${student.nama}"`,
+        'Buka & Edit Siswa'
+      );
+      return;
+    }
+    openEditModalInternal(student);
+  };
+
+  const deleteStudentInternal = (studentId) => {
     const studentToDelete = students.find(s => s.id === studentId);
     if (window.confirm(`Apakah Anda yakin ingin menghapus data siswa ${studentToDelete?.nama || ''}?`)) {
       const updated = students.filter(s => s.id !== studentId);
@@ -80,8 +117,38 @@ export default function DataSiswa({ students, classes, onSaveStudents, schoolPro
     }
   };
 
+  const handleDelete = (studentId) => {
+    if (!isAdminUnlocked && typeof onRequestAdminUnlock === 'function') {
+      onRequestAdminUnlock(
+        () => deleteStudentInternal(studentId),
+        'Akses Hapus Data Siswa',
+        'Masukkan PIN Admin untuk menghapus data siswa ini',
+        'Konfirmasi Hapus'
+      );
+      return;
+    }
+    deleteStudentInternal(studentId);
+  };
+
+  const handleImportBtnClick = () => {
+    if (!isAdminUnlocked && typeof onRequestAdminUnlock === 'function') {
+      onRequestAdminUnlock(
+        () => fileInputRef.current?.click(),
+        'Akses Import Data Siswa',
+        'Masukkan PIN Admin untuk mengimpor data siswa dari file Excel',
+        'Buka File Import'
+      );
+      return;
+    }
+    fileInputRef.current?.click();
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (!isAdminUnlocked) {
+      alert('Akses ditolak: Hanya Admin yang dapat menambah atau menyimpan data siswa!');
+      return;
+    }
     if (!formData.nama.trim() || !formData.nis.trim()) {
       alert('Nama dan NIS wajib diisi!');
       return;
@@ -203,6 +270,32 @@ export default function DataSiswa({ students, classes, onSaveStudents, schoolPro
               <span className="inline-flex items-center gap-1 bg-emerald-100 text-emerald-800 text-[11px] font-bold px-2.5 py-0.5 rounded-full border border-emerald-300">
                 T.A. {schoolProfile?.tahunAjaran || '2026/2027'} • Semester {schoolProfile?.semester || 'Ganjil'}
               </span>
+              {isAdminUnlocked ? (
+                <div className="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-800 text-[11px] font-bold px-2.5 py-0.5 rounded-full border border-emerald-300 shadow-sm">
+                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>Mode Admin Aktif</span>
+                  {onLockAdmin && (
+                    <button
+                      type="button"
+                      onClick={onLockAdmin}
+                      className="ml-1 text-slate-400 hover:text-rose-600 underline text-[10px]"
+                      title="Kunci kembali mode Admin"
+                    >
+                      Kunci
+                    </button>
+                  )}
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => onRequestAdminUnlock && onRequestAdminUnlock(null, 'Akses Admin Data Siswa', 'Masukkan PIN Admin untuk mengaktifkan akses edit dan tambah data siswa', 'Buka Akses Admin')}
+                  className="inline-flex items-center gap-1 bg-amber-50 hover:bg-amber-100 text-amber-800 text-[11px] font-bold px-2.5 py-0.5 rounded-full border border-amber-300 transition shadow-sm cursor-pointer"
+                  title="Klik untuk membuka hak akses edit dan tambah siswa"
+                >
+                  <Lock className="w-3 h-3 text-amber-600" />
+                  <span>Khusus Admin (Terkunci)</span>
+                </button>
+              )}
             </div>
             <p className="text-xs text-slate-500">Kelola informasi data siswa MTs Darussalam Ngesong Jombang per kelas.</p>
           </div>
@@ -224,18 +317,31 @@ export default function DataSiswa({ students, classes, onSaveStudents, schoolPro
               Template Excel
             </button>
 
-            <label className="inline-flex items-center gap-1.5 bg-teal-50 hover:bg-teal-100 text-teal-800 border border-teal-200 font-semibold px-3 py-2 rounded-xl text-xs cursor-pointer transition">
+            <input 
+              ref={fileInputRef} 
+              type="file" 
+              accept=".xlsx, .xls" 
+              onChange={handleImportExcel} 
+              className="hidden" 
+            />
+            <button
+              type="button"
+              onClick={handleImportBtnClick}
+              className="inline-flex items-center gap-1.5 bg-teal-50 hover:bg-teal-100 text-teal-800 border border-teal-200 font-semibold px-3 py-2 rounded-xl text-xs cursor-pointer transition"
+            >
               <Upload className="w-4 h-4 text-teal-600" />
               Import Excel
-              <input type="file" accept=".xlsx, .xls" onChange={handleImportExcel} className="hidden" />
-            </label>
+              {!isAdminUnlocked && <Lock className="w-3 h-3 opacity-60 ml-0.5" />}
+            </button>
 
             <button
+              type="button"
               onClick={handleOpenAddModal}
               className="inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2 rounded-xl text-xs shadow-md transition"
             >
               <UserPlus className="w-4 h-4" />
               Tambah Siswa Baru
+              {!isAdminUnlocked && <Lock className="w-3 h-3 opacity-70 ml-0.5" />}
             </button>
           </div>
         </div>
@@ -293,7 +399,14 @@ export default function DataSiswa({ students, classes, onSaveStudents, schoolPro
                   <th className="py-3.5 px-4 text-center">L/P</th>
                   <th className="py-3.5 px-4 text-center">Kelas</th>
                   <th className="py-3.5 px-4">No HP Ortu</th>
-                  <th className="py-3.5 px-4 text-center w-28">Aksi</th>
+                  <th className="py-3.5 px-4 text-center w-28">
+                    <div className="inline-flex items-center justify-center gap-1">
+                      <span>Aksi</span>
+                      {!isAdminUnlocked && (
+                        <Lock className="w-3 h-3 text-slate-400" title="Khusus Admin" />
+                      )}
+                    </div>
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -318,15 +431,23 @@ export default function DataSiswa({ students, classes, onSaveStudents, schoolPro
                       <div className="flex items-center justify-center gap-1">
                         <button
                           onClick={() => handleOpenEditModal(s)}
-                          className="p-1.5 text-slate-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition"
-                          title="Edit Siswa"
+                          className={`p-1.5 rounded-lg transition ${
+                            isAdminUnlocked 
+                              ? 'text-slate-600 hover:text-emerald-700 hover:bg-emerald-50' 
+                              : 'text-slate-400 hover:text-emerald-700 hover:bg-slate-100'
+                          }`}
+                          title={isAdminUnlocked ? "Edit Siswa" : "Edit Siswa (Khusus Admin - Perlu PIN)"}
                         >
                           <Edit3 className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => handleDelete(s.id)}
-                          className="p-1.5 text-slate-600 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition"
-                          title="Hapus Siswa"
+                          className={`p-1.5 rounded-lg transition ${
+                            isAdminUnlocked 
+                              ? 'text-slate-600 hover:text-rose-600 hover:bg-rose-50' 
+                              : 'text-slate-400 hover:text-rose-600 hover:bg-slate-100'
+                          }`}
+                          title={isAdminUnlocked ? "Hapus Siswa" : "Hapus Siswa (Khusus Admin - Perlu PIN)"}
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
