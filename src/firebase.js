@@ -136,13 +136,11 @@ export const syncAttendanceToCloud = async (records, arg2, arg3) => {
   }
 };
 
-// Real-time subscriptions for instantaneous multi-device sync
+// Real-time subscriptions for instantaneous multi-device sync (Strictly read-only)
 export const subscribeSchoolProfile = (onUpdate) => {
   return onSnapshot(doc(db, "school", "profile"), (docSnap) => {
     if (docSnap.exists()) {
       onUpdate(docSnap.data());
-    } else {
-      syncSchoolProfileToCloud(INITIAL_SCHOOL_PROFILE);
     }
   }, (err) => console.warn("Realtime error (profile):", err));
 };
@@ -151,8 +149,6 @@ export const subscribeClasses = (onUpdate) => {
   return onSnapshot(doc(db, "school", "classes"), (docSnap) => {
     if (docSnap.exists() && Array.isArray(docSnap.data().list)) {
       onUpdate(docSnap.data().list);
-    } else {
-      syncClassesToCloud(INITIAL_CLASSES);
     }
   }, (err) => console.warn("Realtime error (classes):", err));
 };
@@ -161,8 +157,6 @@ export const subscribeStudents = (onUpdate) => {
   return onSnapshot(doc(db, "school", "students"), (docSnap) => {
     if (docSnap.exists() && Array.isArray(docSnap.data().list)) {
       onUpdate(docSnap.data().list);
-    } else {
-      syncStudentsToCloud(INITIAL_STUDENTS);
     }
   }, (err) => console.warn("Realtime error (students):", err));
 };

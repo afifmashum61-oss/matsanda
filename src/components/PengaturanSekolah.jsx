@@ -13,7 +13,7 @@ import {
   Check,
   X
 } from 'lucide-react';
-import { exportFullBackup, resetDataToDefault } from '../utils/storage';
+import { exportFullBackup } from '../utils/storage';
 
 export default function PengaturanSekolah({ 
   schoolProfile, 
@@ -102,12 +102,6 @@ export default function PengaturanSekolah({
     }
   };
 
-  const handleReset = () => {
-    if (window.confirm('PERHATIAN: Apakah Anda yakin ingin mengembalikan semua data ke data awal bawaan? Data inputan Anda akan diset ulang.')) {
-      resetDataToDefault();
-      window.location.reload();
-    }
-  };
 
   return (
     <div className="space-y-6 max-w-4xl mx-auto">
@@ -433,22 +427,6 @@ export default function PengaturanSekolah({
           >
             <Download className="w-4 h-4" />
             Download Backup File
-          </button>
-        </div>
-
-        <div className="pt-4 border-t border-slate-100 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-          <div>
-            <p className="text-sm font-bold text-rose-700 flex items-center gap-1.5">
-              <AlertTriangle className="w-4 h-4" /> Reset ke Data Bawaan
-            </p>
-            <p className="text-xs text-slate-500">Kembalikan sistem ke data sampel awal MTs Darussalam.</p>
-          </div>
-          <button
-            onClick={handleReset}
-            className="inline-flex items-center gap-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-bold px-4 py-2 rounded-xl text-xs transition"
-          >
-            <RefreshCw className="w-4 h-4" />
-            Reset Data
           </button>
         </div>
       </div>

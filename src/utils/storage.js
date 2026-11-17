@@ -97,11 +97,11 @@ export const sortStudentsAlphabetically = (studentsList) => {
 
 export const getStudents = () => {
   const data = localStorage.getItem(KEYS.STUDENTS);
-  if (!data) return sortStudentsAlphabetically(INITIAL_STUDENTS);
+  if (!data) return [];
   try {
     return sortStudentsAlphabetically(JSON.parse(data));
   } catch (err) {
-    return sortStudentsAlphabetically(INITIAL_STUDENTS);
+    return [];
   }
 };
 
@@ -155,16 +155,7 @@ export const saveGradeForClassSubject = async (classId, mapelId, semester, grade
 };
 
 export const resetDataToDefault = () => {
-  const sortedStudents = sortStudentsAlphabetically(INITIAL_STUDENTS);
-  localStorage.setItem(KEYS.SCHOOL, JSON.stringify(INITIAL_SCHOOL_PROFILE));
-  localStorage.setItem(KEYS.CLASSES, JSON.stringify(INITIAL_CLASSES));
-  localStorage.setItem(KEYS.STUDENTS, JSON.stringify(sortedStudents));
-  localStorage.setItem(KEYS.ATTENDANCE, JSON.stringify(INITIAL_ATTENDANCE));
-
-  syncSchoolProfileToCloud(INITIAL_SCHOOL_PROFILE);
-  syncClassesToCloud(INITIAL_CLASSES);
-  syncStudentsToCloud(sortedStudents);
-  syncAttendanceToCloud(INITIAL_ATTENDANCE);
+  console.warn("Reset to default has been disabled to prevent accidental loss of school database.");
 };
 
 export const exportFullBackup = () => {
